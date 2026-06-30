@@ -1,0 +1,36 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+[Ll]og/
+[Ll]ogs/
+
+# .NET
+*.user
+*.suo
+*.userosscache
+project.lock.json
+project.assets.json
+*.nupkg
+
+# Rider / VS / VS Code
+.vs/
+.idea/
+*.DotSettings.user
+
+# Environment / secrets
+appsettings.*.local.json
+*.env
+.env
+
+# macOS
+.DS_Store
+
+# Flutter / Dart (frontend, added later)
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/build/
+**/.packages
+*.iml

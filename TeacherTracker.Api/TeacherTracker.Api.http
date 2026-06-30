@@ -1,6 +1,67 @@
-@TeacherTracker.Api_HostAddress = http://localhost:5001
+@host = http://localhost:5001
 
-GET {{TeacherTracker.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Health check
+GET {{host}}/
 
-###
+### Create a teacher
+# @name createTeacher
+POST {{host}}/api/teachers
+Content-Type: application/json
+
+{
+  "firstName": "Ayse",
+  "lastName": "Yilmaz",
+  "email": "ayse@example.com"
+}
+
+### List teachers
+GET {{host}}/api/teachers
+
+### Get one teacher
+GET {{host}}/api/teachers/1
+
+### Update a teacher
+PUT {{host}}/api/teachers/1
+Content-Type: application/json
+
+{
+  "firstName": "Ayse",
+  "lastName": "Kaya",
+  "email": "ayse.kaya@example.com"
+}
+
+### Create a student (teacherId must reference an existing teacher)
+POST {{host}}/api/students
+Content-Type: application/json
+
+{
+  "firstName": "Mehmet",
+  "lastName": "Demir",
+  "studentNumber": "101",
+  "teacherId": 1
+}
+
+### List all students
+GET {{host}}/api/students
+
+### List students for a teacher
+GET {{host}}/api/students?teacherId=1
+
+### Get one student
+GET {{host}}/api/students/1
+
+### Update a student
+PUT {{host}}/api/students/1
+Content-Type: application/json
+
+{
+  "firstName": "Mehmet",
+  "lastName": "Demir",
+  "studentNumber": "102"
+}
+
+### Delete a student
+DELETE {{host}}/api/students/1
+
+### Delete a teacher
+DELETE {{host}}/api/teachers/1
