@@ -1,25 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/student.dart';
-import '../../teacher/state/teacher_providers.dart';
+import '../../auth/state/auth_controller.dart';
 import '../data/students_repository.dart';
 
-/// The list of students for the current teacher, with mutation helpers that
-/// refresh the list after each change.
+/// The authenticated teacher's students, with mutation helpers that refresh
+/// the list after each change. Rebuilds when the session changes.
 class StudentsNotifier extends AsyncNotifier<List<Student>> {
   @override
   Future<List<Student>> build() async {
-    // Rebuilds automatically if the current teacher changes.
-    final teacher = await ref.watch(currentTeacherProvider.future);
-    return ref.read(studentsRepositoryProvider).getForTeacher(teacher.id);
+    // Rebuild on login/logout; only load when signed in.
+    final auth = ref.watch(authControllerProvider).value;
+    if (auth == null) return [];
+    return ref.read(studentsRepositoryProvider).getAll();
   }
 
   Future<void> _reload() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final teacher = await ref.read(currentTeacherProvider.future);
-      return ref.read(studentsRepositoryProvider).getForTeacher(teacher.id);
-    });
+    state = await AsyncValue.guard(
+      () => ref.read(studentsRepositoryProvider).getAll(),
+    );
   }
 
   Future<Student> add({
@@ -27,14 +27,13 @@ class StudentsNotifier extends AsyncNotifier<List<Student>> {
     required String lastName,
     required String studentNumber,
   }) async {
-    final teacher = await ref.read(currentTeacherProvider.future);
     final created = await ref.read(studentsRepositoryProvider).create(
           Student(
             id: 0,
             firstName: firstName,
             lastName: lastName,
             studentNumber: studentNumber,
-            teacherId: teacher.id,
+            teacherId: 0, // assigned server-side from the token
           ),
         );
     await _reload();

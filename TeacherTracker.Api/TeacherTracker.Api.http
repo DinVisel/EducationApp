@@ -3,65 +3,76 @@
 ### Health check
 GET {{host}}/
 
-### Create a teacher
-# @name createTeacher
-POST {{host}}/api/teachers
+### Register (returns { token, teacher })
+# @name register
+POST {{host}}/api/auth/register
 Content-Type: application/json
 
 {
-  "firstName": "Ayse",
-  "lastName": "Yilmaz",
-  "email": "ayse@example.com"
+  "firstName": "Arda",
+  "lastName": "Ozcan",
+  "email": "arda@example.com",
+  "password": "secret123"
 }
 
-### List teachers
-GET {{host}}/api/teachers
-
-### Get one teacher
-GET {{host}}/api/teachers/1
-
-### Update a teacher
-PUT {{host}}/api/teachers/1
+### Login (returns { token, teacher })
+# @name login
+POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "firstName": "Ayse",
-  "lastName": "Kaya",
-  "email": "ayse.kaya@example.com"
+  "email": "arda@example.com",
+  "password": "secret123"
 }
 
-### Create a student (teacherId must reference an existing teacher)
+### Capture the token from the login response for the calls below
+@token = {{login.response.body.token}}
+
+### Current profile
+GET {{host}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Update profile
+PUT {{host}}/api/auth/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Arda",
+  "lastName": "Özcan",
+  "email": "arda@example.com"
+}
+
+### Create a student (teacherId comes from the token)
 POST {{host}}/api/students
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "firstName": "Mehmet",
-  "lastName": "Demir",
-  "studentNumber": "101",
-  "teacherId": 1
+  "firstName": "Zeynep",
+  "lastName": "Kaya",
+  "studentNumber": "3B-07"
 }
 
-### List all students
+### List my students
 GET {{host}}/api/students
-
-### List students for a teacher
-GET {{host}}/api/students?teacherId=1
+Authorization: Bearer {{token}}
 
 ### Get one student
 GET {{host}}/api/students/1
+Authorization: Bearer {{token}}
 
 ### Update a student
 PUT {{host}}/api/students/1
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "firstName": "Mehmet",
-  "lastName": "Demir",
-  "studentNumber": "102"
+  "firstName": "Zeynep",
+  "lastName": "Kaya",
+  "studentNumber": "3B-08"
 }
 
 ### Delete a student
 DELETE {{host}}/api/students/1
-
-### Delete a teacher
-DELETE {{host}}/api/teachers/1
+Authorization: Bearer {{token}}

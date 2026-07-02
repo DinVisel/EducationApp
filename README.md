@@ -35,20 +35,26 @@ The API listens on `http://localhost:5001` (see `Properties/launchSettings.json`
 - OpenAPI spec: `http://localhost:5001/openapi/v1.json`
 - Sample requests: `TeacherTracker.Api.http`
 
+### Auth
+
+Teachers authenticate with email + password and receive a JWT (bearer token).
+All student endpoints require the token and are scoped to that teacher; there is
+no cross-teacher access. Configure signing under the `Jwt` section of
+`appsettings.json` (override the dev key before deploying).
+
 ### Endpoints (MVP)
 
-| Method | Route                          | Purpose                         |
-| ------ | ------------------------------ | ------------------------------- |
-| GET    | `/api/teachers`                | List teachers                   |
-| GET    | `/api/teachers/{id}`           | Get a teacher                   |
-| POST   | `/api/teachers`                | Create a teacher                |
-| PUT    | `/api/teachers/{id}`           | Update a teacher                |
-| DELETE | `/api/teachers/{id}`           | Delete a teacher                |
-| GET    | `/api/students[?teacherId=]`   | List students (optional filter) |
-| GET    | `/api/students/{id}`           | Get a student                   |
-| POST   | `/api/students`                | Create a student                |
-| PUT    | `/api/students/{id}`           | Update a student                |
-| DELETE | `/api/students/{id}`           | Delete a student                |
+| Method | Route                  | Auth | Purpose                            |
+| ------ | ---------------------- | ---- | ---------------------------------- |
+| POST   | `/api/auth/register`   | —    | Create account → `{ token, teacher }` |
+| POST   | `/api/auth/login`      | —    | Sign in → `{ token, teacher }`     |
+| GET    | `/api/auth/me`         | ✓    | Current teacher profile            |
+| PUT    | `/api/auth/me`         | ✓    | Update current teacher profile     |
+| GET    | `/api/students`        | ✓    | List the current teacher's students |
+| GET    | `/api/students/{id}`   | ✓    | Get a student                      |
+| POST   | `/api/students`        | ✓    | Create a student                   |
+| PUT    | `/api/students/{id}`   | ✓    | Update a student                   |
+| DELETE | `/api/students/{id}`   | ✓    | Delete a student                   |
 
 ### Adding a migration after model changes
 
@@ -64,11 +70,13 @@ Flutter app: **Riverpod** (state), **dio** (HTTP), **go_router** (navigation).
 Feature-first layout under `lib/features/` (`auth`, `home`, `students`,
 `teacher`); shared bits in `lib/core/` and `lib/models/`.
 
-MVP scope: placeholder login (no real auth yet) → home with a bottom nav for
+MVP scope: **login / register** (real JWT auth) → home with a bottom nav for
 **Students** (list / add / edit / delete / detail) and **Profile** (view/edit the
-current teacher). Until auth exists, the app uses the first teacher from the API
-and auto-creates a default one if the database is empty
-(`lib/features/teacher/state/teacher_providers.dart`).
+signed-in teacher + sign out). The JWT is kept in `flutter_secure_storage` and
+attached to every request by a dio interceptor
+(`lib/core/api/api_client.dart`); a 401 on an authenticated request signs the
+user out. Session state and routing live in
+`lib/features/auth/state/auth_controller.dart` and the router in `lib/app.dart`.
 
 ### Run locally
 

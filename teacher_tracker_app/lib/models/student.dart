@@ -24,12 +24,12 @@ class Student {
         teacherId: json['teacherId'] as int,
       );
 
-  /// Body for POST /api/students (CreateStudentDto).
+  /// Body for POST /api/students (CreateStudentDto). The server assigns
+  /// teacherId from the auth token.
   Map<String, dynamic> toCreateJson() => {
         'firstName': firstName,
         'lastName': lastName,
         'studentNumber': studentNumber,
-        'teacherId': teacherId,
       };
 
   /// Body for PUT /api/students/{id} (UpdateStudentDto — no teacherId).

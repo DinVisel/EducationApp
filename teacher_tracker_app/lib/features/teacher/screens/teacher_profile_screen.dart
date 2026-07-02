@@ -2,43 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/teacher.dart';
-import '../state/teacher_providers.dart';
+import '../../auth/state/auth_controller.dart';
 
 class TeacherProfileScreen extends ConsumerWidget {
   const TeacherProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final teacherAsync = ref.watch(currentTeacherProvider);
+    final teacher = ref.watch(currentTeacherProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: teacherAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline,
-                    size: 56, color: Colors.redAccent),
-                const SizedBox(height: 12),
-                Text('Could not load profile\n$err',
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 12),
-                FilledButton.tonal(
-                  onPressed: () =>
-                      ref.read(currentTeacherProvider.notifier).refresh(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+      appBar: AppBar(
+        title: const Text('Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign out',
+            onPressed: () => _confirmLogout(context, ref),
           ),
-        ),
-        data: (teacher) => _ProfileForm(teacher: teacher),
+        ],
+      ),
+      body: teacher == null
+          ? const Center(child: CircularProgressIndicator())
+          : _ProfileForm(teacher: teacher),
+    );
+  }
+
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign out?'),
+        content: const Text('You will need to sign in again.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Sign out'),
+          ),
+        ],
       ),
     );
+    if (ok == true) {
+      await ref.read(authControllerProvider.notifier).logout();
+    }
   }
 }
 
@@ -78,7 +88,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     try {
-      await ref.read(currentTeacherProvider.notifier).save(
+      await ref.read(authControllerProvider.notifier).updateProfile(
             widget.teacher.copyWith(
               firstName: _firstName.text.trim(),
               lastName: _lastName.text.trim(),
@@ -110,10 +120,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
           Center(
             child: CircleAvatar(
               radius: 40,
-              child: Text(
-                _initials(),
-                style: const TextStyle(fontSize: 28),
-              ),
+              child: Text(_initials(), style: const TextStyle(fontSize: 28)),
             ),
           ),
           const SizedBox(height: 24),

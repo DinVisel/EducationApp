@@ -9,11 +9,9 @@ class StudentsRepository {
 
   final Dio _dio;
 
-  Future<List<Student>> getForTeacher(int teacherId) async {
-    final res = await _dio.get<List<dynamic>>(
-      '/api/students',
-      queryParameters: {'teacherId': teacherId},
-    );
+  /// Students belonging to the authenticated teacher (scoped server-side).
+  Future<List<Student>> getAll() async {
+    final res = await _dio.get<List<dynamic>>('/api/students');
     return (res.data ?? [])
         .map((e) => Student.fromJson(e as Map<String, dynamic>))
         .toList();
