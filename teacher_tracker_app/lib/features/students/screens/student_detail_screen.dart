@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/student.dart';
 import '../state/students_providers.dart';
 import 'student_form_screen.dart';
+import 'tabs/books_tab.dart';
+import 'tabs/homework_tab.dart';
+import 'tabs/info_tab.dart';
+import 'tabs/notes_tab.dart';
 
 class StudentDetailScreen extends ConsumerWidget {
   const StudentDetailScreen({super.key, required this.student});
@@ -21,63 +25,40 @@ class StudentDetailScreen extends ConsumerWidget {
           orElse: () => student,
         );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(current.fullName),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Edit',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => StudentFormScreen(student: current),
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(current.fullName),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Edit info',
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => StudentFormScreen(student: current),
+                ),
               ),
             ),
+          ],
+          bottom: const TabBar(
+            isScrollable: true,
+            tabs: [
+              Tab(icon: Icon(Icons.person_outline), text: 'Info'),
+              Tab(icon: Icon(Icons.sticky_note_2_outlined), text: 'Notes'),
+              Tab(icon: Icon(Icons.assignment_outlined), text: 'Homework'),
+              Tab(icon: Icon(Icons.menu_book_outlined), text: 'Books'),
+            ],
           ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _InfoTile(
-            icon: Icons.badge_outlined,
-            label: 'First name',
-            value: current.firstName,
-          ),
-          _InfoTile(
-            icon: Icons.badge_outlined,
-            label: 'Last name',
-            value: current.lastName,
-          ),
-          _InfoTile(
-            icon: Icons.numbers,
-            label: 'Student number',
-            value: current.studentNumber.isEmpty ? '—' : current.studentNumber,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  const _InfoTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: Icon(icon),
-        title: Text(label),
-        subtitle: Text(value, style: Theme.of(context).textTheme.titleMedium),
+        ),
+        body: TabBarView(
+          children: [
+            InfoTab(student: current),
+            NotesTab(studentId: current.id),
+            HomeworkTab(studentId: current.id),
+            BooksTab(studentId: current.id),
+          ],
+        ),
       ),
     );
   }

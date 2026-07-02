@@ -1,0 +1,202 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../models/homework.dart';
+import '../../../../models/student.dart' show formatDateOnly;
+import '../../state/homework_providers.dart';
+import '../../widgets/async_list.dart';
+
+class HomeworkTab extends ConsumerWidget {
+  const HomeworkTab({super.key, required this.studentId});
+
+  final int studentId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(homeworkProvider(studentId));
+
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _add(context, ref),
+        child: const Icon(Icons.add),
+      ),
+      body: AsyncList<Homework>(
+        value: async,
+        onRefresh: () => ref.refresh(homeworkProvider(studentId).future),
+        onRetry: () => ref.invalidate(homeworkProvider(studentId)),
+        emptyIcon: Icons.assignment_outlined,
+        emptyText: 'No homework yet',
+        itemBuilder: (hw) => Card(
+          child: ListTile(
+            leading: Checkbox(
+              value: hw.isDone,
+              onChanged: (v) => ref
+                  .read(homeworkProvider(studentId).notifier)
+                  .toggleDone(hw, v ?? false),
+            ),
+            title: Text(
+              hw.title,
+              style: hw.isDone
+                  ? const TextStyle(
+                      decoration: TextDecoration.lineThrough,
+                    )
+                  : null,
+            ),
+            subtitle: _subtitle(hw),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Delete',
+              onPressed: () => ref
+                  .read(homeworkProvider(studentId).notifier)
+                  .remove(hw.id),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget? _subtitle(Homework hw) {
+    final parts = <String>[
+      if (hw.description != null && hw.description!.isNotEmpty) hw.description!,
+      if (hw.dueDate != null) 'Due ${formatDateOnly(hw.dueDate!)}',
+    ];
+    return parts.isEmpty ? null : Text(parts.join('\n'));
+  }
+
+  Future<void> _add(BuildContext context, WidgetRef ref) async {
+    final result = await showDialog<_HomeworkInput>(
+      context: context,
+      builder: (_) => const _HomeworkDialog(),
+    );
+    if (result == null) return;
+    try {
+      await ref.read(homeworkProvider(studentId).notifier).add(
+            title: result.title,
+            description: result.description,
+            dueDate: result.dueDate,
+          );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Add failed: $e')));
+      }
+    }
+  }
+}
+
+class _HomeworkInput {
+  const _HomeworkInput(this.title, this.description, this.dueDate);
+  final String title;
+  final String? description;
+  final DateTime? dueDate;
+}
+
+class _HomeworkDialog extends StatefulWidget {
+  const _HomeworkDialog();
+
+  @override
+  State<_HomeworkDialog> createState() => _HomeworkDialogState();
+}
+
+class _HomeworkDialogState extends State<_HomeworkDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _title = TextEditingController();
+  final _description = TextEditingController();
+  DateTime? _dueDate;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _description.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDue() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? now,
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 2),
+    );
+    if (picked != null) setState(() => _dueDate = picked);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Add homework'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _title,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Title',
+                border: OutlineInputBorder(),
+              ),
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _description,
+              minLines: 1,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Description (optional)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _pickDue,
+                    icon: const Icon(Icons.event),
+                    label: Text(
+                      _dueDate == null
+                          ? 'Due date (optional)'
+                          : 'Due ${formatDateOnly(_dueDate!)}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                if (_dueDate != null)
+                  IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () => setState(() => _dueDate = null),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            if (!_formKey.currentState!.validate()) return;
+            Navigator.pop(
+              context,
+              _HomeworkInput(
+                _title.text.trim(),
+                _description.text.trim(),
+                _dueDate,
+              ),
+            );
+          },
+          child: const Text('Add'),
+        ),
+      ],
+    );
+  }
+}

@@ -22,20 +22,9 @@ class StudentsNotifier extends AsyncNotifier<List<Student>> {
     );
   }
 
-  Future<Student> add({
-    required String firstName,
-    required String lastName,
-    required String studentNumber,
-  }) async {
-    final created = await ref.read(studentsRepositoryProvider).create(
-          Student(
-            id: 0,
-            firstName: firstName,
-            lastName: lastName,
-            studentNumber: studentNumber,
-            teacherId: 0, // assigned server-side from the token
-          ),
-        );
+  Future<Student> add(Student draft) async {
+    // id/teacherId are assigned server-side; the draft carries the fields.
+    final created = await ref.read(studentsRepositoryProvider).create(draft);
     await _reload();
     return created;
   }

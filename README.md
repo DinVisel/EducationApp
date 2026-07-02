@@ -71,8 +71,10 @@ Feature-first layout under `lib/features/` (`auth`, `home`, `students`,
 `teacher`); shared bits in `lib/core/` and `lib/models/`.
 
 MVP scope: **login / register** (real JWT auth) → home with a bottom nav for
-**Students** (list / add / edit / delete / detail) and **Profile** (view/edit the
-signed-in teacher + sign out). The JWT is kept in `flutter_secure_storage` and
+**Students** (list / add / edit / delete) and **Profile** (view/edit the
+signed-in teacher + sign out). The student detail screen is **tabbed**: Info
+(detailed profile), Notes, Homework, and Books — each backed by a
+`studentId`-keyed family provider under `lib/features/students/`. The JWT is kept in `flutter_secure_storage` and
 attached to every request by a dio interceptor
 (`lib/core/api/api_client.dart`); a 401 on an authenticated request signs the
 user out. Session state and routing live in
