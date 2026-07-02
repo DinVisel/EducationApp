@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../core/design.dart';
-import '../students/screens/students_list_screen.dart';
+import '../students/screens/student_dashboard_screen.dart';
+import '../students/screens/homework_tracker_screen.dart';
+import '../students/screens/reading_log_screen.dart';
 import '../teacher/screens/teacher_profile_screen.dart';
 
-/// App shell with bottom navigation between Students and Profile.
+/// App shell with bottom navigation — 4 tabs matching the Stitch design:
+/// Students (Dashboard), Homework Tracker, Reading Log, Profile.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -16,7 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
   static const _pages = [
-    StudentsListScreen(),
+    StudentDashboardScreen(),
+    HomeworkTrackerScreen(),
+    ReadingLogScreen(),
     TeacherProfileScreen(),
   ];
 
@@ -32,6 +37,16 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.groups_outlined),
             selectedIcon: Icon(Icons.groups),
             label: 'Students',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.menu_book_outlined),
+            selectedIcon: Icon(Icons.menu_book),
+            label: 'Homework',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.auto_stories_outlined),
+            selectedIcon: Icon(Icons.auto_stories),
+            label: 'Reading',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
