@@ -5,9 +5,10 @@ An app for primary school teachers to track their students. Cross-platform:
 
 ## Project layout
 
-| Path                 | What it is                                   |
-| -------------------- | -------------------------------------------- |
-| `TeacherTracker.Api` | ASP.NET Core (.NET 10) Web API + PostgreSQL  |
+| Path                  | What it is                                    |
+| --------------------- | --------------------------------------------- |
+| `TeacherTracker.Api`  | ASP.NET Core (.NET 10) Web API + PostgreSQL   |
+| `teacher_tracker_app` | Flutter app (Riverpod + dio + go_router)      |
 
 ## Backend (TeacherTracker.Api)
 
@@ -56,3 +57,29 @@ cd TeacherTracker.Api
 dotnet ef migrations add <Name>
 dotnet ef database update
 ```
+
+## Frontend (teacher_tracker_app)
+
+Flutter app: **Riverpod** (state), **dio** (HTTP), **go_router** (navigation).
+Feature-first layout under `lib/features/` (`auth`, `home`, `students`,
+`teacher`); shared bits in `lib/core/` and `lib/models/`.
+
+MVP scope: placeholder login (no real auth yet) → home with a bottom nav for
+**Students** (list / add / edit / delete / detail) and **Profile** (view/edit the
+current teacher). Until auth exists, the app uses the first teacher from the API
+and auto-creates a default one if the database is empty
+(`lib/features/teacher/state/teacher_providers.dart`).
+
+### Run locally
+
+```bash
+# 1. Backend must be running first (see above) at http://localhost:5001
+# 2. Then:
+cd teacher_tracker_app
+flutter pub get
+flutter run -d chrome        # web avoids emulator networking gotchas
+```
+
+API base URL is resolved per-platform in `lib/core/config.dart`
+(`10.0.2.2` for the Android emulator, `localhost` elsewhere). Debug builds allow
+plain HTTP to localhost (Android `usesCleartextTraffic`, iOS ATS exception).
