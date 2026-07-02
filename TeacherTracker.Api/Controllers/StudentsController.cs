@@ -29,7 +29,8 @@ public class StudentsController : ControllerBase
         var students = await _db.Students
             .AsNoTracking()
             .Where(s => s.TeacherId == TeacherId)
-            .Select(s => new StudentDto(s.Id, s.FirstName, s.LastName, s.StudentNumber, s.TeacherId))
+            .OrderBy(s => s.FirstName).ThenBy(s => s.LastName)
+            .Select(s => ToDto(s))
             .ToListAsync();
 
         return Ok(students);
@@ -41,7 +42,7 @@ public class StudentsController : ControllerBase
         var student = await _db.Students
             .AsNoTracking()
             .Where(s => s.Id == id && s.TeacherId == TeacherId)
-            .Select(s => new StudentDto(s.Id, s.FirstName, s.LastName, s.StudentNumber, s.TeacherId))
+            .Select(s => ToDto(s))
             .FirstOrDefaultAsync();
 
         return student is null ? NotFound() : Ok(student);
@@ -55,14 +56,18 @@ public class StudentsController : ControllerBase
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             StudentNumber = dto.StudentNumber,
+            DateOfBirth = dto.DateOfBirth,
+            Gender = dto.Gender,
+            GuardianName = dto.GuardianName,
+            GuardianPhone = dto.GuardianPhone,
+            Notes = dto.Notes,
             TeacherId = TeacherId
         };
 
         _db.Students.Add(student);
         await _db.SaveChangesAsync();
 
-        var result = new StudentDto(student.Id, student.FirstName, student.LastName, student.StudentNumber, student.TeacherId);
-        return CreatedAtAction(nameof(GetById), new { id = student.Id }, result);
+        return CreatedAtAction(nameof(GetById), new { id = student.Id }, ToDto(student));
     }
 
     [HttpPut("{id:int}")]
@@ -76,6 +81,11 @@ public class StudentsController : ControllerBase
         student.FirstName = dto.FirstName;
         student.LastName = dto.LastName;
         student.StudentNumber = dto.StudentNumber;
+        student.DateOfBirth = dto.DateOfBirth;
+        student.Gender = dto.Gender;
+        student.GuardianName = dto.GuardianName;
+        student.GuardianPhone = dto.GuardianPhone;
+        student.Notes = dto.Notes;
 
         await _db.SaveChangesAsync();
         return NoContent();
@@ -93,4 +103,9 @@ public class StudentsController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    private static StudentDto ToDto(Student s) => new(
+        s.Id, s.FirstName, s.LastName, s.StudentNumber,
+        s.DateOfBirth, s.Gender, s.GuardianName, s.GuardianPhone, s.Notes,
+        s.TeacherId);
 }
