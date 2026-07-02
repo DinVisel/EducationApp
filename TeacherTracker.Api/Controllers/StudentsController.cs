@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
@@ -7,6 +9,7 @@ using TeacherTracker.Api.Models;
 namespace TeacherTracker.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class StudentsController : ControllerBase
 {
@@ -17,15 +20,15 @@ public class StudentsController : ControllerBase
         _db = db;
     }
 
-    // Optional ?teacherId= filter so the teacher only sees their own students.
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<StudentDto>>> GetAll([FromQuery] int? teacherId)
-    {
-        var query = _db.Students.AsNoTracking();
-        if (teacherId is not null)
-            query = query.Where(s => s.TeacherId == teacherId);
+    // All queries are scoped to the authenticated teacher (from the JWT).
+    private int TeacherId => User.GetTeacherId();
 
-        var students = await query
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<StudentDto>>> GetAll()
+    {
+        var students = await _db.Students
+            .AsNoTracking()
+            .Where(s => s.TeacherId == TeacherId)
             .Select(s => new StudentDto(s.Id, s.FirstName, s.LastName, s.StudentNumber, s.TeacherId))
             .ToListAsync();
 
@@ -37,7 +40,7 @@ public class StudentsController : ControllerBase
     {
         var student = await _db.Students
             .AsNoTracking()
-            .Where(s => s.Id == id)
+            .Where(s => s.Id == id && s.TeacherId == TeacherId)
             .Select(s => new StudentDto(s.Id, s.FirstName, s.LastName, s.StudentNumber, s.TeacherId))
             .FirstOrDefaultAsync();
 
@@ -47,16 +50,12 @@ public class StudentsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<StudentDto>> Create(CreateStudentDto dto)
     {
-        var teacherExists = await _db.Teachers.AnyAsync(t => t.Id == dto.TeacherId);
-        if (!teacherExists)
-            return BadRequest($"Teacher {dto.TeacherId} does not exist.");
-
         var student = new Student
         {
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             StudentNumber = dto.StudentNumber,
-            TeacherId = dto.TeacherId
+            TeacherId = TeacherId
         };
 
         _db.Students.Add(student);
@@ -69,7 +68,8 @@ public class StudentsController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateStudentDto dto)
     {
-        var student = await _db.Students.FindAsync(id);
+        var student = await _db.Students
+            .FirstOrDefaultAsync(s => s.Id == id && s.TeacherId == TeacherId);
         if (student is null)
             return NotFound();
 
@@ -84,7 +84,8 @@ public class StudentsController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var student = await _db.Students.FindAsync(id);
+        var student = await _db.Students
+            .FirstOrDefaultAsync(s => s.Id == id && s.TeacherId == TeacherId);
         if (student is null)
             return NotFound();
 

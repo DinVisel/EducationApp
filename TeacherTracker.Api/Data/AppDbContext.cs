@@ -11,4 +11,14 @@ public class AppDbContext : DbContext
 
     public DbSet<Teacher> Teachers { get; set; }
     public DbSet<Student> Students { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Email is the login identifier, so it must be unique.
+        modelBuilder.Entity<Teacher>()
+            .HasIndex(t => t.Email)
+            .IsUnique();
+    }
 }

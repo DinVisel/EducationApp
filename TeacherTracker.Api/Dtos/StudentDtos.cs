@@ -12,8 +12,7 @@ public record StudentDto(
 public record CreateStudentDto(
     [Required, MaxLength(100)] string FirstName,
     [Required, MaxLength(100)] string LastName,
-    [MaxLength(50)] string StudentNumber,
-    [Required] int TeacherId);
+    [MaxLength(50)] string StudentNumber);
 
 public record UpdateStudentDto(
     [Required, MaxLength(100)] string FirstName,
