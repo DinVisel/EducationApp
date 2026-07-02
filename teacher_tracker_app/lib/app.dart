@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/design.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/auth/state/auth_controller.dart';
@@ -51,10 +52,7 @@ class TeacherTrackerApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Teacher Tracker',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
       routerConfig: ref.watch(routerProvider),
     );
   }
@@ -65,6 +63,8 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return const GlassScaffold(
+      body: Center(child: CircularProgressIndicator()),
+    );
   }
 }

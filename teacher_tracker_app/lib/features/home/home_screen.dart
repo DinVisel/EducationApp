@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/design.dart';
 import '../students/screens/students_list_screen.dart';
 import '../teacher/screens/teacher_profile_screen.dart';
 
@@ -21,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GlassScaffold(
       body: IndexedStack(index: _index, children: _pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,

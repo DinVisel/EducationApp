@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/design.dart';
 import '../state/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -46,13 +47,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
+    return GlassScaffold(
       body: Center(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 380),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: GlassCard(
+              float: true,
+              padding: const EdgeInsets.all(AppSpacing.xl),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -61,23 +64,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     Icon(Icons.school,
                         size: 72, color: theme.colorScheme.primary),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     Text('Teacher Tracker',
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall),
-                    const SizedBox(height: 4),
+                        style: theme.textTheme.headlineMedium),
+                    const SizedBox(height: AppSpacing.xs),
                     Text('Sign in to track your students',
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium
-                            ?.copyWith(color: theme.hintColor)),
-                    const SizedBox(height: 32),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant)),
+                    const SizedBox(height: AppSpacing.xl),
                     TextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
                       decoration: const InputDecoration(
                         labelText: 'Email',
-                        border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (v) {
@@ -87,7 +89,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       controller: _password,
                       obscureText: true,
@@ -95,28 +97,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onFieldSubmitted: (_) => _submit(),
                       decoration: const InputDecoration(
                         labelText: 'Password',
-                        border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.lock_outline),
                       ),
                       validator: (v) =>
                           (v == null || v.isEmpty) ? 'Required' : null,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     FilledButton(
                       onPressed: _submitting ? null : _submit,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: _submitting
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text('Sign in'),
-                      ),
+                      child: _submitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Sign in'),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     TextButton(
                       onPressed:
                           _submitting ? null : () => context.push('/register'),
