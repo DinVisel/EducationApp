@@ -77,3 +77,15 @@ final authControllerProvider =
 final currentTeacherProvider = Provider<Teacher?>((ref) {
   return ref.watch(authControllerProvider).value?.teacher;
 });
+
+/// Convenience: the signed-in account's role (e.g. `Teacher`), or null when
+/// signed out. Used to guard role-specific routes and UI.
+final currentRoleProvider = Provider<String?>((ref) {
+  return ref.watch(authControllerProvider).value?.role;
+});
+
+/// Whether the signed-in account is a teacher. Teacher-only routes/features can
+/// gate on this; other roles get their own experience in later phases.
+final isTeacherProvider = Provider<bool>((ref) {
+  return ref.watch(currentRoleProvider) == 'Teacher';
+});

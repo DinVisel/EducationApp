@@ -9,7 +9,7 @@ using TeacherTracker.Api.Models;
 namespace TeacherTracker.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Roles = nameof(UserRole.Teacher))]
 [Route("api/[controller]")]
 public class StudentsController : ControllerBase
 {

@@ -69,7 +69,7 @@ public class AuthController : ControllerBase
         return Ok(BuildResponse(user, user.Teacher));
     }
 
-    [Authorize]
+    [Authorize(Roles = nameof(UserRole.Teacher))]
     [HttpGet("me")]
     public async Task<ActionResult<TeacherDto>> Me()
     {
@@ -77,7 +77,7 @@ public class AuthController : ControllerBase
         return teacher is null ? NotFound() : Ok(ToDto(teacher));
     }
 
-    [Authorize]
+    [Authorize(Roles = nameof(UserRole.Teacher))]
     [HttpPut("me")]
     public async Task<ActionResult<TeacherDto>> UpdateMe(UpdateProfileDto dto)
     {
