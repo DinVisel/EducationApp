@@ -1,10 +1,12 @@
 using System.Text;
+using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
+using TeacherTracker.Api.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddAuthorization();
+
+// --- File storage (Cloudflare R2, S3-compatible) ---
+builder.Services.Configure<R2Options>(
+    builder.Configuration.GetSection(R2Options.SectionName));
+
+var r2 = builder.Configuration.GetSection(R2Options.SectionName).Get<R2Options>()
+         ?? new R2Options();
+
+builder.Services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(
+    new Amazon.Runtime.BasicAWSCredentials(r2.AccessKey, r2.SecretKey),
+    new AmazonS3Config
+    {
+        ServiceURL = r2.Endpoint,
+        ForcePathStyle = true, // R2 requires path-style addressing
+        // R2 uses a single region alias.
+        AuthenticationRegion = "auto",
+    }));
+builder.Services.AddScoped<IFileStorage, R2FileStorage>();
 
 // Allow the Flutter client to call the API during development.
 const string FlutterCorsPolicy = "FlutterClient";

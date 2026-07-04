@@ -17,6 +17,11 @@ public class Student
     public int TeacherId { get; set; }
     public Teacher? Teacher { get; set; }
 
+    // Optional login account for the student (populated in the student module,
+    // Phase 4). Null means the student is a passive record with no login.
+    public int? UserId { get; set; }
+    public User? User { get; set; }
+
     public List<TrackingNote> TrackingNotes { get; set; } = new();
     public List<Homework> Homeworks { get; set; } = new();
     public List<Book> Books { get; set; } = new();

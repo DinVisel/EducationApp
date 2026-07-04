@@ -17,5 +17,6 @@ public record UpdateProfileDto(
     [Required, MaxLength(100)] string LastName,
     [Required, EmailAddress, MaxLength(256)] string Email);
 
-/// Returned by register/login: the signed token plus the teacher profile.
-public record AuthResponseDto(string Token, TeacherDto Teacher);
+/// Returned by register/login: the signed token, the account role, and the
+/// teacher profile (present when the account is a teacher).
+public record AuthResponseDto(string Token, string Role, TeacherDto? Teacher);

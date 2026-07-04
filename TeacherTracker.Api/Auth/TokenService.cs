@@ -16,16 +16,26 @@ public class TokenService
         _options = options.Value;
     }
 
-    /// Issues a signed JWT whose subject is the teacher's id.
-    public string CreateToken(Teacher teacher)
+    /// Issues a signed JWT whose subject is the user's id. When the user has a
+    /// teacher profile, a `teacherId` claim is included so teacher-scoped
+    /// controllers can resolve it directly.
+    public string CreateToken(User user, Teacher? teacher = null)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, teacher.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, teacher.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("name", $"{teacher.FirstName} {teacher.LastName}".Trim()),
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new("role", user.Role.ToString()),
+            new(ClaimTypes.Role, user.Role.ToString()),
         };
+
+        if (teacher is not null)
+        {
+            claims.Add(new Claim("teacherId", teacher.Id.ToString()));
+            claims.Add(new Claim("name",
+                $"{teacher.FirstName} {teacher.LastName}".Trim()));
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

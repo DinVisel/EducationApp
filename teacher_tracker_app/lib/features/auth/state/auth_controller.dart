@@ -5,10 +5,13 @@ import '../../../core/auth/token_store.dart';
 import '../../../models/teacher.dart';
 import '../data/auth_repository.dart';
 
-/// Signed-in session: the current teacher (token lives in [TokenStore]).
+/// Signed-in session: the current teacher + account role (token lives in
+/// [TokenStore]). Only teachers can sign in today; student sessions arrive in a
+/// later phase, at which point [teacher] may be absent for those accounts.
 class AuthState {
-  const AuthState({required this.teacher});
+  const AuthState({required this.teacher, this.role = 'Teacher'});
   final Teacher teacher;
+  final String role;
 }
 
 /// Owns authentication. `null` data = signed out.
@@ -36,7 +39,7 @@ class AuthController extends AsyncNotifier<AuthState?> {
         .read(authRepositoryProvider)
         .login(email: email.trim(), password: password);
     await ref.read(tokenStoreProvider).save(result.token);
-    state = AsyncData(AuthState(teacher: result.teacher));
+    state = AsyncData(AuthState(teacher: result.teacher!, role: result.role));
   }
 
   Future<void> register({
@@ -52,7 +55,7 @@ class AuthController extends AsyncNotifier<AuthState?> {
           password: password,
         );
     await ref.read(tokenStoreProvider).save(result.token);
-    state = AsyncData(AuthState(teacher: result.teacher));
+    state = AsyncData(AuthState(teacher: result.teacher!, role: result.role));
   }
 
   Future<void> logout() async {

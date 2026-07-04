@@ -4,11 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../models/teacher.dart';
 
-/// Token + teacher returned by register/login.
+/// Token + role + teacher profile returned by register/login. `teacher` is null
+/// for non-teacher accounts (student login lands in a later phase).
 class AuthResult {
-  const AuthResult({required this.token, required this.teacher});
+  const AuthResult({
+    required this.token,
+    required this.role,
+    required this.teacher,
+  });
   final String token;
-  final Teacher teacher;
+  final String role;
+  final Teacher? teacher;
 }
 
 class AuthRepository {
@@ -55,10 +61,15 @@ class AuthRepository {
     return Teacher.fromJson(res.data!);
   }
 
-  AuthResult _parse(Map<String, dynamic> json) => AuthResult(
-        token: json['token'] as String,
-        teacher: Teacher.fromJson(json['teacher'] as Map<String, dynamic>),
-      );
+  AuthResult _parse(Map<String, dynamic> json) {
+    final teacher = json['teacher'];
+    return AuthResult(
+      token: json['token'] as String,
+      role: json['role'] as String? ?? 'Teacher',
+      teacher:
+          teacher == null ? null : Teacher.fromJson(teacher as Map<String, dynamic>),
+    );
+  }
 }
 
 final authRepositoryProvider = Provider<AuthRepository>(
