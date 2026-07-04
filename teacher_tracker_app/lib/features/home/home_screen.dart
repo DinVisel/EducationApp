@@ -5,9 +5,10 @@ import '../students/screens/student_dashboard_screen.dart';
 import '../students/screens/homework_tracker_screen.dart';
 import '../students/screens/reading_log_screen.dart';
 import '../teacher/screens/teacher_profile_screen.dart';
+import 'home_dashboard_screen.dart';
 
-/// App shell with bottom navigation — 4 tabs matching the Stitch design:
-/// Students (Dashboard), Homework Tracker, Reading Log, Profile.
+/// App shell with bottom navigation — 5 tabs:
+/// Home, Students (Dashboard), Homework Tracker, Reading Log, Profile.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,21 +19,29 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
-  static const _pages = [
-    StudentDashboardScreen(),
-    HomeworkTrackerScreen(),
-    ReadingLogScreen(),
-    TeacherProfileScreen(),
-  ];
+  void _goTo(int i) => setState(() => _index = i);
 
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      HomeDashboardScreen(onNavigate: _goTo),
+      const StudentDashboardScreen(),
+      const HomeworkTrackerScreen(),
+      const ReadingLogScreen(),
+      const TeacherProfileScreen(),
+    ];
+
     return GlassScaffold(
-      body: IndexedStack(index: _index, children: _pages),
+      body: IndexedStack(index: _index, children: pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        onDestinationSelected: _goTo,
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
           NavigationDestination(
             icon: Icon(Icons.groups_outlined),
             selectedIcon: Icon(Icons.groups),
