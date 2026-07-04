@@ -83,7 +83,7 @@ books / notes exactly as before, with role enforced server-side.
 
 ---
 
-## Phase 2 — Classes & enrollment
+## Phase 2 — Classes & enrollment ✅
 
 **Backend** — `Classroom { Id, Name, TeacherId }`, `Enrollment { StudentId,
 ClassroomId }`; endpoints to create classes, add/remove students, list a class

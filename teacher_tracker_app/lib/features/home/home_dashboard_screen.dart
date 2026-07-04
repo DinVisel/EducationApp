@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/design.dart';
 import '../../models/student.dart';
 import '../auth/state/auth_controller.dart';
+import '../classes/state/classrooms_providers.dart';
 import '../students/screens/student_form_screen.dart';
 import '../students/screens/student_profile_screen.dart';
 import '../students/state/students_providers.dart';
@@ -23,6 +24,7 @@ class HomeDashboardScreen extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
     final teacher = ref.watch(currentTeacherProvider);
     final studentsAsync = ref.watch(studentsProvider);
+    final classroomsAsync = ref.watch(classroomsProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -60,8 +62,11 @@ class HomeDashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: _StatCard(
                         icon: Icons.class_,
-                        label: 'Class',
-                        value: '3B',
+                        label: 'Classes',
+                        value: classroomsAsync.maybeWhen(
+                          data: (c) => c.length.toString(),
+                          orElse: () => '—',
+                        ),
                         cs: cs,
                         tt: tt,
                       ),
@@ -91,9 +96,19 @@ class HomeDashboardScreen extends ConsumerWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: _ActionTile(
+                        icon: Icons.class_outlined,
+                        label: 'Classes',
+                        onTap: () => onNavigate(2),
+                        cs: cs,
+                        tt: tt,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _ActionTile(
                         icon: Icons.menu_book_outlined,
                         label: 'Homework',
-                        onTap: () => onNavigate(2),
+                        onTap: () => onNavigate(3),
                         cs: cs,
                         tt: tt,
                       ),
@@ -103,7 +118,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                       child: _ActionTile(
                         icon: Icons.auto_stories_outlined,
                         label: 'Reading',
-                        onTap: () => onNavigate(3),
+                        onTap: () => onNavigate(4),
                         cs: cs,
                         tt: tt,
                       ),

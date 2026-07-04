@@ -24,11 +24,22 @@ public class StudentsController : ControllerBase
     private int TeacherId => User.GetTeacherId();
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<StudentDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<StudentDto>>> GetAll(
+        [FromQuery] int? classroomId)
     {
-        var students = await _db.Students
+        var query = _db.Students
             .AsNoTracking()
-            .Where(s => s.TeacherId == TeacherId)
+            .Where(s => s.TeacherId == TeacherId);
+
+        // Optionally restrict to students enrolled in one of the teacher's classes.
+        if (classroomId is int cid)
+        {
+            query = query.Where(s =>
+                s.TeacherId == TeacherId &&
+                _db.Enrollments.Any(e => e.StudentId == s.Id && e.ClassroomId == cid));
+        }
+
+        var students = await query
             .OrderBy(s => s.FirstName).ThenBy(s => s.LastName)
             .Select(s => ToDto(s))
             .ToListAsync();

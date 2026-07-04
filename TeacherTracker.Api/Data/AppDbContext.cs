@@ -16,6 +16,8 @@ public class AppDbContext : DbContext
     public DbSet<Homework> Homeworks { get; set; }
     public DbSet<Book> Books { get; set; }
     public DbSet<FileObject> Files { get; set; }
+    public DbSet<Classroom> Classrooms { get; set; }
+    public DbSet<Enrollment> Enrollments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -68,5 +70,30 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Book>()
             .Property(b => b.Status)
             .HasConversion<string>();
+
+        // A teacher owns many classrooms; deleting the teacher removes them.
+        modelBuilder.Entity<Classroom>()
+            .HasOne(c => c.Teacher)
+            .WithMany()
+            .HasForeignKey(c => c.TeacherId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // A student can only be enrolled in a given classroom once.
+        modelBuilder.Entity<Enrollment>()
+            .HasIndex(e => new { e.StudentId, e.ClassroomId })
+            .IsUnique();
+
+        // Removing either side removes the enrollment link.
+        modelBuilder.Entity<Enrollment>()
+            .HasOne(e => e.Classroom)
+            .WithMany(c => c.Enrollments)
+            .HasForeignKey(e => e.ClassroomId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Enrollment>()
+            .HasOne(e => e.Student)
+            .WithMany()
+            .HasForeignKey(e => e.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
