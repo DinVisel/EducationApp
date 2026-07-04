@@ -113,14 +113,28 @@ teacher doesn't own; delete clears the assignment (files survive).
 
 ---
 
-## Phase 4 — Student module
+## Phase 4 — Student module ✅
 
-**Backend** — create student `User` accounts (invite / credential flow) linked to
-`Student`; student-scoped endpoints (my classes, my assignments, submit work).
-**Frontend** — student login and a student-facing home: classes, assignments,
-reading, submissions.
+**Backend** — teacher provisions a student login (credential flow):
+`POST/GET/DELETE /api/students/{id}/account` creates a `User(Role=Student)`
+linked to the `Student`. JWT gains a `studentId` claim; `TokenService` and
+`GetStudentId()` resolve it. `StudentModuleController` (`[Authorize(Student)]`):
+`me`, `classes`, `assignments`, `assignments/{id}/complete|uncomplete` (mark done
+= submission). `GET /api/auth/session` restores any role from a saved token.
+`FilesController.GetUrl` now also authorizes a student to download a file
+attached to an assignment fanned out to them.
+**Frontend** — auth layer carries teacher **or** student profiles; router sends
+students to a dedicated `StudentShell` (Assignments / Classes / Profile).
+Assignments screen: due-first list, mark-done toggle, attachment download (link
+copied to clipboard — inline open is Phase 6). Teacher's student profile gains a
+**Login Account** card to create/revoke credentials.
 
-**Done when** — a student logs in and sees/submits their assigned work.
+**Done when** — a student logs in and sees/submits their assigned work. ✅
+Verified end-to-end: account create (+409 dup), student login returns
+`Student` role/profile/`studentId`, `me`/`classes`/`assignments`, mark-complete
+sets `isDone`+`completedAt`, session restore, teacher-only → 403, and the
+attachment access check (assigned file allowed, unrelated file denied — presign
+itself needs live R2 creds).
 
 ---
 

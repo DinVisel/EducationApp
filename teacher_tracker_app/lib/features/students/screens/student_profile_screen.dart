@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
 import '../../../models/student.dart';
+import '../data/student_account_repository.dart';
 import '../state/notes_providers.dart';
 import '../state/students_providers.dart';
 import 'student_form_screen.dart';
@@ -36,6 +37,7 @@ class StudentProfileScreen extends ConsumerWidget {
           SliverToBoxAdapter(child: _ProfileAppBar(student: current, cs: cs, tt: tt)),
           SliverToBoxAdapter(child: _HeroCard(student: current, cs: cs, tt: tt)),
           SliverToBoxAdapter(child: _PersonalInfoCard(student: current, cs: cs, tt: tt)),
+          SliverToBoxAdapter(child: _AccountCard(student: current, cs: cs, tt: tt)),
           SliverToBoxAdapter(child: _RecentActivityCard(cs: cs, tt: tt)),
           SliverToBoxAdapter(child: _ParentContactsCard(student: current, cs: cs, tt: tt)),
           SliverToBoxAdapter(child: _NotesCardSection(student: current, cs: cs, tt: tt)),
@@ -744,5 +746,179 @@ class _SectionHeader extends StatelessWidget {
         const Divider(height: 12),
       ],
     );
+  }
+}
+
+/// Teacher-facing login-account management for a student: shows whether the
+/// student can log in and lets the teacher provision or revoke credentials.
+class _AccountCard extends ConsumerWidget {
+  const _AccountCard(
+      {required this.student, required this.cs, required this.tt});
+  final Student student;
+  final ColorScheme cs;
+  final TextTheme tt;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountAsync = ref.watch(studentAccountProvider(student.id));
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+      child: GlassCard(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.login, color: cs.primary, size: 20),
+                const SizedBox(width: 8),
+                Text('Login Account',
+                    style: tt.titleMedium?.copyWith(
+                        color: cs.onSurface, fontWeight: FontWeight.w700)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            accountAsync.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: LinearProgressIndicator(),
+              ),
+              error: (e, _) => Text('Could not load: $e',
+                  style: tt.bodySmall?.copyWith(color: cs.error)),
+              data: (account) => account.hasAccount
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Can sign in',
+                                  style: tt.bodyMedium
+                                      ?.copyWith(color: cs.onSurface)),
+                              Text(account.email ?? '',
+                                  style: tt.labelMedium?.copyWith(
+                                      color: cs.onSurfaceVariant)),
+                            ],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => _revoke(context, ref),
+                          child: Text('Revoke',
+                              style: TextStyle(color: cs.error)),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('No login yet. Create one so this student can '
+                            'sign in and see their assignments.',
+                            style: tt.bodySmall
+                                ?.copyWith(color: cs.onSurfaceVariant)),
+                        const SizedBox(height: 12),
+                        FilledButton.tonalIcon(
+                          onPressed: () => _create(context, ref),
+                          icon: const Icon(Icons.person_add_alt),
+                          label: const Text('Create login'),
+                        ),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _create(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final emailC = TextEditingController();
+    final passC = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: const Text('Create login'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: emailC,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (v) => (v == null || !v.contains('@'))
+                    ? 'Enter a valid email'
+                    : null,
+              ),
+              TextFormField(
+                controller: passC,
+                decoration:
+                    const InputDecoration(labelText: 'Temporary password'),
+                validator: (v) => (v == null || v.length < 6)
+                    ? 'At least 6 characters'
+                    : null,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(d, false),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) Navigator.pop(d, true);
+              },
+              child: const Text('Create')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    try {
+      await ref.read(studentAccountRepositoryProvider).create(
+            student.id,
+            email: emailC.text.trim(),
+            password: passC.text,
+          );
+      ref.invalidate(studentAccountProvider(student.id));
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Login created. Share the credentials.')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Could not create: $e')));
+    }
+  }
+
+  Future<void> _revoke(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: const Text('Revoke login?'),
+        content: const Text(
+            'The student will no longer be able to sign in. Their profile and '
+            'work are kept.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(d, false),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, true),
+              child: const Text('Revoke')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ref.read(studentAccountRepositoryProvider).delete(student.id);
+      ref.invalidate(studentAccountProvider(student.id));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Could not revoke: $e')));
+    }
   }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TeacherTracker.Api.Auth;
@@ -14,6 +15,7 @@ namespace TeacherTracker.Api.Controllers;
 public class StudentsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly PasswordHasher<User> _hasher = new();
 
     public StudentsController(AppDbContext db)
     {
@@ -111,6 +113,68 @@ public class StudentsController : ControllerBase
             return NotFound();
 
         _db.Students.Remove(student);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    // ── Student login accounts (credential provisioning) ────────────────────
+
+    /// Whether this student has a login account, and under which email.
+    [HttpGet("{id:int}/account")]
+    public async Task<ActionResult<StudentAccountDto>> GetAccount(int id)
+    {
+        var student = await _db.Students
+            .Include(s => s.User)
+            .FirstOrDefaultAsync(s => s.Id == id && s.TeacherId == TeacherId);
+        if (student is null)
+            return NotFound();
+
+        return Ok(student.User is null
+            ? new StudentAccountDto(false, null)
+            : new StudentAccountDto(true, student.User.Email));
+    }
+
+    /// Provisions a login (User with Role=Student) for one of the teacher's
+    /// students and links it to the profile.
+    [HttpPost("{id:int}/account")]
+    public async Task<ActionResult<StudentAccountDto>> CreateAccount(
+        int id, CreateStudentAccountDto dto)
+    {
+        var student = await _db.Students
+            .Include(s => s.User)
+            .FirstOrDefaultAsync(s => s.Id == id && s.TeacherId == TeacherId);
+        if (student is null)
+            return NotFound();
+        if (student.User is not null)
+            return Conflict("This student already has a login account.");
+
+        var email = dto.Email.Trim().ToLowerInvariant();
+        if (await _db.Users.AnyAsync(u => u.Email == email))
+            return Conflict("An account with that email already exists.");
+
+        var user = new User { Email = email, Role = UserRole.Student };
+        user.PasswordHash = _hasher.HashPassword(user, dto.Password);
+        student.User = user;
+        await _db.SaveChangesAsync();
+
+        return Ok(new StudentAccountDto(true, email));
+    }
+
+    /// Revokes a student's login. The student profile and their work remain.
+    [HttpDelete("{id:int}/account")]
+    public async Task<IActionResult> DeleteAccount(int id)
+    {
+        var student = await _db.Students
+            .Include(s => s.User)
+            .FirstOrDefaultAsync(s => s.Id == id && s.TeacherId == TeacherId);
+        if (student is null || student.User is null)
+            return NotFound();
+
+        // Unlink first so the SetNull FK doesn't fight the delete, then remove.
+        var user = student.User;
+        student.User = null;
+        student.UserId = null;
+        _db.Users.Remove(user);
         await _db.SaveChangesAsync();
         return NoContent();
     }

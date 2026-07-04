@@ -34,4 +34,14 @@ public static class ClaimsPrincipalExtensions
             throw new InvalidOperationException("Token is missing a valid teacher id.");
         return id;
     }
+
+    /// The authenticated student profile's id. Only present when the account is a
+    /// student; student-scoped endpoints rely on this claim.
+    public static int GetStudentId(this ClaimsPrincipal user)
+    {
+        var value = user.FindFirstValue("studentId");
+        if (value is null || !int.TryParse(value, out var id))
+            throw new InvalidOperationException("Token is missing a valid student id.");
+        return id;
+    }
 }

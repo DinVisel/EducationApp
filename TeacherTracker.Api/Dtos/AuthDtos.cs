@@ -18,5 +18,13 @@ public record UpdateProfileDto(
     [Required, EmailAddress, MaxLength(256)] string Email);
 
 /// Returned by register/login: the signed token, the account role, and the
-/// teacher profile (present when the account is a teacher).
-public record AuthResponseDto(string Token, string Role, TeacherDto? Teacher);
+/// matching profile (teacher or student, depending on the role).
+public record AuthResponseDto(
+    string Token,
+    string Role,
+    TeacherDto? Teacher,
+    StudentProfileDto? Student = null);
+
+/// The current identity without a token — used to restore a session at startup
+/// regardless of role.
+public record SessionDto(string Role, TeacherDto? Teacher, StudentProfileDto? Student);

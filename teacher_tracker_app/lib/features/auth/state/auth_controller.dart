@@ -2,16 +2,21 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/auth/token_store.dart';
+import '../../../models/student_profile.dart';
 import '../../../models/teacher.dart';
 import '../data/auth_repository.dart';
 
-/// Signed-in session: the current teacher + account role (token lives in
-/// [TokenStore]). Only teachers can sign in today; student sessions arrive in a
-/// later phase, at which point [teacher] may be absent for those accounts.
+/// Signed-in session: the account role plus the matching profile (token lives in
+/// [TokenStore]). Teachers carry [teacher]; students carry [student]. Exactly
+/// one is set for a valid session.
 class AuthState {
-  const AuthState({required this.teacher, this.role = 'Teacher'});
-  final Teacher teacher;
+  const AuthState({required this.role, this.teacher, this.student});
   final String role;
+  final Teacher? teacher;
+  final StudentProfile? student;
+
+  bool get isTeacher => role == 'Teacher';
+  bool get isStudent => role == 'Student';
 }
 
 /// Owns authentication. `null` data = signed out.
@@ -26,8 +31,12 @@ class AuthController extends AsyncNotifier<AuthState?> {
     if (token == null) return null;
 
     try {
-      final teacher = await ref.read(authRepositoryProvider).me();
-      return AuthState(teacher: teacher);
+      final session = await ref.read(authRepositoryProvider).session();
+      return AuthState(
+        role: session.role,
+        teacher: session.teacher,
+        student: session.student,
+      );
     } on DioException {
       await store.clear();
       return null;
@@ -39,7 +48,11 @@ class AuthController extends AsyncNotifier<AuthState?> {
         .read(authRepositoryProvider)
         .login(email: email.trim(), password: password);
     await ref.read(tokenStoreProvider).save(result.token);
-    state = AsyncData(AuthState(teacher: result.teacher!, role: result.role));
+    state = AsyncData(AuthState(
+      role: result.role,
+      teacher: result.teacher,
+      student: result.student,
+    ));
   }
 
   Future<void> register({
@@ -55,7 +68,11 @@ class AuthController extends AsyncNotifier<AuthState?> {
           password: password,
         );
     await ref.read(tokenStoreProvider).save(result.token);
-    state = AsyncData(AuthState(teacher: result.teacher!, role: result.role));
+    state = AsyncData(AuthState(
+      role: result.role,
+      teacher: result.teacher,
+      student: result.student,
+    ));
   }
 
   Future<void> logout() async {
@@ -66,7 +83,7 @@ class AuthController extends AsyncNotifier<AuthState?> {
   /// Updates the current teacher's profile and refreshes session state.
   Future<void> updateProfile(Teacher updated) async {
     final saved = await ref.read(authRepositoryProvider).updateProfile(updated);
-    state = AsyncData(AuthState(teacher: saved));
+    state = AsyncData(AuthState(role: 'Teacher', teacher: saved));
   }
 }
 
@@ -76,6 +93,11 @@ final authControllerProvider =
 /// Convenience: the signed-in teacher, or null.
 final currentTeacherProvider = Provider<Teacher?>((ref) {
   return ref.watch(authControllerProvider).value?.teacher;
+});
+
+/// Convenience: the signed-in student profile, or null.
+final currentStudentProvider = Provider<StudentProfile?>((ref) {
+  return ref.watch(authControllerProvider).value?.student;
 });
 
 /// Convenience: the signed-in account's role (e.g. `Teacher`), or null when

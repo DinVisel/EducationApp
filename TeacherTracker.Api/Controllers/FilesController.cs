@@ -67,11 +67,28 @@ public class FilesController : ControllerBase
     {
         var file = await _db.Files
             .AsNoTracking()
-            .FirstOrDefaultAsync(f => f.Id == id && f.OwnerUserId == UserId);
+            .FirstOrDefaultAsync(f => f.Id == id);
         if (file is null)
             return NotFound();
 
+        // The owner can always fetch it. A student may fetch a file only if it's
+        // attached to an assignment that was fanned out to them.
+        if (file.OwnerUserId != UserId && !await CanStudentAccessAsync(id))
+            return NotFound();
+
         return Ok(new FileUrlDto(_storage.GetPresignedGetUrl(file.Key)));
+    }
+
+    // True when the caller is a student assigned an assignment carrying this file.
+    private async Task<bool> CanStudentAccessAsync(int fileId)
+    {
+        if (User.GetRole() != UserRole.Student)
+            return false;
+
+        var studentId = User.GetStudentId();
+        return await _db.AssignmentAttachments.AnyAsync(a =>
+            a.FileObjectId == fileId &&
+            a.Assignment!.StudentAssignments.Any(sa => sa.StudentId == studentId));
     }
 
     [HttpDelete("{id:int}")]

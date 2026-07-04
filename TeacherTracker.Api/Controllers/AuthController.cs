@@ -31,18 +31,18 @@ public class AuthController : ControllerBase
             return Conflict("An account with that email already exists.");
 
         // A teacher account is a User (identity) + a Teacher profile.
-        var user = new User { Email = email, Role = UserRole.Teacher };
-        user.PasswordHash = _hasher.HashPassword(user, dto.Password);
-        user.Teacher = new Teacher
+        var teacher = new Teacher
         {
             FirstName = dto.FirstName.Trim(),
             LastName = dto.LastName.Trim(),
         };
+        var user = new User { Email = email, Role = UserRole.Teacher, Teacher = teacher };
+        user.PasswordHash = _hasher.HashPassword(user, dto.Password);
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
-        return Ok(BuildResponse(user, user.Teacher));
+        return Ok(BuildResponse(user, teacher));
     }
 
     [HttpPost("login")]
@@ -51,6 +51,7 @@ public class AuthController : ControllerBase
         var email = dto.Email.Trim().ToLowerInvariant();
         var user = await _db.Users
             .Include(u => u.Teacher)
+            .Include(u => u.Student)
             .FirstOrDefaultAsync(u => u.Email == email);
         if (user is null)
             return Unauthorized("Invalid email or password.");
@@ -66,7 +67,26 @@ public class AuthController : ControllerBase
             await _db.SaveChangesAsync();
         }
 
-        return Ok(BuildResponse(user, user.Teacher));
+        return Ok(BuildResponse(user));
+    }
+
+    /// The current identity (any role), used to restore a session from a saved
+    /// token at startup. Returns the profile matching the account's role.
+    [Authorize]
+    [HttpGet("session")]
+    public async Task<ActionResult<SessionDto>> Session()
+    {
+        var user = await _db.Users
+            .Include(u => u.Teacher)
+            .Include(u => u.Student)
+            .FirstOrDefaultAsync(u => u.Id == User.GetUserId());
+        if (user is null)
+            return Unauthorized();
+
+        return Ok(new SessionDto(
+            user.Role.ToString(),
+            user.Teacher is null ? null : ToDto(user.Teacher, user),
+            user.Student is null ? null : ToProfileDto(user.Student)));
     }
 
     [Authorize(Roles = nameof(UserRole.Teacher))]
@@ -104,14 +124,25 @@ public class AuthController : ControllerBase
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.Id == User.GetTeacherId());
 
-    private AuthResponseDto BuildResponse(User user, Teacher? teacher) =>
+    // Register only ever produces a teacher, so keep the explicit overload for it.
+    private AuthResponseDto BuildResponse(User user, Teacher teacher) =>
         new(_tokens.CreateToken(user, teacher),
             user.Role.ToString(),
-            teacher is null ? null : ToDto(teacher, user));
+            ToDto(teacher, user));
+
+    // Login builds from whichever profile the user has (teacher or student).
+    private AuthResponseDto BuildResponse(User user) =>
+        new(_tokens.CreateToken(user, user.Teacher, user.Student),
+            user.Role.ToString(),
+            user.Teacher is null ? null : ToDto(user.Teacher, user),
+            user.Student is null ? null : ToProfileDto(user.Student));
 
     private static TeacherDto ToDto(Teacher t) =>
         new(t.Id, t.FirstName, t.LastName, t.User?.Email ?? string.Empty);
 
     private static TeacherDto ToDto(Teacher t, User u) =>
         new(t.Id, t.FirstName, t.LastName, u.Email);
+
+    private static StudentProfileDto ToProfileDto(Student s) =>
+        new(s.Id, s.FirstName, s.LastName, s.StudentNumber);
 }

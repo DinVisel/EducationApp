@@ -7,6 +7,7 @@ import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/auth/state/auth_controller.dart';
 import 'features/home/home_screen.dart';
+import 'features/student/screens/student_shell.dart';
 
 /// Router that redirects based on auth state. It refreshes whenever the auth
 /// session changes (login, logout, token expiry).
@@ -27,12 +28,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         return loc == '/' ? null : '/';
       }
 
-      final loggedIn = auth.value != null;
+      final session = auth.value;
+      final loggedIn = session != null;
       if (!loggedIn) {
         return (loc == '/login' || loc == '/register') ? null : '/login';
       }
-      // Signed in: keep them out of the auth/splash pages.
-      if (loc == '/' || loc == '/login' || loc == '/register') return '/home';
+
+      // Signed in: route to the shell matching the account's role.
+      final home = session.isStudent ? '/student' : '/home';
+      // Keep users out of the auth/splash pages and the other role's shell.
+      if (loc == '/' || loc == '/login' || loc == '/register') return home;
+      if (session.isStudent && loc == '/home') return '/student';
+      if (!session.isStudent && loc == '/student') return '/home';
       return null;
     },
     routes: [
@@ -40,6 +47,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
       GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
+      GoRoute(path: '/student', builder: (_, _) => const StudentShell()),
     ],
   );
 });
