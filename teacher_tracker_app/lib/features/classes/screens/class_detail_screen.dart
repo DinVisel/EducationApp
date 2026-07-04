@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/design.dart';
 import '../../../models/classroom.dart';
 import '../../../models/student.dart';
+import '../../assignments/screens/class_assignments_screen.dart';
 import '../../students/state/students_providers.dart';
 import '../state/classrooms_providers.dart';
 
@@ -21,6 +22,17 @@ class ClassDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(classroom.name),
         backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.assignment_outlined),
+            tooltip: 'Assignments',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ClassAssignmentsScreen(classroom: classroom),
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _addStudents(context, ref),

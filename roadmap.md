@@ -94,14 +94,22 @@ roster. Student lists become filterable by class.
 
 ---
 
-## Phase 3 — Assignments & materials to a class
+## Phase 3 — Assignments & materials to a class ✅
 
-**Backend** — assign homework/materials to a `Classroom` (fan-out to enrolled
-students); attach R2 files to an assignment.
-**Frontend** — teacher publishes an assignment with attachments to a class.
+**Backend** — `Assignment { Id, Title, Description, DueDate, ClassroomId,
+TeacherId }` published to a class; `StudentAssignment` fan-out to every enrolled
+student on create; `AssignmentAttachment` links shared R2 files (owner-checked)
+to the assignment. `AssignmentsController` (nested under `classrooms/{id}`):
+list / detail / create (fan-out + attach) / delete, teacher-scoped.
+**Frontend** — `Assignment`/`AssignmentAttachment` models, `AssignmentsRepository`
++ providers; class detail → **Assignments** screen listing published work with
+`done/total` progress and attachment chips; **New Assignment** form (title,
+description, due date, file_picker → R2 upload → publish with attachments).
 
 **Done when** — publishing to a class creates work for every enrolled student,
-with downloadable attachments.
+with downloadable attachments. ✅ Verified: fan-out creates one
+`StudentAssignment` per enrolled student; attachment linking drops files the
+teacher doesn't own; delete clears the assignment (files survive).
 
 ---
 

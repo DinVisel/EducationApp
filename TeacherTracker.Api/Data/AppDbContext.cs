@@ -18,6 +18,9 @@ public class AppDbContext : DbContext
     public DbSet<FileObject> Files { get; set; }
     public DbSet<Classroom> Classrooms { get; set; }
     public DbSet<Enrollment> Enrollments { get; set; }
+    public DbSet<Assignment> Assignments { get; set; }
+    public DbSet<AssignmentAttachment> AssignmentAttachments { get; set; }
+    public DbSet<StudentAssignment> StudentAssignments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -95,5 +98,58 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(e => e.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting a classroom removes the assignments published to it.
+        modelBuilder.Entity<Assignment>()
+            .HasOne(a => a.Classroom)
+            .WithMany()
+            .HasForeignKey(a => a.ClassroomId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting a teacher removes the assignments they published (Postgres
+        // allows this second cascade path alongside the classroom one).
+        modelBuilder.Entity<Assignment>()
+            .HasOne(a => a.Teacher)
+            .WithMany()
+            .HasForeignKey(a => a.TeacherId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting an assignment removes its attachment links (not the files).
+        modelBuilder.Entity<AssignmentAttachment>()
+            .HasOne(a => a.Assignment)
+            .WithMany(a => a.Attachments)
+            .HasForeignKey(a => a.AssignmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting the underlying file removes the attachment link too.
+        modelBuilder.Entity<AssignmentAttachment>()
+            .HasOne(a => a.FileObject)
+            .WithMany()
+            .HasForeignKey(a => a.FileObjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // The same file can't be attached to one assignment twice.
+        modelBuilder.Entity<AssignmentAttachment>()
+            .HasIndex(a => new { a.AssignmentId, a.FileObjectId })
+            .IsUnique();
+
+        // Fan-out rows: deleting the assignment removes every student's copy.
+        modelBuilder.Entity<StudentAssignment>()
+            .HasOne(sa => sa.Assignment)
+            .WithMany(a => a.StudentAssignments)
+            .HasForeignKey(sa => sa.AssignmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting the student removes their assignment copies.
+        modelBuilder.Entity<StudentAssignment>()
+            .HasOne(sa => sa.Student)
+            .WithMany()
+            .HasForeignKey(sa => sa.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // A student gets at most one copy of a given assignment.
+        modelBuilder.Entity<StudentAssignment>()
+            .HasIndex(sa => new { sa.AssignmentId, sa.StudentId })
+            .IsUnique();
     }
 }
