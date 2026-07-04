@@ -70,7 +70,7 @@ Groundwork only — no full feature UIs yet.
 
 ---
 
-## Phase 1 — Teacher module on the new identity
+## Phase 1 — Teacher module on the new identity ✅
 
 Make the existing teacher experience first-class under unified identity.
 
