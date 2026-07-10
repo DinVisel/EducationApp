@@ -21,6 +21,10 @@ public class AppDbContext : DbContext
     public DbSet<Assignment> Assignments { get; set; }
     public DbSet<AssignmentAttachment> AssignmentAttachments { get; set; }
     public DbSet<StudentAssignment> StudentAssignments { get; set; }
+    public DbSet<Post> Posts { get; set; }
+    public DbSet<PostAttachment> PostAttachments { get; set; }
+    public DbSet<PostLike> PostLikes { get; set; }
+    public DbSet<PostComment> PostComments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -151,5 +155,71 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<StudentAssignment>()
             .HasIndex(sa => new { sa.AssignmentId, sa.StudentId })
             .IsUnique();
+
+        // --- Social hub (global teacher feed) ---
+
+        // Store the subject as readable text rather than an int.
+        modelBuilder.Entity<Post>()
+            .Property(p => p.Subject)
+            .HasConversion<string>();
+
+        // Deleting the author account removes their posts.
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.Author)
+            .WithMany()
+            .HasForeignKey(p => p.AuthorUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting a post removes its attachment links (not the files).
+        modelBuilder.Entity<PostAttachment>()
+            .HasOne(a => a.Post)
+            .WithMany(p => p.Attachments)
+            .HasForeignKey(a => a.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting the underlying file removes the attachment link too.
+        modelBuilder.Entity<PostAttachment>()
+            .HasOne(a => a.FileObject)
+            .WithMany()
+            .HasForeignKey(a => a.FileObjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // The same file can't be attached to one post twice.
+        modelBuilder.Entity<PostAttachment>()
+            .HasIndex(a => new { a.PostId, a.FileObjectId })
+            .IsUnique();
+
+        // Deleting a post removes its likes.
+        modelBuilder.Entity<PostLike>()
+            .HasOne(l => l.Post)
+            .WithMany(p => p.Likes)
+            .HasForeignKey(l => l.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting the account removes their likes (second cascade path).
+        modelBuilder.Entity<PostLike>()
+            .HasOne(l => l.User)
+            .WithMany()
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // A teacher likes a given post at most once.
+        modelBuilder.Entity<PostLike>()
+            .HasIndex(l => new { l.PostId, l.UserId })
+            .IsUnique();
+
+        // Deleting a post removes its comments.
+        modelBuilder.Entity<PostComment>()
+            .HasOne(c => c.Post)
+            .WithMany(p => p.Comments)
+            .HasForeignKey(c => c.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting the author account removes their comments (second cascade path).
+        modelBuilder.Entity<PostComment>()
+            .HasOne(c => c.Author)
+            .WithMany()
+            .HasForeignKey(c => c.AuthorUserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

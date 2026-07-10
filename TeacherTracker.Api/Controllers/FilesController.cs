@@ -71,9 +71,12 @@ public class FilesController : ControllerBase
         if (file is null)
             return NotFound();
 
-        // The owner can always fetch it. A student may fetch a file only if it's
-        // attached to an assignment that was fanned out to them.
-        if (file.OwnerUserId != UserId && !await CanStudentAccessAsync(id))
+        // The owner can always fetch it. A student may fetch a file attached to an
+        // assignment fanned out to them; any teacher may fetch a file attached to
+        // a post in the global feed.
+        if (file.OwnerUserId != UserId
+            && !await CanStudentAccessAsync(id)
+            && !await CanTeacherAccessPostFileAsync(id))
             return NotFound();
 
         return Ok(new FileUrlDto(_storage.GetPresignedGetUrl(file.Key)));
@@ -89,6 +92,16 @@ public class FilesController : ControllerBase
         return await _db.AssignmentAttachments.AnyAsync(a =>
             a.FileObjectId == fileId &&
             a.Assignment!.StudentAssignments.Any(sa => sa.StudentId == studentId));
+    }
+
+    // True when the caller is a teacher and the file is attached to any post in
+    // the global feed (which every teacher can see).
+    private async Task<bool> CanTeacherAccessPostFileAsync(int fileId)
+    {
+        if (User.GetRole() != UserRole.Teacher)
+            return false;
+
+        return await _db.PostAttachments.AnyAsync(a => a.FileObjectId == fileId);
     }
 
     [HttpDelete("{id:int}")]

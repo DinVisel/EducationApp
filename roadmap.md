@@ -138,16 +138,33 @@ itself needs live R2 creds).
 
 ---
 
-## Phase 5 — Social hub (global teacher feed)
+## Phase 5 — Social hub (global teacher feed) ✅
 
-**Backend** — `Post { Id, AuthorUserId, Text, Subject, CreatedAt }`,
-`PostAttachment (→ FileObject)`, `PostLike`, `PostComment`; endpoints to create,
-list/paginate, like, comment, and filter by subject.
-**Frontend** — feed screen: compose a post with text + subject + attachments
-(exercises/videos/files via R2), infinite-scroll feed, like, comment, search.
+**Backend** — `Post { Id, AuthorUserId, Text, Subject, CreatedAt }` (subject is a
+fixed `PostSubject` enum), `PostAttachment (→ FileObject)`, `PostLike` (unique per
+teacher), `PostComment`. `PostsController` (`[Authorize(Teacher)]`, `api/posts`):
+global feed with **cursor pagination** (`?subject=&beforeId=&limit=`, keyset on
+`Id` desc), create (owner-checked attach, fan-in of `PostDto` with `LikeCount`/
+`CommentCount`/`LikedByMe`/`IsMine`), author-only delete, idempotent like/unlike,
+list/add/author-only-delete comments. `FilesController.GetUrl` now also authorizes
+any teacher to download a file attached to any post (global feed).
+**Frontend** — `Post`/`PostAttachment`/`PostComment` models, `post_subject.dart`
+(fixed subjects → chips), `FeedRepository`, an `AsyncNotifier` `FeedNotifier`
+(subject filter + infinite scroll + optimistic like). The feed **replaces the Home
+tab** as the first teacher tab: `FeedScreen` (subject filter chips, infinite-scroll
+cards with like/comment/delete + attachment download → clipboard), `NewPostScreen`
+(text + subject + file_picker → R2 upload → publish), and a dedicated
+`PostCommentsScreen`.
 
 **Done when** — any teacher can post a resource with attachments to the global
-feed and others can view, download, like, and comment.
+feed and others can view, download, like, and comment. ✅ Verified end-to-end via
+API with two teacher tokens: feed lists newest-first, `?subject=` filters,
+`?beforeId=` paginates; like is idempotent (`likeCount`/`likedByMe` update) and
+unlike reverts; comments carry `isMine` per caller and bump `commentCount`;
+author-only delete (owner 204, other 404); student role → 403; and the new
+attachment access check (file attached to a post → 200 presigned URL, unrelated
+file → 404, owner always 200). Note: R2 uploads/presign need live R2 creds — the
+proxy `POST /api/files` upload still 500s without them (unchanged since Phase 0/4).
 
 ---
 

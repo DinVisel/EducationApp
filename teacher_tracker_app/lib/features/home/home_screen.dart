@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../core/design.dart';
 import '../classes/screens/classes_list_screen.dart';
+import '../feed/screens/feed_screen.dart';
 import '../students/screens/student_dashboard_screen.dart';
 import '../students/screens/homework_tracker_screen.dart';
 import '../students/screens/reading_log_screen.dart';
 import '../teacher/screens/teacher_profile_screen.dart';
-import 'home_dashboard_screen.dart';
 
 /// App shell with bottom navigation — 6 tabs:
-/// Home, Students, Classes, Homework, Reading, Profile.
+/// Hub, Students, Classes, Homework, Reading, Profile.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomeDashboardScreen(onNavigate: _goTo),
+      const FeedScreen(),
       const StudentDashboardScreen(),
       const ClassesListScreen(),
       const HomeworkTrackerScreen(),
@@ -40,9 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
         onDestinationSelected: _goTo,
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: Icon(Icons.forum_outlined),
+            selectedIcon: Icon(Icons.forum),
+            label: 'Hub',
           ),
           NavigationDestination(
             icon: Icon(Icons.groups_outlined),
