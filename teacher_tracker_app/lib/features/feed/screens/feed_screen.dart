@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
 import '../../../models/post.dart';
 import '../../../models/post_subject.dart';
-import '../../files/data/files_repository.dart';
+import '../../files/widgets/attachment_tile.dart';
+import '../../notifications/widgets/notification_bell.dart';
 import '../state/feed_providers.dart';
 import 'new_post_screen.dart';
 import 'post_comments_screen.dart';
@@ -85,10 +85,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
-                    20, MediaQuery.of(context).padding.top + 24, 20, 8),
-                child: Text('Community Hub',
-                    style: tt.headlineMedium?.copyWith(
-                        color: cs.onSurface, fontWeight: FontWeight.w700)),
+                    20, MediaQuery.of(context).padding.top + 24, 8, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text('Community Hub',
+                          style: tt.headlineMedium?.copyWith(
+                              color: cs.onSurface,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                    const NotificationBell(),
+                  ],
+                ),
               ),
             ),
             SliverToBoxAdapter(
@@ -233,7 +241,11 @@ class _PostCard extends ConsumerWidget {
           for (final f in post.attachments)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: _AttachmentRow(file: f),
+              child: AttachmentTile(
+                fileId: f.fileId,
+                fileName: f.fileName,
+                contentType: f.contentType,
+              ),
             ),
           const SizedBox(height: 8),
           Row(
@@ -385,56 +397,6 @@ class _SubjectChip extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _AttachmentRow extends ConsumerWidget {
-  const _AttachmentRow({required this.file});
-  final PostAttachment file;
-
-  Future<void> _open(BuildContext context, WidgetRef ref) async {
-    final messenger = ScaffoldMessenger.of(context);
-    try {
-      final url =
-          await ref.read(filesRepositoryProvider).getDownloadUrl(file.fileId);
-      await Clipboard.setData(ClipboardData(text: url));
-      messenger.showSnackBar(SnackBar(
-          content: Text('Download link for "${file.fileName}" copied')));
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not get file: $e')));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: () => _open(context, ref),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Icon(_iconFor(file), size: 20, color: cs.primary),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(file.fileName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
-            ),
-            Icon(Icons.download_outlined, size: 18, color: cs.onSurfaceVariant),
-          ],
-        ),
-      ),
-    );
-  }
-
-  IconData _iconFor(PostAttachment f) {
-    if (f.isImage) return Icons.image_outlined;
-    if (f.isVideo) return Icons.videocam_outlined;
-    return Icons.insert_drive_file_outlined;
   }
 }
 

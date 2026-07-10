@@ -109,7 +109,11 @@ public class PostsController : ControllerBase
     [HttpPost("{id:int}/like")]
     public async Task<IActionResult> Like(int id)
     {
-        if (!await _db.Posts.AnyAsync(p => p.Id == id))
+        var authorUserId = await _db.Posts
+            .Where(p => p.Id == id)
+            .Select(p => (int?)p.AuthorUserId)
+            .FirstOrDefaultAsync();
+        if (authorUserId is null)
             return NotFound();
 
         // Idempotent: only insert if the teacher hasn't already liked it.
@@ -118,6 +122,15 @@ public class PostsController : ControllerBase
         if (!already)
         {
             _db.PostLikes.Add(new PostLike { PostId = id, UserId = UserId });
+            // Notify the author of a new like (not when liking your own post).
+            if (authorUserId != UserId)
+                _db.Notifications.Add(new Notification
+                {
+                    RecipientUserId = authorUserId.Value,
+                    Type = NotificationType.PostLiked,
+                    Text = $"{User.GetName()} liked your post",
+                    PostId = id,
+                });
             await _db.SaveChangesAsync();
         }
 
@@ -162,7 +175,11 @@ public class PostsController : ControllerBase
     [HttpPost("{id:int}/comments")]
     public async Task<ActionResult<PostCommentDto>> AddComment(int id, CreateCommentDto dto)
     {
-        if (!await _db.Posts.AnyAsync(p => p.Id == id))
+        var authorUserId = await _db.Posts
+            .Where(p => p.Id == id)
+            .Select(p => (int?)p.AuthorUserId)
+            .FirstOrDefaultAsync();
+        if (authorUserId is null)
             return NotFound();
 
         var comment = new PostComment
@@ -173,6 +190,15 @@ public class PostsController : ControllerBase
             CreatedAt = DateTime.UtcNow,
         };
         _db.PostComments.Add(comment);
+        // Notify the post author of a new comment (not on your own post).
+        if (authorUserId != UserId)
+            _db.Notifications.Add(new Notification
+            {
+                RecipientUserId = authorUserId.Value,
+                Type = NotificationType.PostCommented,
+                Text = $"{User.GetName()} commented on your post",
+                PostId = id,
+            });
         await _db.SaveChangesAsync();
 
         var created = await _db.PostComments

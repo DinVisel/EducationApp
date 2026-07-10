@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<PostAttachment> PostAttachments { get; set; }
     public DbSet<PostLike> PostLikes { get; set; }
     public DbSet<PostComment> PostComments { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -221,5 +222,23 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(c => c.AuthorUserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // --- Notifications ---
+
+        // Store the type as readable text rather than an int.
+        modelBuilder.Entity<Notification>()
+            .Property(n => n.Type)
+            .HasConversion<string>();
+
+        // Deleting the recipient account removes their notifications.
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.Recipient)
+            .WithMany()
+            .HasForeignKey(n => n.RecipientUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Fetch a recipient's notifications newest-first.
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => new { n.RecipientUserId, n.CreatedAt });
     }
 }

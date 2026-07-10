@@ -79,9 +79,10 @@ public class AssignmentsController : ControllerBase
             .Select(e => e.StudentId)
             .ToListAsync();
 
+        var title = dto.Title.Trim();
         var assignment = new Assignment
         {
-            Title = dto.Title.Trim(),
+            Title = title,
             Description = dto.Description,
             DueDate = dto.DueDate,
             ClassroomId = classroomId,
@@ -96,6 +97,20 @@ public class AssignmentsController : ControllerBase
         };
 
         _db.Assignments.Add(assignment);
+
+        // Notify every enrolled student who has a login account.
+        var recipientUserIds = await _db.Students
+            .Where(s => enrolledStudentIds.Contains(s.Id) && s.UserId != null)
+            .Select(s => s.UserId!.Value)
+            .ToListAsync();
+        foreach (var userId in recipientUserIds)
+            _db.Notifications.Add(new Notification
+            {
+                RecipientUserId = userId,
+                Type = NotificationType.AssignmentAssigned,
+                Text = $"New assignment: {title}",
+            });
+
         await _db.SaveChangesAsync();
 
         // Reload with attachment file metadata for the response.

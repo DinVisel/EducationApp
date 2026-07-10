@@ -16,6 +16,14 @@ public static class ClaimsPrincipalExtensions
         return id;
     }
 
+    /// The authenticated user's display name (from the `name` claim), used for
+    /// notification text. Falls back to "Someone" when absent.
+    public static string GetName(this ClaimsPrincipal user)
+    {
+        var value = user.FindFirstValue("name");
+        return string.IsNullOrWhiteSpace(value) ? "Someone" : value;
+    }
+
     /// The authenticated user's role.
     public static UserRole GetRole(this ClaimsPrincipal user)
     {

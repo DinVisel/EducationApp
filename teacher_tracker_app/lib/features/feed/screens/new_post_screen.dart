@@ -6,6 +6,7 @@ import '../../../core/design.dart';
 import '../../../models/file_object.dart';
 import '../../../models/post_subject.dart';
 import '../../files/data/files_repository.dart';
+import '../../files/mime.dart';
 import '../state/feed_providers.dart';
 
 /// Compose and publish a post to the global feed: text, a subject tag, and
@@ -46,7 +47,11 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
       for (final f in result.files) {
         final bytes = f.bytes;
         if (bytes == null) continue; // withData failed for this entry
-        final uploaded = await repo.upload(bytes: bytes, fileName: f.name);
+        final uploaded = await repo.uploadDirect(
+          bytes: bytes,
+          fileName: f.name,
+          contentType: mimeForFileName(f.name),
+        );
         if (mounted) setState(() => _attachments.add(uploaded));
       }
     } catch (e) {

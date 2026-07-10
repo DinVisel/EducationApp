@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/design.dart';
 import '../../../models/assignment.dart';
 import '../../../models/classroom.dart';
+import '../../files/widgets/attachment_tile.dart';
 import '../state/assignments_providers.dart';
 import 'new_assignment_screen.dart';
 
@@ -154,32 +155,15 @@ class _AssignmentCard extends StatelessWidget {
           if (a.attachments.isNotEmpty) ...[
             const SizedBox(height: 10),
             for (final f in a.attachments)
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Row(
-                  children: [
-                    Icon(_iconFor(f), size: 18, color: cs.onSurfaceVariant),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(f.fileName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: tt.bodySmall
-                              ?.copyWith(color: cs.onSurfaceVariant)),
-                    ),
-                  ],
-                ),
+              AttachmentTile(
+                fileId: f.fileId,
+                fileName: f.fileName,
+                contentType: f.contentType,
               ),
           ],
         ],
       ),
     );
-  }
-
-  IconData _iconFor(AssignmentAttachment f) {
-    if (f.isImage) return Icons.image_outlined;
-    if (f.isVideo) return Icons.videocam_outlined;
-    return Icons.insert_drive_file_outlined;
   }
 
   static String _fmtDate(DateTime d) =>

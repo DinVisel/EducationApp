@@ -46,6 +46,33 @@ public class R2FileStorage : IFileStorage
             Expires = DateTime.UtcNow.AddMinutes(_options.PresignedUrlMinutes),
         });
 
+    public string GetPresignedPutUrl(string key, string contentType) =>
+        _s3.GetPreSignedURL(new GetPreSignedUrlRequest
+        {
+            BucketName = _options.Bucket,
+            Key = key,
+            Verb = HttpVerb.PUT,
+            ContentType = contentType,
+            Expires = DateTime.UtcNow.AddMinutes(_options.PresignedUrlMinutes),
+        });
+
+    public async Task<long?> GetSizeAsync(string key, CancellationToken ct = default)
+    {
+        try
+        {
+            var meta = await _s3.GetObjectMetadataAsync(new GetObjectMetadataRequest
+            {
+                BucketName = _options.Bucket,
+                Key = key,
+            }, ct);
+            return meta.ContentLength;
+        }
+        catch (AmazonS3Exception e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+    }
+
     public Task DeleteAsync(string key, CancellationToken ct = default) =>
         _s3.DeleteObjectAsync(new DeleteObjectRequest
         {

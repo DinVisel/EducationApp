@@ -6,6 +6,7 @@ import '../../../core/design.dart';
 import '../../../models/classroom.dart';
 import '../../../models/file_object.dart';
 import '../../files/data/files_repository.dart';
+import '../../files/mime.dart';
 import '../state/assignments_providers.dart';
 
 /// Compose and publish an assignment to a class: title, optional description,
@@ -62,8 +63,11 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
       for (final f in result.files) {
         final bytes = f.bytes;
         if (bytes == null) continue; // withData failed for this entry
-        final uploaded =
-            await repo.upload(bytes: bytes, fileName: f.name);
+        final uploaded = await repo.uploadDirect(
+          bytes: bytes,
+          fileName: f.name,
+          contentType: mimeForFileName(f.name),
+        );
         if (mounted) setState(() => _attachments.add(uploaded));
       }
     } catch (e) {

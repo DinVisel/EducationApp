@@ -62,6 +62,52 @@ public class FilesController : ControllerBase
         return Ok(ToDto(record));
     }
 
+    // --- Direct upload (presigned PUT): the client uploads straight to R2, then
+    // confirms so we record the metadata. Preferred for large media. ---
+
+    [HttpPost("presign")]
+    public ActionResult<PresignUploadResponseDto> Presign(PresignUploadDto dto)
+    {
+        var contentType = string.IsNullOrWhiteSpace(dto.ContentType)
+            ? "application/octet-stream"
+            : dto.ContentType;
+        var key = $"uploads/{UserId}/{Guid.NewGuid():N}{Path.GetExtension(dto.FileName)}";
+        var url = _storage.GetPresignedPutUrl(key, contentType);
+        return Ok(new PresignUploadResponseDto(url, key));
+    }
+
+    [HttpPost("confirm")]
+    public async Task<ActionResult<FileObjectDto>> Confirm(ConfirmUploadDto dto, CancellationToken ct)
+    {
+        // The key must be one we issued to this caller (prevents claiming another
+        // user's object or an arbitrary key).
+        if (!dto.Key.StartsWith($"uploads/{UserId}/", StringComparison.Ordinal))
+            return BadRequest("Invalid upload key.");
+
+        var size = await _storage.GetSizeAsync(dto.Key, ct);
+        if (size is null)
+            return BadRequest("Upload not found — the file was not uploaded to R2.");
+        if (size > MaxUploadBytes)
+            return BadRequest("File exceeds the maximum upload size.");
+
+        var contentType = string.IsNullOrWhiteSpace(dto.ContentType)
+            ? "application/octet-stream"
+            : dto.ContentType;
+
+        var record = new FileObject
+        {
+            Key = dto.Key,
+            FileName = dto.FileName,
+            ContentType = contentType,
+            Size = size.Value,
+            OwnerUserId = UserId,
+        };
+        _db.Files.Add(record);
+        await _db.SaveChangesAsync(ct);
+
+        return Ok(ToDto(record));
+    }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<FileUrlDto>> GetUrl(int id)
     {

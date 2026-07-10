@@ -168,13 +168,34 @@ proxy `POST /api/files` upload still 500s without them (unchanged since Phase 0/
 
 ---
 
-## Phase 6 — Media & notifications
+## Phase 6 — Media & notifications ✅
 
-**Backend** — presigned-PUT direct uploads (replace the Phase 0 proxy upload for
-large files), thumbnails/preview metadata, basic notifications.
-**Frontend** — video/file previews, richer download UX, notification surface.
+**Backend** — **direct uploads**: `IFileStorage` gains `GetPresignedPutUrl` +
+`GetSizeAsync`; `FilesController` adds `POST /api/files/presign` (issues a signed
+PUT URL + an `uploads/{userId}/…` key) and `POST /api/files/confirm` (ownership-
+checked key, HEADs R2 for size, records the `FileObject`). The Phase 0 proxy
+upload stays as the small-file fallback. **Notifications**: `Notification` +
+`NotificationType`, created inline when a post is liked/commented (→ author, not
+self) and when an assignment is published (→ each enrolled student *with a login
+account*); `NotificationsController` (list / unread-count / `{id}/read` /
+`read-all`), all recipient-scoped.
+**Frontend** — `FilesRepository.uploadDirect` (presign → bare-`Dio` PUT to R2 →
+confirm) + a filename→MIME helper, used by both compose screens. A shared
+`AttachmentTile` renders **images inline** (presigned GET) and **opens any file in
+the browser** (`url_launcher`), replacing the three duplicated attachment rows and
+the clipboard-copy UX. In-app notifications: `AppNotification`, repository,
+`notificationsProvider` + a 30s-polled `unreadCountProvider`, a `NotificationBell`
+(badge) on the teacher (Hub) and student (Assignments) landing headers, and a
+`NotificationsScreen` that marks all read on open.
 
-**Done when** — large media uploads go direct to R2 and previews render inline.
+**Done when** — large media uploads go direct to R2 and previews render inline. ✅
+Notifications verified end-to-end via API (like/comment/assignment triggers, like
+idempotency, self-action suppression, recipient scoping, unread-count, read-all);
+`presign` verified to return a signed PUT URL + owner-scoped key, and `confirm`
+rejects a foreign key (400). Deferred to live R2 (as in Phases 4–5): the full
+presign→PUT→confirm round-trip, `confirm`'s missing-object→400 branch (needs a
+reachable bucket), and the live UI drive (inline image render, open-in-browser,
+direct upload, bell badge). `flutter analyze` clean.
 
 ---
 

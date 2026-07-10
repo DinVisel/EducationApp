@@ -11,5 +11,13 @@ public interface IFileStorage
     /// A time-limited URL the client can GET directly from R2.
     string GetPresignedGetUrl(string key);
 
+    /// A time-limited URL the client can PUT bytes to directly (with the given
+    /// content type), bypassing the proxy upload for large media.
+    string GetPresignedPutUrl(string key, string contentType);
+
+    /// The size in bytes of the object at <paramref name="key"/>, or null when it
+    /// doesn't exist. Used to confirm a direct upload actually landed.
+    Task<long?> GetSizeAsync(string key, CancellationToken ct = default);
+
     Task DeleteAsync(string key, CancellationToken ct = default);
 }
