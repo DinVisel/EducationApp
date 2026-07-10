@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/design.dart';
 import '../../../models/post.dart';
 import '../../../models/post_comment.dart';
+import '../data/feed_repository.dart';
 import '../state/feed_providers.dart';
+import '../widgets/report_dialog.dart';
 
 /// Full-screen comments for one feed post: the thread plus a compose row.
 class PostCommentsScreen extends ConsumerStatefulWidget {
@@ -50,6 +52,21 @@ class _PostCommentsScreenState extends ConsumerState<PostCommentsScreen> {
     }
   }
 
+  Future<void> _report(PostComment c) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final reason = await showReportDialog(context, 'comment');
+    if (reason == null) return;
+    try {
+      await ref
+          .read(feedRepositoryProvider)
+          .reportComment(widget.post.id, c.id, reason);
+      messenger.showSnackBar(const SnackBar(
+          content: Text('Reported — thanks. An admin will review it.')));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Could not report: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final commentsAsync = ref.watch(postCommentsProvider(widget.post.id));
@@ -88,6 +105,7 @@ class _PostCommentsScreenState extends ConsumerState<PostCommentsScreen> {
                       itemBuilder: (_, i) => _CommentCard(
                         comment: comments[i],
                         onDelete: () => _delete(comments[i]),
+                        onReport: () => _report(comments[i]),
                       ),
                     ),
                   );
@@ -107,9 +125,14 @@ class _PostCommentsScreenState extends ConsumerState<PostCommentsScreen> {
 }
 
 class _CommentCard extends StatelessWidget {
-  const _CommentCard({required this.comment, required this.onDelete});
+  const _CommentCard({
+    required this.comment,
+    required this.onDelete,
+    required this.onReport,
+  });
   final PostComment comment;
   final VoidCallback onDelete;
+  final VoidCallback onReport;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +158,14 @@ class _CommentCard extends StatelessWidget {
                   icon: Icon(Icons.delete_outline, size: 18, color: cs.error),
                   tooltip: 'Delete',
                   onPressed: onDelete,
+                )
+              else
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: Icon(Icons.flag_outlined,
+                      size: 18, color: cs.onSurfaceVariant),
+                  tooltip: 'Report',
+                  onPressed: onReport,
                 ),
             ],
           ),

@@ -199,10 +199,25 @@ direct upload, bell badge). `flutter analyze` clean.
 
 ---
 
-## Phase 7 — Hardening & deployment
+## Phase 7 — Hardening & deployment ✅
 
-Moderation/reporting for the hub, `Admin` role + admin tooling, rate limiting,
-R2 bucket + CORS + secrets for production, and an automated test pass.
+**Backend** — **Moderation**: `Report` (targets a post or comment) with
+`POST /api/posts/{id}/report` + `.../comments/{id}/report`; `AdminController`
+(`[Authorize(Admin)]`) to list open/resolved reports, dismiss, or remove content,
+plus a user roster. **Admin role**: seeded on startup from `Admin:Email`/
+`Admin:Password` if absent. **Rate limiting**: a global 300/min-per-IP cap + a
+10/min cap on `/api/auth/*` (toggleable via `RateLimiting:Enabled`). **Config**:
+CORS origins via `Cors:AllowedOrigins` (permissive only when unset), all secrets
+externalized. **Tests**: `TeacherTracker.Api.Tests` — xUnit + `WebApplicationFactory`
+on in-memory SQLite + a fake file store (no Postgres/R2), covering auth, role
+enforcement, likes/notifications, presign/confirm, and the report→admin-remove flow.
+**Frontend** — Report action on others' posts/comments (feed + comments); a
+dedicated `AdminShell` (role-routed) with a moderation queue (open/resolved,
+dismiss/remove) and a user roster.
 
 **Done when** — the platform is deployable with secrets externalized, abuse
-controls in place, and green tests.
+controls in place, and green tests. ✅ **10/10 tests pass**; live-verified admin
+seeding (config → `Admin` login) and the auth rate limiter (401×10 → 429);
+`flutter analyze` clean. Deployment + R2 CORS/secrets documented in `README.md`.
+Remaining before production use: create a real R2 bucket/creds and run the
+deferred live media checks from Phases 4–6.

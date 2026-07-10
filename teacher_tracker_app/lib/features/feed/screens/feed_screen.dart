@@ -6,7 +6,9 @@ import '../../../models/post.dart';
 import '../../../models/post_subject.dart';
 import '../../files/widgets/attachment_tile.dart';
 import '../../notifications/widgets/notification_bell.dart';
+import '../data/feed_repository.dart';
 import '../state/feed_providers.dart';
+import '../widgets/report_dialog.dart';
 import 'new_post_screen.dart';
 import 'post_comments_screen.dart';
 
@@ -230,7 +232,7 @@ class _PostCard extends ConsumerWidget {
                 ),
               ),
               _SubjectChip(subject: post.subject),
-              if (post.isMine) _PostMenu(post: post),
+              _PostMenu(post: post),
             ],
           ),
           if (post.text.isNotEmpty) ...[
@@ -296,7 +298,7 @@ class _PostCard extends ConsumerWidget {
   }
 }
 
-/// Overflow menu for the caller's own posts — currently just delete.
+/// Overflow menu: delete on your own posts, report on everyone else's.
 class _PostMenu extends ConsumerWidget {
   const _PostMenu({required this.post});
   final Post post;
@@ -306,9 +308,13 @@ class _PostMenu extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     return PopupMenuButton<String>(
       icon: Icon(Icons.more_horiz, color: cs.onSurfaceVariant),
-      onSelected: (_) => _confirmDelete(context, ref),
-      itemBuilder: (_) => const [
-        PopupMenuItem(value: 'delete', child: Text('Delete')),
+      onSelected: (v) =>
+          v == 'delete' ? _confirmDelete(context, ref) : _report(context, ref),
+      itemBuilder: (_) => [
+        if (post.isMine)
+          const PopupMenuItem(value: 'delete', child: Text('Delete'))
+        else
+          const PopupMenuItem(value: 'report', child: Text('Report')),
       ],
     );
   }
@@ -335,6 +341,19 @@ class _PostMenu extends ConsumerWidget {
       await ref.read(feedProvider.notifier).remove(post.id);
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('Could not delete: $e')));
+    }
+  }
+
+  Future<void> _report(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final reason = await showReportDialog(context, 'post');
+    if (reason == null) return;
+    try {
+      await ref.read(feedRepositoryProvider).reportPost(post.id, reason);
+      messenger.showSnackBar(
+          const SnackBar(content: Text('Reported — thanks. An admin will review it.')));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Could not report: $e')));
     }
   }
 }

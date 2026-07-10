@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'core/design.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
+import 'features/admin/screens/admin_shell.dart';
 import 'features/auth/state/auth_controller.dart';
 import 'features/home/home_screen.dart';
 import 'features/student/screens/student_shell.dart';
@@ -35,11 +36,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Signed in: route to the shell matching the account's role.
-      final home = session.isStudent ? '/student' : '/home';
-      // Keep users out of the auth/splash pages and the other role's shell.
+      final home = session.isStudent
+          ? '/student'
+          : session.isAdmin
+              ? '/admin'
+              : '/home';
+      // Keep users out of the auth/splash pages and other roles' shells.
       if (loc == '/' || loc == '/login' || loc == '/register') return home;
-      if (session.isStudent && loc == '/home') return '/student';
-      if (!session.isStudent && loc == '/student') return '/home';
+      const shells = {'/home', '/student', '/admin'};
+      if (shells.contains(loc) && loc != home) return home;
       return null;
     },
     routes: [
@@ -48,6 +53,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
       GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
       GoRoute(path: '/student', builder: (_, _) => const StudentShell()),
+      GoRoute(path: '/admin', builder: (_, _) => const AdminShell()),
     ],
   );
 });

@@ -26,6 +26,7 @@ public class AppDbContext : DbContext
     public DbSet<PostLike> PostLikes { get; set; }
     public DbSet<PostComment> PostComments { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<Report> Reports { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -240,5 +241,37 @@ public class AppDbContext : DbContext
         // Fetch a recipient's notifications newest-first.
         modelBuilder.Entity<Notification>()
             .HasIndex(n => new { n.RecipientUserId, n.CreatedAt });
+
+        // --- Reports (moderation) ---
+
+        // Store the resolution as readable text rather than an int.
+        modelBuilder.Entity<Report>()
+            .Property(r => r.Resolution)
+            .HasConversion<string>();
+
+        // Deleting the reporter account removes their reports.
+        modelBuilder.Entity<Report>()
+            .HasOne(r => r.Reporter)
+            .WithMany()
+            .HasForeignKey(r => r.ReporterUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Removing reported content clears the link but keeps the report as a
+        // historical record of the moderation action.
+        modelBuilder.Entity<Report>()
+            .HasOne(r => r.Post)
+            .WithMany()
+            .HasForeignKey(r => r.PostId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Report>()
+            .HasOne(r => r.PostComment)
+            .WithMany()
+            .HasForeignKey(r => r.PostCommentId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // List open reports first.
+        modelBuilder.Entity<Report>()
+            .HasIndex(r => r.ResolvedAt);
     }
 }

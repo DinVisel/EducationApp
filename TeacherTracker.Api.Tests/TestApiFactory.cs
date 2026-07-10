@@ -1,0 +1,71 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using TeacherTracker.Api.Data;
+using TeacherTracker.Api.Storage;
+
+namespace TeacherTracker.Api.Tests;
+
+/// Boots the real API for integration tests, but backed by an in-memory SQLite
+/// database and a fake file store so nothing touches Postgres or R2. Rate
+/// limiting is disabled so the suite can register many accounts.
+public class TestApiFactory : WebApplicationFactory<Program>
+{
+    private readonly SqliteConnection _connection = new("DataSource=:memory:");
+
+    public FakeFileStorage Storage { get; } = new();
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        _connection.Open(); // keep the in-memory DB alive for the host lifetime
+
+        builder.UseSetting("RateLimiting:Enabled", "false");
+        builder.UseEnvironment("Development");
+
+        builder.ConfigureServices(services =>
+        {
+            // Swap Npgsql for a shared in-memory SQLite connection. Remove every
+            // DbContext-options registration (the concrete options plus EF's
+            // internal options-configuration) so only SQLite is configured.
+            var toRemove = services.Where(d =>
+                d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
+                d.ServiceType == typeof(DbContextOptions) ||
+                (d.ServiceType.FullName?.Contains("IDbContextOptionsConfiguration") ?? false))
+                .ToList();
+            foreach (var d in toRemove) services.Remove(d);
+            services.AddDbContext<AppDbContext>(o => o.UseSqlite(_connection));
+
+            // Swap R2 for the in-memory fake.
+            services.RemoveAll<IFileStorage>();
+            services.AddSingleton<IFileStorage>(Storage);
+        });
+    }
+
+    /// Creates the schema and returns a client. Call once per test.
+    public HttpClient CreateApiClient()
+    {
+        var client = CreateClient();
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.EnsureCreated();
+        return client;
+    }
+
+    /// Runs an action against the database (e.g. to seed an admin).
+    public async Task WithDbAsync(Func<AppDbContext, Task> action)
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await action(db);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing) _connection.Dispose();
+    }
+}

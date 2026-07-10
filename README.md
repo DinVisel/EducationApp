@@ -64,6 +64,47 @@ dotnet ef migrations add <Name>
 dotnet ef database update
 ```
 
+### Tests
+
+Integration tests (xUnit + `WebApplicationFactory`, backed by in-memory SQLite and
+a fake file store — no Postgres or R2 needed):
+
+```bash
+cd TeacherTracker.Api.Tests
+dotnet test
+```
+
+### Deployment / hardening (Phase 7)
+
+Externalize every secret via environment variables or `dotnet user-secrets` — the
+committed `appsettings.json` ships empty placeholders only.
+
+| Setting | Purpose |
+| ------- | ------- |
+| `ConnectionStrings__DefaultConnection` | Postgres connection string |
+| `Jwt__Key` | JWT signing key (**must** be overridden for production) |
+| `R2__Endpoint` / `R2__AccessKey` / `R2__SecretKey` / `R2__Bucket` | Cloudflare R2 credentials |
+| `Cors__AllowedOrigins__0`, `__1`, … | Allowed browser origins; if none set, CORS is permissive (dev only) |
+| `Admin__Email` / `Admin__Password` | Bootstraps the first `Admin` account on startup (once, if absent) |
+| `RateLimiting__Enabled` | `true` by default; a global 300/min-per-IP cap + a 10/min cap on `/api/auth/*` |
+
+**R2 CORS** — direct (presigned-PUT) uploads are browser `PUT`s straight to R2, so
+the bucket needs a CORS policy allowing `PUT`/`GET` from your app origins, e.g.:
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://your-app.example"],
+    "AllowedMethods": ["GET", "PUT"],
+    "AllowedHeaders": ["*"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+Run migrations (`dotnet ef database update`) before first launch so the admin
+seeder has a schema to write to.
+
 ## Frontend (teacher_tracker_app)
 
 Flutter app: **Riverpod** (state), **dio** (HTTP), **go_router** (navigation).

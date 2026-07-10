@@ -17,6 +17,7 @@ class AuthState {
 
   bool get isTeacher => role == 'Teacher';
   bool get isStudent => role == 'Student';
+  bool get isAdmin => role == 'Admin';
 }
 
 /// Owns authentication. `null` data = signed out.

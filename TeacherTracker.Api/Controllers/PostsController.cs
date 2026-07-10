@@ -229,6 +229,38 @@ public class PostsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:int}/report")]
+    public async Task<IActionResult> ReportPost(int id, CreateReportDto dto)
+    {
+        if (!await _db.Posts.AnyAsync(p => p.Id == id))
+            return NotFound();
+
+        _db.Reports.Add(new Report
+        {
+            ReporterUserId = UserId,
+            PostId = id,
+            Reason = dto.Reason.Trim(),
+        });
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpPost("{id:int}/comments/{commentId:int}/report")]
+    public async Task<IActionResult> ReportComment(int id, int commentId, CreateReportDto dto)
+    {
+        if (!await _db.PostComments.AnyAsync(c => c.Id == commentId && c.PostId == id))
+            return NotFound();
+
+        _db.Reports.Add(new Report
+        {
+            ReporterUserId = UserId,
+            PostCommentId = commentId,
+            Reason = dto.Reason.Trim(),
+        });
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
     // Post → DTO with the caller's like state. Built per-request because
     // `LikedByMe` depends on the current user; kept as an Expression so EF
     // translates the counts and attachment join to SQL.
