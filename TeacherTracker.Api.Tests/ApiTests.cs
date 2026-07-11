@@ -43,6 +43,31 @@ public class ApiTests
         return json.GetProperty("id").GetInt32();
     }
 
+    // The signed-in teacher's account (User) id, via the session endpoint.
+    private static async Task<int> MyUserIdAsync(HttpClient c, string token)
+    {
+        var res = await c.SendAsync(Req(HttpMethod.Get, "/api/auth/session", token));
+        res.EnsureSuccessStatusCode();
+        var json = await res.Content.ReadFromJsonAsync<JsonElement>();
+        return json.GetProperty("teacher").GetProperty("userId").GetInt32();
+    }
+
+    // Presign → seed → confirm a file owned by the caller; returns its id.
+    private static async Task<int> CreateFileAsync(TestApiFactory factory, HttpClient c, string token)
+    {
+        var presign = await c.SendAsync(Req(HttpMethod.Post, "/api/files/presign", token,
+            new { fileName = "a.png", contentType = "image/png" }));
+        presign.EnsureSuccessStatusCode();
+        var pj = await presign.Content.ReadFromJsonAsync<JsonElement>();
+        var key = pj.GetProperty("key").GetString()!;
+        factory.Storage.Seed(key, 10);
+        var ok = await c.SendAsync(Req(HttpMethod.Post, "/api/files/confirm", token,
+            new { key, fileName = "a.png", contentType = "image/png" }));
+        ok.EnsureSuccessStatusCode();
+        var fj = await ok.Content.ReadFromJsonAsync<JsonElement>();
+        return fj.GetProperty("id").GetInt32();
+    }
+
     // Seeds an admin directly, then logs in to get a token.
     private static async Task<string> CreateAdminAndLoginAsync(TestApiFactory factory, HttpClient c, string email)
     {
@@ -231,6 +256,75 @@ public class ApiTests
         var openAfter = await c.SendAsync(Req(HttpMethod.Get, "/api/admin/reports?resolved=false", admin));
         var afterList = await openAfter.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(0, afterList.GetArrayLength());
+    }
+
+    [Fact]
+    public async Task Pin_Is_Author_Only_And_Sorts_Profile_Posts_First()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+        var author = await RegisterTeacherAsync(c, "author@t.com");
+        var authorUid = await MyUserIdAsync(c, author);
+        var other = await RegisterTeacherAsync(c, "other@t.com");
+
+        var p1 = await CreatePostAsync(c, author, "first");
+        var p2 = await CreatePostAsync(c, author, "second"); // newest
+
+        // Author pins the older post.
+        var pin = await c.SendAsync(Req(HttpMethod.Post, $"/api/posts/{p1}/pin", author));
+        Assert.Equal(HttpStatusCode.NoContent, pin.StatusCode);
+
+        // A non-author cannot pin someone else's post → 404 (doesn't reveal it).
+        var badPin = await c.SendAsync(Req(HttpMethod.Post, $"/api/posts/{p2}/pin", other));
+        Assert.Equal(HttpStatusCode.NotFound, badPin.StatusCode);
+
+        // The author's profile lists the pinned post first, even though it's older.
+        var res = await c.SendAsync(Req(HttpMethod.Get, $"/api/posts?authorUserId={authorUid}", other));
+        res.EnsureSuccessStatusCode();
+        var list = await res.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(2, list.GetArrayLength());
+        Assert.Equal(p1, list[0].GetProperty("id").GetInt32());
+        Assert.True(list[0].GetProperty("isPinned").GetBoolean());
+    }
+
+    [Fact]
+    public async Task Profile_Image_Is_Viewable_By_Other_Teachers()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+        var a = await RegisterTeacherAsync(c, "a@t.com");
+        var b = await RegisterTeacherAsync(c, "b@t.com");
+
+        var fileId = await CreateFileAsync(factory, c, a);
+
+        // Before it's a profile image, B can't fetch A's file.
+        var before = await c.SendAsync(Req(HttpMethod.Get, $"/api/files/{fileId}", b));
+        Assert.Equal(HttpStatusCode.NotFound, before.StatusCode);
+
+        // A sets it as their avatar.
+        var upd = await c.SendAsync(Req(HttpMethod.Put, "/api/auth/me", a,
+            new { firstName = "A", lastName = "T", email = "a@t.com", avatarFileId = fileId }));
+        upd.EnsureSuccessStatusCode();
+        var uj = await upd.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(fileId, uj.GetProperty("avatarFileId").GetInt32());
+
+        // Now B can fetch it (profiles are cross-viewable).
+        var after = await c.SendAsync(Req(HttpMethod.Get, $"/api/files/{fileId}", b));
+        Assert.Equal(HttpStatusCode.OK, after.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateProfile_Rejects_A_Foreign_Avatar_File()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+        var a = await RegisterTeacherAsync(c, "a@t.com");
+        var b = await RegisterTeacherAsync(c, "b@t.com");
+        var bFile = await CreateFileAsync(factory, c, b);
+
+        var res = await c.SendAsync(Req(HttpMethod.Put, "/api/auth/me", a,
+            new { firstName = "A", lastName = "T", email = "a@t.com", avatarFileId = bFile }));
+        Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
     [Fact]

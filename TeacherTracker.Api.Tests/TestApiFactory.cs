@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -23,8 +24,20 @@ public class TestApiFactory : WebApplicationFactory<Program>
     {
         _connection.Open(); // keep the in-memory DB alive for the host lifetime
 
-        builder.UseSetting("RateLimiting:Enabled", "false");
         builder.UseEnvironment("Development");
+
+        // Override any developer user-secrets (Admin creds, R2 keys) so tests are
+        // hermetic: no admin seeding at startup, and rate limiting off. Added last
+        // so it wins over user-secrets/appsettings.
+        builder.ConfigureAppConfiguration((_, cfg) =>
+        {
+            cfg.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["RateLimiting:Enabled"] = "false",
+                ["Admin:Email"] = "",
+                ["Admin:Password"] = "",
+            });
+        });
 
         builder.ConfigureServices(services =>
         {

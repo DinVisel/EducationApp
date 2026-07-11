@@ -221,3 +221,44 @@ seeding (config → `Admin` login) and the auth rate limiter (401×10 → 429);
 `flutter analyze` clean. Deployment + R2 CORS/secrets documented in `README.md`.
 Remaining before production use: create a real R2 bucket/creds and run the
 deferred live media checks from Phases 4–6.
+
+---
+
+## Phase 8 — Tab reorg, class hub, richer profiles & pinned posts ✅
+
+Make the teacher UI class-centric and the profiles Instagram-style.
+
+**Navigation** — the teacher bottom nav collapses from 6 flat tabs to **3: Hub ·
+Classes · Profile**. Students, homework, and reading are reached *through* a
+class.
+
+**Class hub** — `ClassDetailScreen` becomes tabbed **Students / Homework /
+Reading**. The roster (Students) taps through to the existing tabbed
+`StudentDetailScreen` (info / notes / homework / reading log). Homework shows both
+the class's fan-out `Assignment`s *and* per-student homework; Reading aggregates
+each roster student's books. All reuse existing providers
+(`classroomDetailProvider`, `classroomAssignmentsProvider`, `homeworkProvider`,
+`booksProvider`).
+
+**Profiles (teachers)** — `Teacher` gains nullable `Avatar`/`CoverFileObjectId`
+(migration `AddTeacherProfileImages`); set via `PUT /api/auth/me` with ownership
+validation and surfaced on `TeacherDto` (which also now carries `UserId`).
+`FilesController` grants any authenticated user access to a file used as a
+profile image (profiles are cross-viewable). The profile screen gains an editable
+cover + avatar (presigned direct upload) via a reusable `ProfileCoverHeader`.
+
+**Pinned posts (Instagram-style)** — `Post` gains `IsPinned` (migration
+`AddPostPinned`); author-only `POST/DELETE /api/posts/{id}/pin`.
+`GET /api/posts?authorUserId=` returns a teacher's posts **pinned-first** (the
+global Hub feed keeps its newest-first, cursor-safe order). Tapping a feed author
+opens their profile (`GET /api/teachers/{userId}/profile` + their posts) via a
+shared `PostCard`; on your own profile you can pin/unpin.
+
+**Done when** — the nav is class-centric, profiles show cover/avatar + the
+teacher's pinned-first posts, and any teacher's profile is viewable from the feed.
+✅ **13/13 API tests pass** (added: pin author-only + profile-post ordering,
+cross-teacher access to a profile image, foreign-avatar rejection); `flutter
+analyze` clean (only the 4 long-standing lints in the now-unused global
+homework/reading screens). Deferred to live R2 (per Phases 4–6): the actual
+image render/upload drive (cover, avatar, author avatars) needs a reachable
+bucket.
