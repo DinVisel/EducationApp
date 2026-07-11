@@ -3,13 +3,10 @@ import 'package:flutter/material.dart';
 import '../../core/design.dart';
 import '../classes/screens/classes_list_screen.dart';
 import '../feed/screens/feed_screen.dart';
-import '../students/screens/student_dashboard_screen.dart';
-import '../students/screens/homework_tracker_screen.dart';
-import '../students/screens/reading_log_screen.dart';
 import '../teacher/screens/teacher_profile_screen.dart';
 
-/// App shell with bottom navigation — 6 tabs:
-/// Hub, Students, Classes, Homework, Reading, Profile.
+/// App shell with bottom navigation — 3 tabs: Hub, Classes, Profile.
+/// Students, homework, and reading are reached through a class (class detail).
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -26,10 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final pages = [
       const FeedScreen(),
-      const StudentDashboardScreen(),
       const ClassesListScreen(),
-      const HomeworkTrackerScreen(),
-      const ReadingLogScreen(),
       const TeacherProfileScreen(),
     ];
 
@@ -45,24 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Hub',
           ),
           NavigationDestination(
-            icon: Icon(Icons.groups_outlined),
-            selectedIcon: Icon(Icons.groups),
-            label: 'Students',
-          ),
-          NavigationDestination(
             icon: Icon(Icons.class_outlined),
             selectedIcon: Icon(Icons.class_),
             label: 'Classes',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.menu_book_outlined),
-            selectedIcon: Icon(Icons.menu_book),
-            label: 'Homework',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.auto_stories_outlined),
-            selectedIcon: Icon(Icons.auto_stories),
-            label: 'Reading',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
