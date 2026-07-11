@@ -12,5 +12,11 @@ public class Teacher
     public int UserId { get; set; }
     public User? User { get; set; }
 
+    // Optional profile picture and cover photo (uploaded files in R2).
+    public int? AvatarFileObjectId { get; set; }
+    public FileObject? AvatarFileObject { get; set; }
+    public int? CoverFileObjectId { get; set; }
+    public FileObject? CoverFileObject { get; set; }
+
     public List<Student> Students { get; set; } = new();
 }

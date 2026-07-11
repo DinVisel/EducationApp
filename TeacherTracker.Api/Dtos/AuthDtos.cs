@@ -15,7 +15,11 @@ public record LoginDto(
 public record UpdateProfileDto(
     [Required, MaxLength(100)] string FirstName,
     [Required, MaxLength(100)] string LastName,
-    [Required, EmailAddress, MaxLength(256)] string Email);
+    [Required, EmailAddress, MaxLength(256)] string Email,
+    // When provided, set the profile picture / cover to this owned file. Null
+    // leaves the current image unchanged.
+    int? AvatarFileId = null,
+    int? CoverFileId = null);
 
 /// Returned by register/login: the signed token, the account role, and the
 /// matching profile (teacher or student, depending on the role).

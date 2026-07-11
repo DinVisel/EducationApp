@@ -119,10 +119,12 @@ public class FilesController : ControllerBase
 
         // The owner can always fetch it. A student may fetch a file attached to an
         // assignment fanned out to them; any teacher may fetch a file attached to
-        // a post in the global feed.
+        // a post in the global feed; any authenticated user may fetch a file used
+        // as a teacher's profile picture / cover (needed to view profiles).
         if (file.OwnerUserId != UserId
             && !await CanStudentAccessAsync(id)
-            && !await CanTeacherAccessPostFileAsync(id))
+            && !await CanTeacherAccessPostFileAsync(id)
+            && !await IsProfileImageAsync(id))
             return NotFound();
 
         return Ok(new FileUrlDto(_storage.GetPresignedGetUrl(file.Key)));
@@ -149,6 +151,12 @@ public class FilesController : ControllerBase
 
         return await _db.PostAttachments.AnyAsync(a => a.FileObjectId == fileId);
     }
+
+    // True when the file is a teacher's avatar or cover — profile images are
+    // viewable by any authenticated user (profiles are cross-viewable).
+    private Task<bool> IsProfileImageAsync(int fileId) =>
+        _db.Teachers.AnyAsync(t =>
+            t.AvatarFileObjectId == fileId || t.CoverFileObjectId == fileId);
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)

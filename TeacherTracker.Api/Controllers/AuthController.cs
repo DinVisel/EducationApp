@@ -116,6 +116,21 @@ public class AuthController : ControllerBase
         teacher.FirstName = dto.FirstName.Trim();
         teacher.LastName = dto.LastName.Trim();
         teacher.User.Email = email;
+
+        // Profile images must be files this teacher uploaded.
+        if (dto.AvatarFileId is int avatarId)
+        {
+            if (!await _db.Files.AnyAsync(f => f.Id == avatarId && f.OwnerUserId == teacher.UserId))
+                return BadRequest("Avatar file not found or not owned by you.");
+            teacher.AvatarFileObjectId = avatarId;
+        }
+        if (dto.CoverFileId is int coverId)
+        {
+            if (!await _db.Files.AnyAsync(f => f.Id == coverId && f.OwnerUserId == teacher.UserId))
+                return BadRequest("Cover file not found or not owned by you.");
+            teacher.CoverFileObjectId = coverId;
+        }
+
         await _db.SaveChangesAsync();
 
         return Ok(ToDto(teacher));
@@ -141,10 +156,12 @@ public class AuthController : ControllerBase
             user.Student is null ? null : ToProfileDto(user.Student));
 
     private static TeacherDto ToDto(Teacher t) =>
-        new(t.Id, t.FirstName, t.LastName, t.User?.Email ?? string.Empty);
+        new(t.Id, t.FirstName, t.LastName, t.User?.Email ?? string.Empty,
+            t.AvatarFileObjectId, t.CoverFileObjectId);
 
     private static TeacherDto ToDto(Teacher t, User u) =>
-        new(t.Id, t.FirstName, t.LastName, u.Email);
+        new(t.Id, t.FirstName, t.LastName, u.Email,
+            t.AvatarFileObjectId, t.CoverFileObjectId);
 
     private static StudentProfileDto ToProfileDto(Student s) =>
         new(s.Id, s.FirstName, s.LastName, s.StudentNumber);

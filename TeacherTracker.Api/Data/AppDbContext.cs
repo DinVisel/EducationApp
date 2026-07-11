@@ -49,6 +49,20 @@ public class AppDbContext : DbContext
             .HasForeignKey<Teacher>(t => t.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Optional profile picture / cover photo; clearing the file just nulls
+        // the reference (keeps the teacher).
+        modelBuilder.Entity<Teacher>()
+            .HasOne(t => t.AvatarFileObject)
+            .WithMany()
+            .HasForeignKey(t => t.AvatarFileObjectId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Teacher>()
+            .HasOne(t => t.CoverFileObject)
+            .WithMany()
+            .HasForeignKey(t => t.CoverFileObjectId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Optional 1:1 User → Student profile (student login, Phase 4).
         modelBuilder.Entity<Student>()
             .HasOne(s => s.User)
