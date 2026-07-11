@@ -4,66 +4,69 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/design.dart';
 import '../../../models/classroom.dart';
 import '../../../models/student.dart';
-import '../../assignments/screens/class_assignments_screen.dart';
+import '../../students/screens/student_detail_screen.dart';
 import '../../students/state/students_providers.dart';
 import '../state/classrooms_providers.dart';
+import 'tabs/class_homework_tab.dart';
+import 'tabs/class_reading_tab.dart';
 
-/// A class's roster: view enrolled students, add more, or remove them.
-class ClassDetailScreen extends ConsumerWidget {
+/// A class hub, tabbed into Students / Homework / Reading. The Students tab is
+/// the roster (tap a student for their detail + reading log); Homework and
+/// Reading aggregate the roster's work.
+class ClassDetailScreen extends ConsumerStatefulWidget {
   const ClassDetailScreen({super.key, required this.classroom});
 
   final Classroom classroom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(classroomDetailProvider(classroom.id));
+  ConsumerState<ClassDetailScreen> createState() => _ClassDetailScreenState();
+}
 
+class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabs = TabController(length: 3, vsync: this)
+    ..addListener(() => setState(() {}));
+
+  Classroom get classroom => widget.classroom;
+
+  @override
+  void dispose() {
+    _tabs.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return GlassScaffold(
       appBar: AppBar(
         title: Text(classroom.name),
         backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.assignment_outlined),
-            tooltip: 'Assignments',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ClassAssignmentsScreen(classroom: classroom),
-              ),
-            ),
+        bottom: TabBar(
+          controller: _tabs,
+          tabs: const [
+            Tab(icon: Icon(Icons.groups_outlined), text: 'Students'),
+            Tab(icon: Icon(Icons.assignment_outlined), text: 'Homework'),
+            Tab(icon: Icon(Icons.auto_stories_outlined), text: 'Reading'),
+          ],
+        ),
+      ),
+      floatingActionButton: _tabs.index == 0
+          ? FloatingActionButton.extended(
+              onPressed: () => _addStudents(context, ref),
+              icon: const Icon(Icons.person_add_alt),
+              label: const Text('Add Students'),
+            )
+          : null,
+      body: TabBarView(
+        controller: _tabs,
+        children: [
+          _RosterTab(
+            classroom: classroom,
+            onRemove: (s) => _removeStudent(context, ref, s),
           ),
+          ClassHomeworkTab(classroom: classroom),
+          ClassReadingTab(classroom: classroom),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _addStudents(context, ref),
-        icon: const Icon(Icons.person_add_alt),
-        label: const Text('Add Students'),
-      ),
-      body: detailAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
-        data: (detail) {
-          if (detail.students.isEmpty) {
-            return const _EmptyRoster();
-          }
-          return RefreshIndicator(
-            onRefresh: () =>
-                ref.refresh(classroomDetailProvider(classroom.id).future),
-            child: ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-              itemCount: detail.students.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (ctx, i) {
-                final s = detail.students[i];
-                return _RosterTile(
-                  student: s,
-                  onRemove: () => _removeStudent(ctx, ref, s),
-                );
-              },
-            ),
-          );
-        },
       ),
     );
   }
@@ -98,16 +101,63 @@ class ClassDetailScreen extends ConsumerWidget {
   }
 }
 
+/// The roster list for the Students tab; tapping a student opens their detail.
+class _RosterTab extends ConsumerWidget {
+  const _RosterTab({required this.classroom, required this.onRemove});
+  final Classroom classroom;
+  final void Function(Student) onRemove;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final detailAsync = ref.watch(classroomDetailProvider(classroom.id));
+    return detailAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+      data: (detail) {
+        if (detail.students.isEmpty) return const _EmptyRoster();
+        return RefreshIndicator(
+          onRefresh: () =>
+              ref.refresh(classroomDetailProvider(classroom.id).future),
+          child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            itemCount: detail.students.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            itemBuilder: (ctx, i) {
+              final s = detail.students[i];
+              return _RosterTile(
+                student: s,
+                onRemove: () => onRemove(s),
+                onTap: () => Navigator.of(ctx).push(
+                  MaterialPageRoute(
+                    builder: (_) => StudentDetailScreen(student: s),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _RosterTile extends StatelessWidget {
-  const _RosterTile({required this.student, required this.onRemove});
+  const _RosterTile({
+    required this.student,
+    required this.onRemove,
+    required this.onTap,
+  });
   final Student student;
   final VoidCallback onRemove;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return GlassCard(
+      onTap: onTap,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
