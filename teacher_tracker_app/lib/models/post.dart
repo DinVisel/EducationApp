@@ -29,7 +29,9 @@ class PostAttachment {
 class Post {
   const Post({
     required this.id,
+    required this.authorUserId,
     required this.authorName,
+    required this.authorAvatarFileId,
     required this.subject,
     required this.text,
     required this.createdAt,
@@ -37,11 +39,14 @@ class Post {
     required this.commentCount,
     required this.likedByMe,
     required this.isMine,
+    required this.isPinned,
     required this.attachments,
   });
 
   final int id;
+  final int authorUserId;
   final String authorName;
+  final int? authorAvatarFileId;
   final String subject;
   final String text;
   final DateTime createdAt;
@@ -49,12 +54,21 @@ class Post {
   final int commentCount;
   final bool likedByMe;
   final bool isMine;
+  final bool isPinned;
   final List<PostAttachment> attachments;
 
-  /// A copy with the like toggled — used for optimistic UI updates.
-  Post copyWith({bool? likedByMe, int? likeCount, int? commentCount}) => Post(
+  /// A copy with the like/pin state changed — used for optimistic UI updates.
+  Post copyWith({
+    bool? likedByMe,
+    int? likeCount,
+    int? commentCount,
+    bool? isPinned,
+  }) =>
+      Post(
         id: id,
+        authorUserId: authorUserId,
         authorName: authorName,
+        authorAvatarFileId: authorAvatarFileId,
         subject: subject,
         text: text,
         createdAt: createdAt,
@@ -62,12 +76,15 @@ class Post {
         commentCount: commentCount ?? this.commentCount,
         likedByMe: likedByMe ?? this.likedByMe,
         isMine: isMine,
+        isPinned: isPinned ?? this.isPinned,
         attachments: attachments,
       );
 
   factory Post.fromJson(Map<String, dynamic> json) => Post(
         id: json['id'] as int,
+        authorUserId: json['authorUserId'] as int? ?? 0,
         authorName: json['authorName'] as String? ?? '',
+        authorAvatarFileId: json['authorAvatarFileId'] as int?,
         subject: json['subject'] as String? ?? 'General',
         text: json['text'] as String? ?? '',
         createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
@@ -76,6 +93,7 @@ class Post {
         commentCount: (json['commentCount'] as num?)?.toInt() ?? 0,
         likedByMe: json['likedByMe'] as bool? ?? false,
         isMine: json['isMine'] as bool? ?? false,
+        isPinned: json['isPinned'] as bool? ?? false,
         attachments: ((json['attachments'] as List<dynamic>?) ?? [])
             .map((e) => PostAttachment.fromJson(e as Map<String, dynamic>))
             .toList(),

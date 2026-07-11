@@ -17,6 +17,10 @@ public class Post
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    // Instagram-style: the author can pin their own posts to the top of their
+    // profile. Does not affect the global feed order.
+    public bool IsPinned { get; set; }
+
     public List<PostAttachment> Attachments { get; set; } = new();
     public List<PostLike> Likes { get; set; } = new();
     public List<PostComment> Comments { get; set; } = new();

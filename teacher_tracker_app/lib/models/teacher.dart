@@ -2,6 +2,7 @@
 class Teacher {
   const Teacher({
     required this.id,
+    required this.userId,
     required this.firstName,
     required this.lastName,
     required this.email,
@@ -10,6 +11,9 @@ class Teacher {
   });
 
   final int id;
+
+  /// The account (User) id — matches a post's `authorUserId`.
+  final int userId;
   final String firstName;
   final String lastName;
   final String email;
@@ -20,6 +24,7 @@ class Teacher {
 
   factory Teacher.fromJson(Map<String, dynamic> json) => Teacher(
         id: json['id'] as int,
+        userId: json['userId'] as int? ?? 0,
         firstName: json['firstName'] as String? ?? '',
         lastName: json['lastName'] as String? ?? '',
         email: json['email'] as String? ?? '',
@@ -46,6 +51,7 @@ class Teacher {
   }) =>
       Teacher(
         id: id,
+        userId: userId,
         firstName: firstName ?? this.firstName,
         lastName: lastName ?? this.lastName,
         email: email ?? this.email,

@@ -15,7 +15,9 @@ public record PostAttachmentDto(
 /// `Subject` serializes as its enum name (JsonStringEnumConverter).
 public record PostDto(
     int Id,
+    int AuthorUserId,
     string AuthorName,
+    int? AuthorAvatarFileId,
     PostSubject Subject,
     string Text,
     DateTime CreatedAt,
@@ -23,6 +25,7 @@ public record PostDto(
     int CommentCount,
     bool LikedByMe,
     bool IsMine,
+    bool IsPinned,
     IReadOnlyList<PostAttachmentDto> Attachments);
 
 public record CreatePostDto(

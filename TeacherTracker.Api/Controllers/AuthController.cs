@@ -156,11 +156,11 @@ public class AuthController : ControllerBase
             user.Student is null ? null : ToProfileDto(user.Student));
 
     private static TeacherDto ToDto(Teacher t) =>
-        new(t.Id, t.FirstName, t.LastName, t.User?.Email ?? string.Empty,
+        new(t.Id, t.UserId, t.FirstName, t.LastName, t.User?.Email ?? string.Empty,
             t.AvatarFileObjectId, t.CoverFileObjectId);
 
     private static TeacherDto ToDto(Teacher t, User u) =>
-        new(t.Id, t.FirstName, t.LastName, u.Email,
+        new(t.Id, u.Id, t.FirstName, t.LastName, u.Email,
             t.AvatarFileObjectId, t.CoverFileObjectId);
 
     private static StudentProfileDto ToProfileDto(Student s) =>

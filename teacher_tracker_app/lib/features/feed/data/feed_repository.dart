@@ -33,6 +33,21 @@ class FeedRepository {
         .toList();
   }
 
+  /// A teacher's own posts (their profile), pinned first then newest.
+  Future<List<Post>> getByAuthor(int authorUserId, {int limit = 50}) async {
+    final res = await _dio.get<List<dynamic>>(
+      '/api/posts',
+      queryParameters: {'authorUserId': authorUserId, 'limit': limit},
+    );
+    return (res.data ?? [])
+        .map((e) => Post.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> pin(int id) => _dio.post<void>('/api/posts/$id/pin');
+
+  Future<void> unpin(int id) => _dio.delete<void>('/api/posts/$id/pin');
+
   /// Publishes a post to the global feed. [fileIds] are ids of files already
   /// uploaded via the files endpoint.
   Future<Post> create({

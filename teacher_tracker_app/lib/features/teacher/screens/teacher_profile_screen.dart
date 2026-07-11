@@ -7,6 +7,7 @@ import '../../auth/state/auth_controller.dart';
 import '../../files/data/files_repository.dart';
 import '../../files/mime.dart';
 import '../../profile/widgets/profile_cover_header.dart';
+import '../../profile/widgets/teacher_posts_list.dart';
 
 class TeacherProfileScreen extends ConsumerWidget {
   const TeacherProfileScreen({super.key});
@@ -218,6 +219,18 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
                         : const Text('Save changes'),
                   ),
                 ),
+                const SizedBox(height: 28),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Your posts',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w700)),
+                ),
+                const SizedBox(height: 8),
+                TeacherPostsList(
+                    userId: widget.teacher.userId, canManage: true),
               ],
             ),
           ),

@@ -121,6 +121,48 @@ class FeedNotifier extends AsyncNotifier<List<Post>> {
 final feedProvider =
     AsyncNotifierProvider<FeedNotifier, List<Post>>(FeedNotifier.new);
 
+/// A teacher's posts for their profile (pinned first), keyed by account userId.
+/// Reloads on login/logout.
+final authorPostsProvider =
+    FutureProvider.family<List<Post>, int>((ref, userId) {
+  ref.watch(authControllerProvider);
+  return ref.watch(feedRepositoryProvider).getByAuthor(userId);
+});
+
+/// Pin/unpin and delete/like for the profile posts list. Mutations refresh the
+/// author list (and the feed, so a deletion/like there stays consistent).
+class ProfilePostActions {
+  ProfilePostActions(this._ref, this.userId);
+  final Ref _ref;
+  final int userId;
+
+  FeedRepository get _repo => _ref.read(feedRepositoryProvider);
+
+  Future<void> _refresh() async {
+    _ref.invalidate(authorPostsProvider(userId));
+    _ref.invalidate(feedProvider);
+  }
+
+  Future<void> togglePin(int id, bool pinned) async {
+    pinned ? await _repo.unpin(id) : await _repo.pin(id);
+    await _refresh();
+  }
+
+  Future<void> toggleLike(int id, bool liked) async {
+    liked ? await _repo.unlike(id) : await _repo.like(id);
+    await _refresh();
+  }
+
+  Future<void> delete(int id) async {
+    await _repo.delete(id);
+    await _refresh();
+  }
+}
+
+final profilePostActionsProvider =
+    Provider.family<ProfilePostActions, int>(
+        (ref, userId) => ProfilePostActions(ref, userId));
+
 /// Comments for one post, keyed by post id.
 final postCommentsProvider =
     FutureProvider.family<List<PostComment>, int>((ref, postId) {

@@ -30,15 +30,24 @@ public class PostsController : ControllerBase
     public async Task<ActionResult<IEnumerable<PostDto>>> GetFeed(
         [FromQuery] PostSubject? subject,
         [FromQuery] int? beforeId,
+        [FromQuery] int? authorUserId,
         [FromQuery] int limit = 20)
     {
         var take = Math.Clamp(limit, 1, 50);
 
-        var posts = await _db.Posts
+        var query = _db.Posts
             .AsNoTracking()
             .Where(p => beforeId == null || p.Id < beforeId)
             .Where(p => subject == null || p.Subject == subject)
-            .OrderByDescending(p => p.Id)
+            .Where(p => authorUserId == null || p.AuthorUserId == authorUserId);
+
+        // A profile view (filtered by author) shows pinned posts first; the
+        // global feed keeps its pure newest-first, cursor-friendly order.
+        query = authorUserId == null
+            ? query.OrderByDescending(p => p.Id)
+            : query.OrderByDescending(p => p.IsPinned).ThenByDescending(p => p.Id);
+
+        var posts = await query
             .Take(take)
             .Select(Projection(UserId))
             .ToListAsync();
@@ -229,6 +238,29 @@ public class PostsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:int}/pin")]
+    public Task<IActionResult> Pin(int id) => SetPinned(id, true);
+
+    [HttpDelete("{id:int}/pin")]
+    public Task<IActionResult> Unpin(int id) => SetPinned(id, false);
+
+    // Pin/unpin is author-only; a non-author (or missing post) gets a 404 so we
+    // don't reveal another author's posts.
+    private async Task<IActionResult> SetPinned(int id, bool pinned)
+    {
+        var post = await _db.Posts
+            .FirstOrDefaultAsync(p => p.Id == id && p.AuthorUserId == UserId);
+        if (post is null)
+            return NotFound();
+
+        if (post.IsPinned != pinned)
+        {
+            post.IsPinned = pinned;
+            await _db.SaveChangesAsync();
+        }
+        return NoContent();
+    }
+
     [HttpPost("{id:int}/report")]
     public async Task<IActionResult> ReportPost(int id, CreateReportDto dto)
     {
@@ -267,7 +299,9 @@ public class PostsController : ControllerBase
     private static Expression<Func<Post, PostDto>> Projection(int userId) => p =>
         new PostDto(
             p.Id,
+            p.AuthorUserId,
             p.Author!.Teacher!.FirstName + " " + p.Author.Teacher.LastName,
+            p.Author.Teacher.AvatarFileObjectId,
             p.Subject,
             p.Text,
             p.CreatedAt,
@@ -275,6 +309,7 @@ public class PostsController : ControllerBase
             p.Comments.Count,
             p.Likes.Any(l => l.UserId == userId),
             p.AuthorUserId == userId,
+            p.IsPinned,
             p.Attachments
                 .Select(at => new PostAttachmentDto(
                     at.FileObject!.Id,
