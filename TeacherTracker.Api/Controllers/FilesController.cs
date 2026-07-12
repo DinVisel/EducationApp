@@ -1,20 +1,24 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
+using TeacherTracker.Api.Moderation;
 using TeacherTracker.Api.Storage;
 
 namespace TeacherTracker.Api.Controllers;
 
-/// Brokers uploads/downloads to Cloudflare R2. Phase 0 uses a server-side proxy
-/// upload (client → API → R2) to avoid R2 CORS setup; large-file direct
-/// (presigned PUT) uploads land in Phase 6.
+/// Brokers uploads/downloads to Cloudflare R2. Direct (presigned PUT) uploads land
+/// in a private `quarantine/` prefix and are scanned for inappropriate imagery on
+/// `confirm`; only clean files are promoted to `uploads/` and recorded. The proxy
+/// path scans the stream before it is ever written to R2.
 [ApiController]
 [Authorize]
 [Route("api/[controller]")]
+[EnableRateLimiting("uploads")]
 public class FilesController : ControllerBase
 {
     // Reject uploads larger than this to protect the proxy path.
@@ -22,14 +26,19 @@ public class FilesController : ControllerBase
 
     private readonly AppDbContext _db;
     private readonly IFileStorage _storage;
+    private readonly IImageModerator _imageModerator;
 
-    public FilesController(AppDbContext db, IFileStorage storage)
+    public FilesController(AppDbContext db, IFileStorage storage, IImageModerator imageModerator)
     {
         _db = db;
         _storage = storage;
+        _imageModerator = imageModerator;
     }
 
     private int UserId => User.GetUserId();
+
+    private static bool IsImage(string contentType) =>
+        contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
 
     [HttpPost]
     [RequestSizeLimit(MaxUploadBytes)]
@@ -44,6 +53,15 @@ public class FilesController : ControllerBase
             ? "application/octet-stream"
             : file.ContentType;
         var key = $"uploads/{UserId}/{Guid.NewGuid():N}{Path.GetExtension(file.FileName)}";
+
+        // Scan images before anything is written to R2; reject flagged content.
+        if (IsImage(contentType))
+        {
+            await using var scanStream = file.OpenReadStream();
+            var scan = await _imageModerator.ScanAsync(scanStream, ct);
+            if (scan.IsFlagged)
+                return UnprocessableEntity("The image was rejected by content moderation.");
+        }
 
         await using var stream = file.OpenReadStream();
         var size = await _storage.PutAsync(stream, key, contentType, ct);
@@ -71,7 +89,8 @@ public class FilesController : ControllerBase
         var contentType = string.IsNullOrWhiteSpace(dto.ContentType)
             ? "application/octet-stream"
             : dto.ContentType;
-        var key = $"uploads/{UserId}/{Guid.NewGuid():N}{Path.GetExtension(dto.FileName)}";
+        // Land in quarantine; `confirm` scans and promotes to `uploads/`.
+        var key = $"quarantine/{UserId}/{Guid.NewGuid():N}{Path.GetExtension(dto.FileName)}";
         var url = _storage.GetPresignedPutUrl(key, contentType);
         return Ok(new PresignUploadResponseDto(url, key));
     }
@@ -79,24 +98,46 @@ public class FilesController : ControllerBase
     [HttpPost("confirm")]
     public async Task<ActionResult<FileObjectDto>> Confirm(ConfirmUploadDto dto, CancellationToken ct)
     {
-        // The key must be one we issued to this caller (prevents claiming another
-        // user's object or an arbitrary key).
-        if (!dto.Key.StartsWith($"uploads/{UserId}/", StringComparison.Ordinal))
+        // The key must be a quarantine key we issued to this caller (prevents
+        // claiming another user's object or an arbitrary key).
+        var quarantinePrefix = $"quarantine/{UserId}/";
+        if (!dto.Key.StartsWith(quarantinePrefix, StringComparison.Ordinal))
             return BadRequest("Invalid upload key.");
 
         var size = await _storage.GetSizeAsync(dto.Key, ct);
         if (size is null)
             return BadRequest("Upload not found — the file was not uploaded to R2.");
         if (size > MaxUploadBytes)
+        {
+            await _storage.DeleteAsync(dto.Key, ct);
             return BadRequest("File exceeds the maximum upload size.");
+        }
 
         var contentType = string.IsNullOrWhiteSpace(dto.ContentType)
             ? "application/octet-stream"
             : dto.ContentType;
 
+        // Scan images before promoting them out of quarantine. Flagged content is
+        // deleted and never recorded, so it's never publicly retrievable.
+        if (IsImage(contentType))
+        {
+            await using var scanStream = await _storage.GetObjectStreamAsync(dto.Key, ct);
+            var scan = await _imageModerator.ScanAsync(scanStream, ct);
+            if (scan.IsFlagged)
+            {
+                await _storage.DeleteAsync(dto.Key, ct);
+                return UnprocessableEntity("The image was rejected by content moderation.");
+            }
+        }
+
+        // Promote out of quarantine into the public prefix, keeping the guid/ext so
+        // all existing `GetUrl` ownership/access checks keep working unchanged.
+        var finalKey = $"uploads/{UserId}/{dto.Key[quarantinePrefix.Length..]}";
+        await _storage.MoveAsync(dto.Key, finalKey, ct);
+
         var record = new FileObject
         {
-            Key = dto.Key,
+            Key = finalKey,
             FileName = dto.FileName,
             ContentType = contentType,
             Size = size.Value,

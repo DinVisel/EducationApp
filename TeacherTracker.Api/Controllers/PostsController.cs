@@ -1,11 +1,13 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
+using TeacherTracker.Api.Moderation;
 
 namespace TeacherTracker.Api.Controllers;
 
@@ -68,6 +70,8 @@ public class PostsController : ControllerBase
     }
 
     [HttpPost]
+    [EnableRateLimiting("writes")]
+    [ServiceFilter(typeof(ProfanityFilterAttribute))]
     public async Task<ActionResult<PostDto>> Create(CreatePostDto dto)
     {
         // Only attach files this teacher owns; silently drop anything else.
@@ -182,6 +186,8 @@ public class PostsController : ControllerBase
     }
 
     [HttpPost("{id:int}/comments")]
+    [EnableRateLimiting("writes")]
+    [ServiceFilter(typeof(ProfanityFilterAttribute))]
     public async Task<ActionResult<PostCommentDto>> AddComment(int id, CreateCommentDto dto)
     {
         var authorUserId = await _db.Posts

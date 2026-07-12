@@ -73,6 +73,35 @@ public class R2FileStorage : IFileStorage
         }
     }
 
+    public async Task<Stream> GetObjectStreamAsync(string key, CancellationToken ct = default)
+    {
+        // Buffer to memory so the caller gets a seekable stream (Rekognition needs
+        // to read the full image) and the S3 response can be disposed immediately.
+        var response = await _s3.GetObjectAsync(new GetObjectRequest
+        {
+            BucketName = _options.Bucket,
+            Key = key,
+        }, ct);
+        var buffer = new MemoryStream();
+        await using (response.ResponseStream)
+            await response.ResponseStream.CopyToAsync(buffer, ct);
+        buffer.Position = 0;
+        return buffer;
+    }
+
+    public async Task MoveAsync(string fromKey, string toKey, CancellationToken ct = default)
+    {
+        // Object stores have no rename: copy to the new key, then delete the old.
+        await _s3.CopyObjectAsync(new CopyObjectRequest
+        {
+            SourceBucket = _options.Bucket,
+            SourceKey = fromKey,
+            DestinationBucket = _options.Bucket,
+            DestinationKey = toKey,
+        }, ct);
+        await DeleteAsync(fromKey, ct);
+    }
+
     public Task DeleteAsync(string key, CancellationToken ct = default) =>
         _s3.DeleteObjectAsync(new DeleteObjectRequest
         {

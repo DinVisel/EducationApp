@@ -1,5 +1,6 @@
 using System.Text;
 using System.Threading.RateLimiting;
+using Amazon.Rekognition;
 using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,7 @@ using Scalar.AspNetCore;
 using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Models;
+using TeacherTracker.Api.Moderation;
 using TeacherTracker.Api.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,6 +68,35 @@ builder.Services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(
     }));
 builder.Services.AddScoped<IFileStorage, R2FileStorage>();
 
+// --- Content moderation ---
+builder.Services.Configure<ModerationOptions>(
+    builder.Configuration.GetSection(ModerationOptions.SectionName));
+
+var moderation = builder.Configuration.GetSection(ModerationOptions.SectionName)
+    .Get<ModerationOptions>() ?? new ModerationOptions();
+
+// Image moderation via AWS Rekognition (needs a real AWS account + region — the
+// R2 alias won't authorize it). Falls back to a pass-through when disabled so the
+// app runs without AWS credentials.
+if (moderation.ImageModerationEnabled)
+{
+    builder.Services.AddSingleton<IAmazonRekognition>(_ => new AmazonRekognitionClient(
+        new Amazon.Runtime.BasicAWSCredentials(moderation.AwsAccessKey, moderation.AwsSecretKey),
+        new AmazonRekognitionConfig
+        {
+            RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(moderation.AwsRegion),
+        }));
+    builder.Services.AddScoped<IImageModerator, RekognitionImageModerator>();
+}
+else
+{
+    builder.Services.AddSingleton<IImageModerator, NullImageModerator>();
+}
+
+// Text moderation (profanity / sensitive keywords) applied per-action via the filter.
+builder.Services.AddSingleton<ProfanityGuard>();
+builder.Services.AddScoped<ProfanityFilterAttribute>();
+
 // CORS: lock down to configured origins in production; permissive in dev when
 // none are configured. Set `Cors:AllowedOrigins` (array) for deployment.
 const string FlutterCorsPolicy = "FlutterClient";
@@ -107,6 +138,30 @@ if (rateLimitingEnabled)
         opt.PermitLimit = 10;
         opt.Window = TimeSpan.FromMinutes(1);
     });
+
+    // Per-user caps on write-heavy endpoints (partitioned by the JWT `sub` claim,
+    // falling back to IP for the rare unauthenticated hit). These sit *under* the
+    // global per-IP cap and curb storage-exhaustion / spam from a single account.
+    static string UserPartition(HttpContext ctx) =>
+        ctx.User.FindFirst("sub")?.Value
+        ?? ctx.Connection.RemoteIpAddress?.ToString()
+        ?? "unknown";
+
+    options.AddPolicy("uploads", ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(UserPartition(ctx),
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 30,
+                Window = TimeSpan.FromMinutes(1),
+            }));
+
+    options.AddPolicy("writes", ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(UserPartition(ctx),
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 60,
+                Window = TimeSpan.FromMinutes(1),
+            }));
 });
 
 var app = builder.Build();

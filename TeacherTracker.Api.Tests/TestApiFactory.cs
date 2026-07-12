@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using TeacherTracker.Api.Data;
+using TeacherTracker.Api.Moderation;
 using TeacherTracker.Api.Storage;
 
 namespace TeacherTracker.Api.Tests;
@@ -19,6 +20,8 @@ public class TestApiFactory : WebApplicationFactory<Program>
     private readonly SqliteConnection _connection = new("DataSource=:memory:");
 
     public FakeFileStorage Storage { get; } = new();
+
+    public FakeImageModerator ImageModerator { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -55,6 +58,10 @@ public class TestApiFactory : WebApplicationFactory<Program>
             // Swap R2 for the in-memory fake.
             services.RemoveAll<IFileStorage>();
             services.AddSingleton<IFileStorage>(Storage);
+
+            // Swap the image moderator for a switchable fake (no AWS Rekognition).
+            services.RemoveAll<IImageModerator>();
+            services.AddSingleton<IImageModerator>(ImageModerator);
         });
     }
 

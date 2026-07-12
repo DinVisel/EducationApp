@@ -19,5 +19,13 @@ public interface IFileStorage
     /// doesn't exist. Used to confirm a direct upload actually landed.
     Task<long?> GetSizeAsync(string key, CancellationToken ct = default);
 
+    /// Opens the object at <paramref name="key"/> for reading. Used to pull bytes
+    /// back for content moderation before an upload is promoted to public.
+    Task<Stream> GetObjectStreamAsync(string key, CancellationToken ct = default);
+
+    /// Moves an object from one key to another (copy + delete — object stores have
+    /// no native rename). Used to promote a scanned upload out of quarantine.
+    Task MoveAsync(string fromKey, string toKey, CancellationToken ct = default);
+
     Task DeleteAsync(string key, CancellationToken ct = default);
 }

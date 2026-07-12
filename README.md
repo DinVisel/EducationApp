@@ -86,7 +86,11 @@ committed `appsettings.json` ships empty placeholders only.
 | `R2__Endpoint` / `R2__AccessKey` / `R2__SecretKey` / `R2__Bucket` | Cloudflare R2 credentials |
 | `Cors__AllowedOrigins__0`, `__1`, … | Allowed browser origins; if none set, CORS is permissive (dev only) |
 | `Admin__Email` / `Admin__Password` | Bootstraps the first `Admin` account on startup (once, if absent) |
-| `RateLimiting__Enabled` | `true` by default; a global 300/min-per-IP cap + a 10/min cap on `/api/auth/*` |
+| `RateLimiting__Enabled` | `true` by default; global 300/min-per-IP + 10/min on `/api/auth/*` + per-user 30/min uploads & 60/min post/comment writes |
+| `Moderation__ImageModerationEnabled` | `false` by default; when `true`, uploaded images are scanned by AWS Rekognition before being promoted out of `quarantine/` |
+| `Moderation__AwsAccessKey` / `__AwsSecretKey` / `__AwsRegion` | AWS Rekognition credentials + a **real** region (e.g. `us-east-1`) — the R2 alias won't authorize Rekognition |
+| `Moderation__MinConfidence` / `__BlockedLabels__0…` | Rekognition hit threshold (default 80) and blocked label categories |
+| `Moderation__TextModerationEnabled` / `__BlockedTerms__0…` | Profanity filter on posts/comments (`true` by default); extra terms merged with the bundled TR+EN list |
 
 **R2 CORS** — direct (presigned-PUT) uploads are browser `PUT`s straight to R2, so
 the bucket needs a CORS policy allowing `PUT`/`GET` from your app origins, e.g.:

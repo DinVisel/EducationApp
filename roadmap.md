@@ -262,3 +262,41 @@ analyze` clean (only the 4 long-standing lints in the now-unused global
 homework/reading screens). Deferred to live R2 (per Phases 4–6): the actual
 image render/upload drive (cover, avatar, author avatars) needs a reachable
 bucket.
+
+---
+
+## Phase 9 — Content safety (image moderation, profanity filter, throttling) ✅
+
+Harden the platform against inappropriate uploads and abusive text.
+
+**Backend — image moderation (AWS Rekognition, quarantine-and-scan).** Direct
+uploads now land in a private **`quarantine/{userId}/…`** prefix
+(`FilesController.Presign`); `Confirm` pulls the bytes back
+(`IFileStorage.GetObjectStreamAsync`), scans images via
+`IImageModerator`/`RekognitionImageModerator` (`DetectModerationLabels`, configurable
+`MinConfidence` + block-list categories), then either **deletes + 422** on a hit or
+**promotes** the object to `uploads/…` (`IFileStorage.MoveAsync`) and records the
+`FileObject` with the final key — so every existing `GetUrl` access check keeps
+working. The proxy `POST /api/files` path scans the stream **before** `PutAsync`.
+Image moderation is toggleable (`Moderation:ImageModerationEnabled`); when off a
+`NullImageModerator` passes everything (dev/offline/tests). Rekognition needs a real
+AWS account + region (not the R2 alias) — keys go in `Moderation:AwsAccessKey/…`.
+
+**Backend — text moderation.** `ProfanityGuard` (normalizes: lowercase, strip
+diacritics, fold leet, collapse separators; bundled TR+EN list + `Moderation:BlockedTerms`)
+behind a `ProfanityFilterAttribute` (`IAsyncActionFilter`, 422 on a hit) applied to
+the **public** social hub only — `PostsController.Create` and `AddComment`. Private
+teacher-authored student records (notes/homework/books) are intentionally **not**
+filtered (legitimate documentation would false-positive).
+
+**Backend — throttling.** Two new per-user rate-limit policies partitioned by the
+JWT `sub` claim: `"uploads"` (30/min) on `FilesController`, `"writes"` (60/min) on
+post/comment creation — under the existing global 300/min-per-IP cap and the
+`RateLimiting:Enabled` toggle.
+
+**Done when** — inappropriate images can't become publicly retrievable, profane
+posts/comments are blocked, and write endpoints are per-user throttled. ✅ **17/17
+API tests pass** (added: flagged image on confirm → 422 + purged + not promoted,
+clean image promoted quarantine→uploads, proxy upload flagged → 422, profane post
+& comment → 422 with clean passthrough). Deferred to live AWS/R2 (per Phases 4–6):
+the real Rekognition round-trip needs live credentials + a reachable bucket.

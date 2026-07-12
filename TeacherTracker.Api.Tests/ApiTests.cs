@@ -192,7 +192,8 @@ public class ApiTests
         presign.EnsureSuccessStatusCode();
         var pj = await presign.Content.ReadFromJsonAsync<JsonElement>();
         var key = pj.GetProperty("key").GetString()!;
-        Assert.Contains("uploads/", key);
+        // Direct uploads land in quarantine; confirm promotes them to uploads/.
+        Assert.Contains("quarantine/", key);
         Assert.False(string.IsNullOrWhiteSpace(pj.GetProperty("uploadUrl").GetString()));
 
         // Confirm before the object "exists" → rejected.
@@ -207,6 +208,10 @@ public class ApiTests
         ok.EnsureSuccessStatusCode();
         var fj = await ok.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(1234, fj.GetProperty("size").GetInt64());
+
+        // The clean image was promoted out of quarantine into uploads/.
+        Assert.False(factory.Storage.Exists(key));
+        Assert.True(factory.Storage.Exists(key.Replace("quarantine/", "uploads/")));
     }
 
     [Fact]
@@ -339,5 +344,82 @@ public class ApiTests
         res.EnsureSuccessStatusCode();
         var users = await res.Content.ReadFromJsonAsync<JsonElement>();
         Assert.True(users.GetArrayLength() >= 2); // the teacher + the admin
+    }
+
+    // --- Phase 9: content safety ----------------------------------------------
+
+    [Fact]
+    public async Task Confirm_Rejects_A_Flagged_Image_And_Deletes_It()
+    {
+        using var factory = new TestApiFactory();
+        factory.ImageModerator.Flagged = true; // Rekognition would flag this image
+        var c = factory.CreateApiClient();
+        var token = await RegisterTeacherAsync(c, "a@t.com");
+
+        var presign = await c.SendAsync(Req(HttpMethod.Post, "/api/files/presign", token,
+            new { fileName = "bad.png", contentType = "image/png" }));
+        presign.EnsureSuccessStatusCode();
+        var key = (await presign.Content.ReadFromJsonAsync<JsonElement>())
+            .GetProperty("key").GetString()!;
+        factory.Storage.Seed(key, 1234);
+
+        var confirm = await c.SendAsync(Req(HttpMethod.Post, "/api/files/confirm", token,
+            new { key, fileName = "bad.png", contentType = "image/png" }));
+
+        // Rejected 422, purged from R2, and never recorded / promoted.
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, confirm.StatusCode);
+        Assert.False(factory.Storage.Exists(key));
+        Assert.False(factory.Storage.Exists(key.Replace("quarantine/", "uploads/")));
+    }
+
+    [Fact]
+    public async Task Proxy_Upload_Rejects_A_Flagged_Image()
+    {
+        using var factory = new TestApiFactory();
+        factory.ImageModerator.Flagged = true;
+        var c = factory.CreateApiClient();
+        var token = await RegisterTeacherAsync(c, "a@t.com");
+
+        using var content = new MultipartFormDataContent();
+        var bytes = new ByteArrayContent(new byte[] { 1, 2, 3, 4 });
+        bytes.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+        content.Add(bytes, "file", "bad.png");
+
+        var req = new HttpRequestMessage(HttpMethod.Post, "/api/files") { Content = content };
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var res = await c.SendAsync(req);
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task Post_With_Profanity_Is_Rejected_And_Clean_Text_Passes()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+        var token = await RegisterTeacherAsync(c, "a@t.com");
+
+        // A blocked term (even lightly obfuscated) is rejected 422.
+        var bad = await c.SendAsync(Req(HttpMethod.Post, "/api/posts", token,
+            new { text = "you are a f.u.c.k", subject = "Math" }));
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, bad.StatusCode);
+
+        // Clean text is accepted.
+        var ok = await c.SendAsync(Req(HttpMethod.Post, "/api/posts", token,
+            new { text = "great work everyone", subject = "Math" }));
+        Assert.Equal(HttpStatusCode.Created, ok.StatusCode);
+    }
+
+    [Fact]
+    public async Task Comment_With_Profanity_Is_Rejected()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+        var token = await RegisterTeacherAsync(c, "a@t.com");
+        var postId = await CreatePostAsync(c, token, "clean post");
+
+        var res = await c.SendAsync(Req(HttpMethod.Post, $"/api/posts/{postId}/comments", token,
+            new { text = "this is shit" }));
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, res.StatusCode);
     }
 }
