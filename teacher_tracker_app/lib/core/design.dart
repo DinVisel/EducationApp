@@ -7,4 +7,5 @@ export 'theme/app_dimens.dart';
 export 'theme/app_theme.dart';
 export 'widgets/glass_background.dart';
 export 'widgets/glass_card.dart';
+export 'widgets/glass_nav_bar.dart';
 export 'widgets/liquid_progress_bar.dart';

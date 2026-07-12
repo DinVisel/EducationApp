@@ -91,6 +91,7 @@ class GlassScaffold extends StatelessWidget {
     this.bottomNavigationBar,
     this.floatingActionButton,
     this.floatingActionButtonLocation,
+    this.floatingActionButtonAnimator,
   });
 
   final PreferredSizeWidget? appBar;
@@ -98,6 +99,7 @@ class GlassScaffold extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
+  final FloatingActionButtonAnimator? floatingActionButtonAnimator;
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +112,7 @@ class GlassScaffold extends StatelessWidget {
         bottomNavigationBar: bottomNavigationBar,
         floatingActionButton: floatingActionButton,
         floatingActionButtonLocation: floatingActionButtonLocation,
+        floatingActionButtonAnimator: floatingActionButtonAnimator,
       ),
     );
   }

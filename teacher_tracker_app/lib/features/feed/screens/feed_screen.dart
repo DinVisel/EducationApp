@@ -54,12 +54,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
   }
 
-  Future<void> _newPost() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const NewPostScreen()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final feedAsync = ref.watch(feedProvider);
@@ -67,97 +61,98 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _newPost,
-        icon: const Icon(Icons.post_add),
-        label: const Text('New Post'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.refresh(feedProvider.future),
-        child: CustomScrollView(
-          controller: _scroll,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                    20, MediaQuery.of(context).padding.top + 24, 8, 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text('Community Hub',
-                          style: tt.headlineMedium?.copyWith(
-                              color: cs.onSurface,
-                              fontWeight: FontWeight.w700)),
-                    ),
-                    const NotificationBell(),
-                  ],
-                ),
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(feedProvider.future),
+      child: CustomScrollView(
+        controller: _scroll,
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                  20, MediaQuery.of(context).padding.top + 24, 8, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text('Community Hub',
+                        style: tt.headlineMedium?.copyWith(
+                            color: cs.onSurface,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                  const NotificationBell(),
+                ],
               ),
             ),
-            SliverToBoxAdapter(
-              child: _SubjectFilterBar(active: activeSubject),
-            ),
-            ...feedAsync.when(
-              loading: () => [
-                const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ],
-              error: (e, _) => [
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: Text('Error: $e')),
-                ),
-              ],
-              data: (posts) {
-                if (posts.isEmpty) {
-                  return const [
-                    SliverFillRemaining(
-                        hasScrollBody: false, child: _Empty()),
-                  ];
-                }
-                return [
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                    sliver: SliverList.separated(
-                      itemCount: posts.length + (_loadingMore ? 1 : 0),
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (ctx, i) {
-                        if (i >= posts.length) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        final post = posts[i];
-                        return PostCard(
-                          post: post,
-                          onToggleLike: () =>
-                              ref.read(feedProvider.notifier).toggleLike(post.id),
-                          onDelete: () =>
-                              ref.read(feedProvider.notifier).remove(post.id),
-                          onTapAuthor: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => TeacherProfileViewScreen(
-                                  userId: post.authorUserId),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+          ),
+          SliverToBoxAdapter(
+            child: _SubjectFilterBar(active: activeSubject),
+          ),
+          ...feedAsync.when(
+            loading: () => [
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ],
+            error: (e, _) => [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: Text('Error: $e')),
+              ),
+            ],
+            data: (posts) {
+              if (posts.isEmpty) {
+                return const [
+                  SliverFillRemaining(
+                      hasScrollBody: false, child: _Empty()),
                 ];
-              },
-            ),
-          ],
-        ),
+              }
+              return [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  sliver: SliverList.separated(
+                    itemCount: posts.length + (_loadingMore ? 1 : 0),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (ctx, i) {
+                      if (i >= posts.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final post = posts[i];
+                      return PostCard(
+                        post: post,
+                        onToggleLike: () =>
+                            ref.read(feedProvider.notifier).toggleLike(post.id),
+                        onDelete: () =>
+                            ref.read(feedProvider.notifier).remove(post.id),
+                        onTapAuthor: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => TeacherProfileViewScreen(
+                                userId: post.authorUserId),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ];
+            },
+          ),
+        ],
       ),
     );
   }
+}
+
+/// Opens the new-post composer. Lifted out of [_FeedScreenState] so the
+/// shell that owns the floating action button (which lives in the same
+/// [Scaffold] as the nav bar, not this screen's own) can trigger it too.
+Future<void> openNewPost(BuildContext context) async {
+  await Navigator.of(context).push(
+    MaterialPageRoute(builder: (_) => const NewPostScreen()),
+  );
 }
 
 /// Horizontal row of subject filter chips (All + each subject).

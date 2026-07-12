@@ -16,56 +16,48 @@ class ClassesListScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _createClass(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('New Class'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.refresh(classroomsProvider.future),
-        child: classroomsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => _Retry(
-            message: '$e',
-            onRetry: () => ref.invalidate(classroomsProvider),
-          ),
-          data: (classes) => CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      20, MediaQuery.of(context).padding.top + 24, 20, 8),
-                  child: Text('Classes',
-                      style: tt.headlineMedium?.copyWith(
-                          color: cs.onSurface, fontWeight: FontWeight.w700)),
-                ),
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(classroomsProvider.future),
+      child: classroomsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => _Retry(
+          message: '$e',
+          onRetry: () => ref.invalidate(classroomsProvider),
+        ),
+        data: (classes) => CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                    20, MediaQuery.of(context).padding.top + 24, 20, 8),
+                child: Text('Classes',
+                    style: tt.headlineMedium?.copyWith(
+                        color: cs.onSurface, fontWeight: FontWeight.w700)),
               ),
-              if (classes.isEmpty)
-                const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: _Empty(),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-                  sliver: SliverList.separated(
-                    itemCount: classes.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (ctx, i) => _ClassCard(
-                      classroom: classes[i],
-                      cs: cs,
-                      tt: tt,
-                      onTap: () => _openDetail(ctx, classes[i]),
-                      onRename: () => _renameClass(ctx, ref, classes[i]),
-                      onDelete: () => _deleteClass(ctx, ref, classes[i]),
-                    ),
+            ),
+            if (classes.isEmpty)
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: _Empty(),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+                sliver: SliverList.separated(
+                  itemCount: classes.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  itemBuilder: (ctx, i) => _ClassCard(
+                    classroom: classes[i],
+                    cs: cs,
+                    tt: tt,
+                    onTap: () => _openDetail(ctx, classes[i]),
+                    onRename: () => _renameClass(ctx, ref, classes[i]),
+                    onDelete: () => _deleteClass(ctx, ref, classes[i]),
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
@@ -77,20 +69,9 @@ class ClassesListScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _createClass(BuildContext ctx, WidgetRef ref) async {
-    final messenger = ScaffoldMessenger.of(ctx);
-    final name = await _promptName(ctx, title: 'New Class');
-    if (name == null || name.isEmpty) return;
-    try {
-      await ref.read(classroomsProvider.notifier).add(name);
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not create class: $e')));
-    }
-  }
-
   Future<void> _renameClass(BuildContext ctx, WidgetRef ref, Classroom c) async {
     final messenger = ScaffoldMessenger.of(ctx);
-    final name = await _promptName(ctx, title: 'Rename Class', initial: c.name);
+    final name = await _promptClassName(ctx, title: 'Rename Class', initial: c.name);
     if (name == null || name.isEmpty || name == c.name) return;
     try {
       await ref.read(classroomsProvider.notifier).rename(c.id, name);
@@ -125,30 +106,46 @@ class ClassesListScreen extends ConsumerWidget {
     }
   }
 
-  Future<String?> _promptName(BuildContext ctx,
-      {required String title, String? initial}) {
-    final controller = TextEditingController(text: initial);
-    return showDialog<String>(
-      context: ctx,
-      builder: (d) => AlertDialog(
-        title: Text(title),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(labelText: 'Class name'),
-          onSubmitted: (v) => Navigator.pop(d, v.trim()),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(d), child: const Text('Cancel')),
-          FilledButton(
-              onPressed: () => Navigator.pop(d, controller.text.trim()),
-              child: const Text('Save')),
-        ],
-      ),
-    );
+}
+
+/// Prompts for a class create dialog, then creates it. Lifted to a top-level
+/// function so the shell that owns the floating action button (which lives
+/// in the same [Scaffold] as the nav bar, not this screen's own) can trigger
+/// it too.
+Future<void> createClass(BuildContext ctx, WidgetRef ref) async {
+  final messenger = ScaffoldMessenger.of(ctx);
+  final name = await _promptClassName(ctx, title: 'New Class');
+  if (name == null || name.isEmpty) return;
+  try {
+    await ref.read(classroomsProvider.notifier).add(name);
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text('Could not create class: $e')));
   }
+}
+
+Future<String?> _promptClassName(BuildContext ctx,
+    {required String title, String? initial}) {
+  final controller = TextEditingController(text: initial);
+  return showDialog<String>(
+    context: ctx,
+    builder: (d) => AlertDialog(
+      title: Text(title),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        textCapitalization: TextCapitalization.words,
+        decoration: const InputDecoration(labelText: 'Class name'),
+        onSubmitted: (v) => Navigator.pop(d, v.trim()),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(d), child: const Text('Cancel')),
+        FilledButton(
+            onPressed: () => Navigator.pop(d, controller.text.trim()),
+            child: const Text('Save')),
+      ],
+    ),
+  );
 }
 
 class _ClassCard extends StatelessWidget {

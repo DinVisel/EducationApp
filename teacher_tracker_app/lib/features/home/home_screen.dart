@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/design.dart';
 import '../classes/screens/classes_list_screen.dart';
@@ -7,14 +8,18 @@ import '../teacher/screens/teacher_profile_screen.dart';
 
 /// App shell with bottom navigation — 3 tabs: Hub, Classes, Profile.
 /// Students, homework, and reading are reached through a class (class detail).
-class HomeScreen extends StatefulWidget {
+///
+/// Owns the floating action button (swapped per tab) rather than letting
+/// each tab page have its own: the FAB and the nav bar must live in the same
+/// [Scaffold] for Flutter's default FAB placement to auto-avoid the nav bar.
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _index = 0;
 
   void _goTo(int i) => setState(() => _index = i);
@@ -29,27 +34,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return GlassScaffold(
       body: IndexedStack(index: _index, children: pages),
-      bottomNavigationBar: NavigationBar(
+      floatingActionButton: _fabForIndex(_index),
+      floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+      bottomNavigationBar: GlassNavBar(
         selectedIndex: _index,
         onDestinationSelected: _goTo,
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.forum_outlined),
-            selectedIcon: Icon(Icons.forum),
+          GlassNavDestination(
+            icon: Icons.forum_outlined,
+            selectedIcon: Icons.forum,
             label: 'Hub',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.class_outlined),
-            selectedIcon: Icon(Icons.class_),
+          GlassNavDestination(
+            icon: Icons.class_outlined,
+            selectedIcon: Icons.class_,
             label: 'Classes',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
+          GlassNavDestination(
+            icon: Icons.person_outline,
+            selectedIcon: Icons.person,
             label: 'Profile',
           ),
         ],
       ),
     );
+  }
+
+  Widget? _fabForIndex(int index) {
+    switch (index) {
+      case 0:
+        return FloatingActionButton.extended(
+          key: const ValueKey('fab-new-post'),
+          onPressed: () => openNewPost(context),
+          icon: const Icon(Icons.post_add),
+          label: const Text('New Post'),
+        );
+      case 1:
+        return FloatingActionButton.extended(
+          key: const ValueKey('fab-new-class'),
+          onPressed: () => createClass(context, ref),
+          icon: const Icon(Icons.add),
+          label: const Text('New Class'),
+        );
+      default:
+        return null;
+    }
   }
 }

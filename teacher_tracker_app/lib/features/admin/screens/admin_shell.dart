@@ -35,18 +35,18 @@ class _AdminShellState extends ConsumerState<AdminShell> {
         ],
       ),
       body: IndexedStack(index: _index, children: pages),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: GlassNavBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.flag_outlined),
-            selectedIcon: Icon(Icons.flag),
+          GlassNavDestination(
+            icon: Icons.flag_outlined,
+            selectedIcon: Icons.flag,
             label: 'Reports',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outline),
-            selectedIcon: Icon(Icons.people),
+          GlassNavDestination(
+            icon: Icons.people_outline,
+            selectedIcon: Icons.people,
             label: 'Users',
           ),
         ],

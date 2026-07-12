@@ -92,13 +92,6 @@ abstract final class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: AppGlass.fillStrong,
-        surfaceTintColor: Colors.transparent,
-        indicatorColor: scheme.primary.withValues(alpha: 0.14),
-        elevation: 0,
-        labelTextStyle: WidgetStatePropertyAll(text.labelMedium),
-      ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,

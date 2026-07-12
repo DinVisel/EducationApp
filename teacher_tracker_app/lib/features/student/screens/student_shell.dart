@@ -27,23 +27,23 @@ class _StudentShellState extends State<StudentShell> {
 
     return GlassScaffold(
       body: IndexedStack(index: _index, children: pages),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: GlassNavBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.assignment_outlined),
-            selectedIcon: Icon(Icons.assignment),
+          GlassNavDestination(
+            icon: Icons.assignment_outlined,
+            selectedIcon: Icons.assignment,
             label: 'Assignments',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.class_outlined),
-            selectedIcon: Icon(Icons.class_),
+          GlassNavDestination(
+            icon: Icons.class_outlined,
+            selectedIcon: Icons.class_,
             label: 'Classes',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
+          GlassNavDestination(
+            icon: Icons.person_outline,
+            selectedIcon: Icons.person,
             label: 'Profile',
           ),
         ],
