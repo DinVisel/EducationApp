@@ -300,3 +300,39 @@ API tests pass** (added: flagged image on confirm → 422 + purged + not promote
 clean image promoted quarantine→uploads, proxy upload flagged → 422, profane post
 & comment → 422 with clean passthrough). Deferred to live AWS/R2 (per Phases 4–6):
 the real Rekognition round-trip needs live credentials + a reachable bucket.
+
+---
+
+## Phase 10 — Deep-link post sharing (native Universal/App Links + web fallback) ✅
+
+Share a post as a URL that opens the exact post in-app if installed, else redirects
+to the App Store / Play Store.
+
+**Backend** — `GET /api/posts/{id}` already existed (reused). New `LinksController`
+(anonymous) serves the association files the OS verifies —
+`/.well-known/apple-app-site-association` (applinks → `TEAMID.bundleId`, paths
+`/post/*`) and `/.well-known/assetlinks.json` (package + SHA-256 fingerprint) — plus
+an HTML **fallback page** `GET /post/{id}` with Open Graph tags and JS that tries the
+app then redirects to the platform's store. All deployment-specific values (domain,
+Team ID, package, fingerprint, store URLs) come from a new `DeepLink` config section.
+
+**Frontend** — `share_plus` + `app_links` added. `FeedRepository.getPost(id)` fetches
+a single post; new `PostDetailScreen` (route `/post/:id`) renders it via the shared
+`PostCard` (with optimistic like + delete). A **Share** action on every `PostCard`
+shares `"$publicWebBaseUrl/post/{id}"`. `_DeepLinkListener` (in `app.dart`) consumes
+incoming Universal/App Links + the custom scheme (`teachertracker://post/42`), parking
+a link that arrives while signed out and flushing it once auth resolves; the router
+redirect preserves a `/post/:id` target through the login gate.
+
+**Platform config** — iOS `Info.plist` custom URL scheme + a `Runner.entitlements`
+with Associated Domains (`applinks:app.example.com` — must be linked to the Runner
+target in Xcode); Android `VIEW` intent-filter (`autoVerify`, https, host, `/post`
+prefix) + custom-scheme filter.
+
+**Done when** — a shared link opens the exact post in-app (or routes to the store).
+✅ **20/20 API tests pass** (added: well-known files are public JSON, fallback page
+renders OG tags, `GET /api/posts/{id}` projection/404); `flutter analyze` clean (only
+the 4 long-standing homework/reading lints). Deferred to a live deployment: swap
+`app.example.com`/store IDs/Team ID/fingerprint for real values, host the association
+files over HTTPS, link the entitlement in Xcode, and validate with Apple's/Google's
+link validators on a device.

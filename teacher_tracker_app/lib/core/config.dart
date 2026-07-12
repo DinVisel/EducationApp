@@ -11,3 +11,9 @@ String get apiBaseUrl {
   }
   return 'http://localhost:5001';
 }
+
+/// Public HTTPS host that shareable post links point at, e.g.
+/// `https://app.example.com/post/42`. This must match the domain configured for
+/// iOS Universal Links / Android App Links and the API's `DeepLink:PublicWebBaseUrl`.
+/// Swap for your real domain when deploying.
+const String publicWebBaseUrl = 'https://app.example.com';

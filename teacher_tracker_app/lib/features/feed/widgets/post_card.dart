@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../../core/config.dart';
 import '../../../core/design.dart';
 import '../../../models/post.dart';
 import '../../../models/post_subject.dart';
@@ -122,11 +124,25 @@ class PostCard extends ConsumerWidget {
                   ),
                 ),
               ),
+              const Spacer(),
+              _ActionButton(
+                icon: Icons.ios_share,
+                color: cs.onSurfaceVariant,
+                label: 'Share',
+                onTap: () => _share(post),
+              ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  // Shares a link to this post. If the recipient has the app, the OS deep-links
+  // straight to the post; otherwise the web fallback sends them to the store.
+  void _share(Post post) {
+    final url = '$publicWebBaseUrl/post/${post.id}';
+    Share.share(url, subject: '${post.authorName} shared a post');
   }
 
   static String _fmtWhen(DateTime d) {

@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,8 +11,13 @@ import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/admin/screens/admin_shell.dart';
 import 'features/auth/state/auth_controller.dart';
+import 'features/feed/screens/post_detail_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/student/screens/student_shell.dart';
+
+/// A `/post/:id` deep link that arrived before the user was signed in. Held until
+/// auth completes, then navigated to (see [_DeepLinkListener]).
+final _pendingDeepLink = ValueNotifier<String?>(null);
 
 /// Router that redirects based on auth state. It refreshes whenever the auth
 /// session changes (login, logout, token expiry).
@@ -23,6 +32,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final auth = ref.read(authControllerProvider);
       final loc = state.matchedLocation;
+      final isPost = loc.startsWith('/post/');
 
       // Still restoring a saved token at startup.
       if (auth.isLoading || !auth.hasValue) {
@@ -32,10 +42,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       final session = auth.value;
       final loggedIn = session != null;
       if (!loggedIn) {
+        // Remember a deep-linked post so we can land on it after login.
+        if (isPost) {
+          _pendingDeepLink.value = loc;
+          return '/login';
+        }
         return (loc == '/login' || loc == '/register') ? null : '/login';
       }
 
-      // Signed in: route to the shell matching the account's role.
+      // Signed in: a shared post opens directly, regardless of the role shell.
+      if (isPost) return null;
+
+      // Route to the shell matching the account's role.
       final home = session.isStudent
           ? '/student'
           : session.isAdmin
@@ -54,6 +72,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
       GoRoute(path: '/student', builder: (_, _) => const StudentShell()),
       GoRoute(path: '/admin', builder: (_, _) => const AdminShell()),
+      GoRoute(
+        path: '/post/:id',
+        builder: (_, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+          return PostDetailScreen(postId: id);
+        },
+      ),
     ],
   );
 });
@@ -63,12 +88,86 @@ class TeacherTrackerApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp.router(
-      title: 'Teacher Tracker',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      routerConfig: ref.watch(routerProvider),
+    return _DeepLinkListener(
+      child: MaterialApp.router(
+        title: 'Teacher Tracker',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        routerConfig: ref.watch(routerProvider),
+      ),
     );
+  }
+}
+
+/// Listens for incoming Universal/App Links (and the custom scheme) and routes
+/// `…/post/:id` links to the post. Links that arrive while signed out are parked
+/// in [pendingDeepLinkPathProvider] and flushed once the session is ready.
+class _DeepLinkListener extends ConsumerStatefulWidget {
+  const _DeepLinkListener({required this.child});
+  final Widget child;
+
+  @override
+  ConsumerState<_DeepLinkListener> createState() => _DeepLinkListenerState();
+}
+
+class _DeepLinkListenerState extends ConsumerState<_DeepLinkListener> {
+  StreamSubscription<Uri>? _sub;
+
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) return; // app_links targets native platforms
+    final links = AppLinks();
+    unawaited(links.getInitialLink().then((uri) {
+      if (uri != null) _onUri(uri);
+    }));
+    _sub = links.uriLinkStream.listen(_onUri);
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  void _onUri(Uri uri) {
+    final path = _postPath(uri);
+    if (path == null) return;
+    _pendingDeepLink.value = path;
+    _flushPending();
+  }
+
+  // Navigate to a parked deep link once a session exists.
+  void _flushPending() {
+    final pending = _pendingDeepLink.value;
+    if (pending == null) return;
+    if (ref.read(authControllerProvider).value != null) {
+      _pendingDeepLink.value = null;
+      ref.read(routerProvider).go(pending);
+    }
+  }
+
+  // Extracts `/post/:id` from either an https link or the custom scheme
+  // (`teachertracker://post/42`); returns null for anything else.
+  static String? _postPath(Uri uri) {
+    final segs = <String>[
+      if (uri.host.isNotEmpty) uri.host,
+      ...uri.pathSegments,
+    ].where((s) => s.isNotEmpty).toList();
+    for (var i = 0; i < segs.length - 1; i++) {
+      if (segs[i] == 'post') {
+        final id = int.tryParse(segs[i + 1]);
+        if (id != null) return '/post/$id';
+      }
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Flush a parked link the moment auth resolves to a signed-in session.
+    ref.listen(authControllerProvider, (_, _) => _flushPending());
+    return widget.child;
   }
 }
 

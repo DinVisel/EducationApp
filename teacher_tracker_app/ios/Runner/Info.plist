@@ -26,6 +26,20 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<!-- Custom URL scheme fallback for deep links (secondary to Universal Links,
+	     which are configured via the Associated Domains entitlement +
+	     apple-app-site-association served from your domain). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>teachertracker.post</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>teachertracker</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleName</key>
 	<string>teacher_tracker_app</string>
 	<key>CFBundlePackageType</key>

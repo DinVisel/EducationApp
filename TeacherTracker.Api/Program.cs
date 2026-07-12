@@ -97,6 +97,10 @@ else
 builder.Services.AddSingleton<ProfanityGuard>();
 builder.Services.AddScoped<ProfanityFilterAttribute>();
 
+// --- Deep linking (shareable post links) ---
+builder.Services.Configure<TeacherTracker.Api.Links.DeepLinkOptions>(
+    builder.Configuration.GetSection(TeacherTracker.Api.Links.DeepLinkOptions.SectionName));
+
 // CORS: lock down to configured origins in production; permissive in dev when
 // none are configured. Set `Cors:AllowedOrigins` (array) for deployment.
 const string FlutterCorsPolicy = "FlutterClient";

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Universal Links: replace app.example.com with your real domain (the one
+	     that serves /.well-known/apple-app-site-association). This file must be
+	     linked to the Runner target in Xcode via the "Associated Domains"
+	     capability (Signing & Capabilities) so CODE_SIGN_ENTITLEMENTS points here. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:app.example.com</string>
+	</array>
+</dict>
+</plist>

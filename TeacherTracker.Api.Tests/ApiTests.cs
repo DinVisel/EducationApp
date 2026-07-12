@@ -422,4 +422,56 @@ public class ApiTests
             new { text = "this is shit" }));
         Assert.Equal(HttpStatusCode.UnprocessableEntity, res.StatusCode);
     }
+
+    // --- Phase 10: deep-link sharing ------------------------------------------
+
+    [Fact]
+    public async Task WellKnown_Association_Files_Are_Public()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+
+        var aasa = await c.GetAsync("/.well-known/apple-app-site-association");
+        aasa.EnsureSuccessStatusCode();
+        Assert.Equal("application/json", aasa.Content.Headers.ContentType?.MediaType);
+        Assert.Contains("applinks", await aasa.Content.ReadAsStringAsync());
+
+        var assetlinks = await c.GetAsync("/.well-known/assetlinks.json");
+        assetlinks.EnsureSuccessStatusCode();
+        Assert.Contains("android_app", await assetlinks.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Post_Fallback_Page_Renders_Og_Tags()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+        var token = await RegisterTeacherAsync(c, "a@t.com");
+        var postId = await CreatePostAsync(c, token, "hello world");
+
+        var res = await c.GetAsync($"/post/{postId}"); // anonymous — no auth header
+        res.EnsureSuccessStatusCode();
+        Assert.Equal("text/html", res.Content.Headers.ContentType?.MediaType);
+        var body = await res.Content.ReadAsStringAsync();
+        Assert.Contains("og:title", body);
+        Assert.Contains("hello world", body);
+    }
+
+    [Fact]
+    public async Task GetPost_By_Id_Returns_Projection_Or_404()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+        var token = await RegisterTeacherAsync(c, "a@t.com");
+        var postId = await CreatePostAsync(c, token, "single post");
+
+        var ok = await c.SendAsync(Req(HttpMethod.Get, $"/api/posts/{postId}", token));
+        ok.EnsureSuccessStatusCode();
+        var pj = await ok.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(postId, pj.GetProperty("id").GetInt32());
+        Assert.Equal("single post", pj.GetProperty("text").GetString());
+
+        var missing = await c.SendAsync(Req(HttpMethod.Get, "/api/posts/999999", token));
+        Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+    }
 }

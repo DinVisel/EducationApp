@@ -91,6 +91,10 @@ committed `appsettings.json` ships empty placeholders only.
 | `Moderation__AwsAccessKey` / `__AwsSecretKey` / `__AwsRegion` | AWS Rekognition credentials + a **real** region (e.g. `us-east-1`) — the R2 alias won't authorize Rekognition |
 | `Moderation__MinConfidence` / `__BlockedLabels__0…` | Rekognition hit threshold (default 80) and blocked label categories |
 | `Moderation__TextModerationEnabled` / `__BlockedTerms__0…` | Profanity filter on posts/comments (`true` by default); extra terms merged with the bundled TR+EN list |
+| `DeepLink__PublicWebBaseUrl` | HTTPS host shareable post links point at (e.g. `https://app.example.com`); must match the app's `publicWebBaseUrl` and the Universal/App Link domain |
+| `DeepLink__IosTeamId` / `__IosBundleId` / `__AppStoreUrl` | iOS Universal Link app ID (served in the AASA) + App Store fallback URL |
+| `DeepLink__AndroidPackageName` / `__AndroidSha256CertFingerprints__0…` / `__PlayStoreUrl` | Android App Link package + signing fingerprint(s) (served in assetlinks.json) + Play Store fallback URL |
+| `DeepLink__AppScheme` | Custom URL scheme fallback (default `teachertracker`) |
 
 **R2 CORS** — direct (presigned-PUT) uploads are browser `PUT`s straight to R2, so
 the bucket needs a CORS policy allowing `PUT`/`GET` from your app origins, e.g.:

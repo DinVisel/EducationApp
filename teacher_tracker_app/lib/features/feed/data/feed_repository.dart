@@ -33,6 +33,13 @@ class FeedRepository {
         .toList();
   }
 
+  /// A single post by id — used to open a shared/deep-linked post that isn't in
+  /// the current feed page.
+  Future<Post> getPost(int id) async {
+    final res = await _dio.get<Map<String, dynamic>>('/api/posts/$id');
+    return Post.fromJson(res.data!);
+  }
+
   /// A teacher's own posts (their profile), pinned first then newest.
   Future<List<Post>> getByAuthor(int authorUserId, {int limit = 50}) async {
     final res = await _dio.get<List<dynamic>>(
