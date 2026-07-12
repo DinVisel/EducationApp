@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../models/file_object.dart';
@@ -69,6 +72,39 @@ class FilesRepository {
   Future<String> getDownloadUrl(int id) async {
     final res = await _dio.get<Map<String, dynamic>>('/api/files/$id');
     return res.data!['url'] as String;
+  }
+
+  /// Downloads a file to device storage. Images/videos are saved into the
+  /// Gallery (via `gal`, which requests the add-to-gallery permission itself);
+  /// other files (PDFs/docs) are downloaded then handed to the OS save/share
+  /// sheet so the user can keep them in Files/Downloads. Returns a short
+  /// user-facing status message. Throws [GalException] if gallery access is
+  /// denied so the caller can prompt for settings.
+  Future<String> downloadToDevice({
+    required int fileId,
+    required String fileName,
+    required bool isImage,
+    required bool isVideo,
+  }) async {
+    final url = await getDownloadUrl(fileId);
+
+    // Stream to a temp file first. Use a bare Dio so the app's bearer token /
+    // base URL are never sent to the presigned R2 URL.
+    final dir = await getTemporaryDirectory();
+    final path = '${dir.path}/$fileName';
+    await Dio().download(url, path);
+
+    if (isImage) {
+      await Gal.putImage(path, album: 'TeacherTracker');
+      return 'Saved "$fileName" to your gallery';
+    }
+    if (isVideo) {
+      await Gal.putVideo(path, album: 'TeacherTracker');
+      return 'Saved "$fileName" to your gallery';
+    }
+    // Documents: let the OS save sheet place it in Files/Downloads.
+    await Share.shareXFiles([XFile(path)], subject: fileName);
+    return 'Ready to save "$fileName"';
   }
 
   Future<void> delete(int id) => _dio.delete<void>('/api/files/$id');

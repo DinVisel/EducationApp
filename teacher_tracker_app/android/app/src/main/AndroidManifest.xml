@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Saving downloaded images/videos to the gallery (gal). Modern Android
+         (API 30+) uses scoped storage and needs no permission; the legacy write
+         permission is capped at API 29. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <application
         android:label="teacher_tracker_app"
         android:name="${applicationName}"

@@ -4,6 +4,11 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- Saving downloaded attachments into the photo library (gal). -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save shared images and videos to your photo library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Save shared images and videos to your photo library.</string>
 	<!-- Dev-only: allow plain HTTP to the local API on localhost. -->
 	<key>NSAppTransportSecurity</key>
 	<dict>

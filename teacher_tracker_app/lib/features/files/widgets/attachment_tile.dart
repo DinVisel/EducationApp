@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/files_repository.dart';
 import '../state/file_url_providers.dart';
 
 /// A downloadable attachment. Images render inline (via a presigned GET URL);
-/// any file opens in the browser on tap. Shared across the feed, class
-/// assignments, and student assignments so the download UX stays consistent.
-class AttachmentTile extends ConsumerWidget {
+/// tapping opens the file in the browser, and a Download action saves it to the
+/// device (Gallery for media, the OS save sheet for documents). Shared across the
+/// feed, class assignments, and student assignments so the UX stays consistent.
+class AttachmentTile extends ConsumerStatefulWidget {
   const AttachmentTile({
     super.key,
     required this.fileId,
@@ -20,6 +22,17 @@ class AttachmentTile extends ConsumerWidget {
   final int fileId;
   final String fileName;
   final String contentType;
+
+  @override
+  ConsumerState<AttachmentTile> createState() => _AttachmentTileState();
+}
+
+class _AttachmentTileState extends ConsumerState<AttachmentTile> {
+  bool _downloading = false;
+
+  int get fileId => widget.fileId;
+  String get fileName => widget.fileName;
+  String get contentType => widget.contentType;
 
   bool get _isImage => contentType.startsWith('image/');
   bool get _isVideo => contentType.startsWith('video/');
@@ -32,7 +45,7 @@ class AttachmentTile extends ConsumerWidget {
 
   /// Opens the file in the browser; falls back to copying the link if the
   /// platform can't launch it.
-  Future<void> _open(BuildContext context, WidgetRef ref) async {
+  Future<void> _open(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
     try {
       final url = await ref.read(filesRepositoryProvider).getDownloadUrl(fileId);
@@ -49,14 +62,39 @@ class AttachmentTile extends ConsumerWidget {
     }
   }
 
+  /// Saves the file to the device (Gallery for media, OS save sheet for docs).
+  Future<void> _download(BuildContext context) async {
+    if (_downloading) return;
+    setState(() => _downloading = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final message = await ref.read(filesRepositoryProvider).downloadToDevice(
+            fileId: fileId,
+            fileName: fileName,
+            isImage: _isImage,
+            isVideo: _isVideo,
+          );
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    } on GalException catch (e) {
+      // Gallery permission denied / not granted — point the user at settings.
+      messenger.showSnackBar(SnackBar(
+          content: Text('Storage permission needed to save: ${e.type.message}')));
+    } catch (e) {
+      messenger
+          .showSnackBar(SnackBar(content: Text('Could not download: $e')));
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () => _open(context, ref),
+      onTap: () => _open(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -73,8 +111,22 @@ class AttachmentTile extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
                 ),
-                Icon(Icons.open_in_new,
-                    size: 18, color: cs.onSurfaceVariant),
+                _downloading
+                    ? const Padding(
+                        padding: EdgeInsets.all(6),
+                        child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2)),
+                      )
+                    : IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(Icons.download_outlined,
+                            size: 20, color: cs.primary),
+                        tooltip: 'Save to device',
+                        onPressed: () => _download(context),
+                      ),
+                Icon(Icons.open_in_new, size: 18, color: cs.onSurfaceVariant),
               ],
             ),
           ),

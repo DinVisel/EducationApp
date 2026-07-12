@@ -336,3 +336,39 @@ the 4 long-standing homework/reading lints). Deferred to a live deployment: swap
 `app.example.com`/store IDs/Team ID/fingerprint for real values, host the association
 files over HTTPS, link the entitlement in Xcode, and validate with Apple's/Google's
 link validators on a device.
+
+---
+
+## Phase 11 — Download shared content to device ✅
+
+Let teachers save shared assignment/post images, PDFs, and documents to device
+storage with proper permission handling.
+
+**Frontend only.** `gal` + `path_provider` added.
+`FilesRepository.downloadToDevice(fileId, fileName, isImage, isVideo)` fetches the
+presigned URL, streams to a temp file with a bare `Dio` (no bearer token leaks to
+R2), then: images/videos → saved to the **Gallery** via `gal` (album
+"TeacherTracker"; `gal` requests the add-to-gallery permission itself); documents →
+handed to the OS **save/share sheet** (`share_plus`) so the user drops them in
+Files/Downloads. The shared `AttachmentTile` becomes stateful and gains a
+**Download** action (spinner + success/permission/error snackbars), keeping
+open-in-browser as the tap behavior.
+
+**Platform config** — iOS `Info.plist` `NSPhotoLibraryAddUsageDescription` +
+`NSPhotoLibraryUsageDescription`; Android `WRITE_EXTERNAL_STORAGE`
+(`maxSdkVersion=29`) + `ACCESS_MEDIA_LOCATION`.
+
+**Done when** — an image saves to the Gallery, a PDF/doc goes through the save sheet,
+and permission denial is handled gracefully. ✅ `flutter analyze` clean (only the 4
+long-standing homework/reading lints). Deferred to a real device: the actual
+save-to-gallery / save-sheet drive and the permission prompts (needs a live R2 file
++ a device, per the standing R2 note).
+
+---
+
+## Deferred to a future roadmap
+
+- **Parent role** — new `UserRole.Parent`, parent↔student links, parent-facing UI.
+- **Multi-tenancy** — `Tenant` entity, tenant claim in `TokenService`, EF global
+  query filters, tenant-scoped uniqueness/onboarding (touches every entity + a data
+  migration). Skipped for now — Teacher/Student/Admin is sufficient.
