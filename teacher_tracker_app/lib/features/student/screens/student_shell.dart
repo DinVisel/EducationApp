@@ -4,6 +4,7 @@ import '../../../core/design.dart';
 import 'student_assignments_screen.dart';
 import 'student_classes_screen.dart';
 import 'student_profile_screen.dart';
+import 'student_quizzes_screen.dart';
 
 /// App shell for student accounts — bottom navigation across Assignments,
 /// Classes, and Profile. Distinct from the teacher [HomeScreen].
@@ -21,6 +22,7 @@ class _StudentShellState extends State<StudentShell> {
   Widget build(BuildContext context) {
     const pages = [
       StudentAssignmentsScreen(),
+      StudentQuizzesScreen(),
       StudentClassesScreen(),
       StudentProfileScreen(),
     ];
@@ -35,6 +37,11 @@ class _StudentShellState extends State<StudentShell> {
             icon: Icons.assignment_outlined,
             selectedIcon: Icons.assignment,
             label: 'Assignments',
+          ),
+          GlassNavDestination(
+            icon: Icons.quiz_outlined,
+            selectedIcon: Icons.quiz,
+            label: 'Quizzes',
           ),
           GlassNavDestination(
             icon: Icons.class_outlined,

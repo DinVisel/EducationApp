@@ -27,6 +27,11 @@ public class AppDbContext : DbContext
     public DbSet<PostComment> PostComments { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Report> Reports { get; set; }
+    public DbSet<Quiz> Quizzes { get; set; }
+    public DbSet<QuizQuestion> QuizQuestions { get; set; }
+    public DbSet<QuizChoice> QuizChoices { get; set; }
+    public DbSet<StudentQuizAttempt> StudentQuizAttempts { get; set; }
+    public DbSet<StudentQuizAnswer> StudentQuizAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -287,5 +292,67 @@ public class AppDbContext : DbContext
         // List open reports first.
         modelBuilder.Entity<Report>()
             .HasIndex(r => r.ResolvedAt);
+
+        // --- Quizzes (teacher-authored, fanned out to a class) ---
+
+        // Store the category as readable text rather than an int.
+        modelBuilder.Entity<Quiz>()
+            .Property(q => q.Category)
+            .HasConversion<string>();
+
+        // Deleting a classroom removes the quizzes published to it.
+        modelBuilder.Entity<Quiz>()
+            .HasOne(q => q.Classroom)
+            .WithMany()
+            .HasForeignKey(q => q.ClassroomId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting a teacher removes the quizzes they published (second cascade
+        // path, as with Assignments).
+        modelBuilder.Entity<Quiz>()
+            .HasOne(q => q.Teacher)
+            .WithMany()
+            .HasForeignKey(q => q.TeacherId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting a quiz removes its questions.
+        modelBuilder.Entity<QuizQuestion>()
+            .HasOne(q => q.Quiz)
+            .WithMany(z => z.Questions)
+            .HasForeignKey(q => q.QuizId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting a question removes its choices.
+        modelBuilder.Entity<QuizChoice>()
+            .HasOne(c => c.Question)
+            .WithMany(q => q.Choices)
+            .HasForeignKey(c => c.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Fan-out rows: deleting the quiz removes every student's attempt.
+        modelBuilder.Entity<StudentQuizAttempt>()
+            .HasOne(a => a.Quiz)
+            .WithMany(q => q.Attempts)
+            .HasForeignKey(a => a.QuizId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting the student removes their attempts.
+        modelBuilder.Entity<StudentQuizAttempt>()
+            .HasOne(a => a.Student)
+            .WithMany()
+            .HasForeignKey(a => a.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // A student gets at most one attempt per quiz.
+        modelBuilder.Entity<StudentQuizAttempt>()
+            .HasIndex(a => new { a.QuizId, a.StudentId })
+            .IsUnique();
+
+        // Deleting an attempt removes its per-question answers.
+        modelBuilder.Entity<StudentQuizAnswer>()
+            .HasOne(a => a.Attempt)
+            .WithMany(t => t.Answers)
+            .HasForeignKey(a => a.AttemptId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

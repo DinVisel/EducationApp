@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../models/student_assignment.dart';
+import '../../../models/student_quiz.dart';
 
 /// The student-facing API: the signed-in student's classes, assignments, and
 /// completion actions. All endpoints are scoped to the token's student id.
@@ -30,6 +31,34 @@ class StudentModuleRepository {
         '/api/student/assignments/$studentAssignmentId/'
         '${done ? 'complete' : 'uncomplete'}',
       );
+
+  Future<List<StudentQuizSummary>> getQuizzes() async {
+    final res = await _dio.get<List<dynamic>>('/api/student/quizzes');
+    return (res.data ?? [])
+        .map((e) => StudentQuizSummary.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// The full quiz for one [attemptId] (the student's own attempt).
+  Future<StudentQuizDetail> getQuiz(int attemptId) async {
+    final res =
+        await _dio.get<Map<String, dynamic>>('/api/student/quizzes/$attemptId');
+    return StudentQuizDetail.fromJson(res.data!);
+  }
+
+  /// Submits answers for [attemptId]; the server grades authoritatively and
+  /// returns the score. [answers] maps question id → chosen choice id.
+  Future<QuizResult> submitQuiz(int attemptId, Map<int, int> answers) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/student/quizzes/$attemptId/submit',
+      data: {
+        'answers': answers.entries
+            .map((e) => {'questionId': e.key, 'choiceId': e.value})
+            .toList(),
+      },
+    );
+    return QuizResult.fromJson(res.data!);
+  }
 }
 
 final studentModuleRepositoryProvider = Provider<StudentModuleRepository>(

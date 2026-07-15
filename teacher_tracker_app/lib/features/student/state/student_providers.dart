@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/student_assignment.dart';
+import '../../../models/student_quiz.dart';
 import '../../auth/state/auth_controller.dart';
 import '../data/student_module_repository.dart';
 
@@ -36,4 +37,13 @@ final studentClassesProvider =
   final auth = ref.watch(authControllerProvider).value;
   if (auth == null || !auth.isStudent) return [];
   return ref.read(studentModuleRepositoryProvider).getClasses();
+});
+
+/// The signed-in student's quizzes (their attempts across all classes). Empty
+/// unless a student is signed in.
+final studentQuizzesProvider =
+    FutureProvider<List<StudentQuizSummary>>((ref) async {
+  final auth = ref.watch(authControllerProvider).value;
+  if (auth == null || !auth.isStudent) return [];
+  return ref.read(studentModuleRepositoryProvider).getQuizzes();
 });

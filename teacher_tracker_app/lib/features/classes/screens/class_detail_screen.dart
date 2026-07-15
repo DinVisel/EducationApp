@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/design.dart';
 import '../../../models/classroom.dart';
 import '../../../models/student.dart';
+import '../../quizzes/screens/class_quizzes_tab.dart';
 import '../../students/screens/student_detail_screen.dart';
 import '../../students/state/students_providers.dart';
 import '../state/classrooms_providers.dart';
@@ -24,7 +25,7 @@ class ClassDetailScreen extends ConsumerStatefulWidget {
 
 class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
     with SingleTickerProviderStateMixin {
-  late final TabController _tabs = TabController(length: 3, vsync: this)
+  late final TabController _tabs = TabController(length: 4, vsync: this)
     ..addListener(() => setState(() {}));
 
   Classroom get classroom => widget.classroom;
@@ -46,6 +47,7 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
           tabs: const [
             Tab(icon: Icon(Icons.groups_outlined), text: 'Students'),
             Tab(icon: Icon(Icons.assignment_outlined), text: 'Homework'),
+            Tab(icon: Icon(Icons.quiz_outlined), text: 'Quizzes'),
             Tab(icon: Icon(Icons.auto_stories_outlined), text: 'Reading'),
           ],
         ),
@@ -65,6 +67,7 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
             onRemove: (s) => _removeStudent(context, ref, s),
           ),
           ClassHomeworkTab(classroom: classroom),
+          ClassQuizzesTab(classroom: classroom),
           ClassReadingTab(classroom: classroom),
         ],
       ),
