@@ -187,12 +187,29 @@ app.UseAuthorization();
 app.MapGet("/", () => "Teacher Tracker API Çalışıyor!");
 app.MapControllers();
 
+// In development, apply any pending EF migrations on startup so the schema stays
+// in sync with the code without a manual `dotnet ef database update`. Left off
+// outside development, where migrations should be applied deliberately as part
+// of deployment.
+if (app.Environment.IsDevelopment())
+    await ApplyMigrationsAsync(app);
+
 // Seed an admin account from configuration if one doesn't exist yet. Set
 // `Admin:Email` + `Admin:Password` (env/user-secrets) to bootstrap the first
 // admin; leave unset to skip. Requires the schema to already be migrated.
 await SeedAdminAsync(app);
 
 app.Run();
+
+static async Task ApplyMigrationsAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    // Only the Postgres provider has these migrations; the integration tests run
+    // on in-memory SQLite (via EnsureCreated) where MigrateAsync would fail.
+    if (db.Database.IsNpgsql())
+        await db.Database.MigrateAsync();
+}
 
 static async Task SeedAdminAsync(WebApplication app)
 {
