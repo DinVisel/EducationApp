@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/design.dart';
 import '../../../models/classroom.dart';
 import '../../../models/quiz.dart';
+import '../../feed/screens/new_post_screen.dart';
 import '../state/quizzes_providers.dart';
 import 'new_quiz_screen.dart';
 import 'quiz_analytics_screen.dart';
@@ -64,6 +65,14 @@ class ClassQuizzesTab extends ConsumerWidget {
                           ),
                         ),
                       ),
+                      onShare: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => NewPostScreen(
+                            initialQuizId: q.id,
+                            initialQuizTitle: q.title,
+                          ),
+                        ),
+                      ),
                       onDelete: () => _delete(context, ref, q),
                     ),
                 ],
@@ -107,10 +116,12 @@ class _QuizCard extends StatelessWidget {
   const _QuizCard({
     required this.quiz,
     required this.onOpen,
+    required this.onShare,
     required this.onDelete,
   });
   final Quiz quiz;
   final VoidCallback onOpen;
+  final VoidCallback onShare;
   final VoidCallback onDelete;
 
   @override
@@ -135,6 +146,12 @@ class _QuizCard extends StatelessWidget {
                   child: Text(q.title,
                       style: tt.titleMedium
                           ?.copyWith(fontWeight: FontWeight.w700)),
+                ),
+                IconButton(
+                  icon: Icon(Icons.ios_share, color: cs.primary),
+                  tooltip: 'Share to Hub',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: onShare,
                 ),
                 IconButton(
                   icon: Icon(Icons.delete_outline, color: cs.error),

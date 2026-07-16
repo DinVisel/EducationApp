@@ -125,6 +125,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                         post: post,
                         onToggleLike: () =>
                             ref.read(feedProvider.notifier).toggleLike(post.id),
+                        onRate: (v) =>
+                            ref.read(feedProvider.notifier).rate(post.id, v),
                         onDelete: () =>
                             ref.read(feedProvider.notifier).remove(post.id),
                         onTapAuthor: () => Navigator.of(context).push(

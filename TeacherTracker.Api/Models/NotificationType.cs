@@ -7,4 +7,6 @@ public enum NotificationType
     PostCommented,
     AssignmentAssigned,
     QuizAssigned,
+    QuizCloned,
+    PostRated,
 }

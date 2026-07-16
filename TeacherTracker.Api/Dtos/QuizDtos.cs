@@ -41,6 +41,35 @@ public record QuizDto(
     int SubmittedCount,
     double? AverageScorePct);
 
+// --- Sharing / cloning (feed discovery) ---
+
+/// A quiz the signed-in teacher owns, for the "share a quiz" picker in compose.
+public record MyQuizDto(
+    int Id,
+    string Title,
+    QuizCategory Category,
+    string ClassName,
+    int QuestionCount);
+
+/// A shared quiz's full content, for a teacher to preview before cloning.
+/// Correct answers are shown (the viewer is a teacher).
+public record QuizPreviewChoiceDto(string Text, bool IsCorrect);
+public record QuizPreviewQuestionDto(
+    string Text,
+    IReadOnlyList<QuizPreviewChoiceDto> Choices);
+public record QuizPreviewDto(
+    int Id,
+    string Title,
+    string? Description,
+    QuizCategory Category,
+    string? BookReference,
+    string AuthorName,
+    IReadOnlyList<QuizPreviewQuestionDto> Questions);
+
+/// Clone a shared quiz into one of the caller's classes ("Assign to My Class").
+public record CloneQuizDto(
+    [Required] int ClassroomId);
+
 // --- Teacher analytics ---
 
 /// One student's result on a quiz.

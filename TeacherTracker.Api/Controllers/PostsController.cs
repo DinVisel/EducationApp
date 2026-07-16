@@ -27,6 +27,7 @@ public class PostsController : ControllerBase
     }
 
     private int UserId => User.GetUserId();
+    private int TeacherId => User.GetTeacherId();
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PostDto>>> GetFeed(
@@ -83,11 +84,24 @@ public class PostsController : ControllerBase
                 .Select(f => f.Id)
                 .ToListAsync();
 
+        // Only share a quiz the author actually owns; ignore anything else.
+        int? sharedQuizId = null;
+        if (dto.SharedQuizId is int quizId)
+        {
+            var owns = await _db.Quizzes
+                .AnyAsync(q => q.Id == quizId && q.TeacherId == TeacherId);
+            if (!owns)
+                return BadRequest("You can only share a quiz you created.");
+            sharedQuizId = quizId;
+        }
+
         var post = new Post
         {
             AuthorUserId = UserId,
             Text = dto.Text.Trim(),
             Subject = dto.Subject,
+            GradeLevel = dto.GradeLevel,
+            SharedQuizId = sharedQuizId,
             CreatedAt = DateTime.UtcNow,
             Attachments = ownedFileIds
                 .Select(fid => new PostAttachment { FileObjectId = fid })
@@ -158,6 +172,63 @@ public class PostsController : ControllerBase
         if (like is not null)
         {
             _db.PostLikes.Remove(like);
+            await _db.SaveChangesAsync();
+        }
+
+        return NoContent();
+    }
+
+    // Rate a shared-quiz post 1–5 stars (upsert: re-rating updates the value).
+    // Only posts that share a quiz are rateable.
+    [HttpPut("{id:int}/rating")]
+    public async Task<IActionResult> Rate(int id, RatePostDto dto)
+    {
+        var post = await _db.Posts
+            .Where(p => p.Id == id)
+            .Select(p => new { p.AuthorUserId, p.SharedQuizId })
+            .FirstOrDefaultAsync();
+        if (post is null)
+            return NotFound();
+        if (post.SharedQuizId is null)
+            return BadRequest("Only shared quizzes can be rated.");
+
+        var rating = await _db.PostRatings
+            .FirstOrDefaultAsync(r => r.PostId == id && r.UserId == UserId);
+        if (rating is null)
+        {
+            _db.PostRatings.Add(new PostRating
+            {
+                PostId = id,
+                UserId = UserId,
+                Value = dto.Value,
+            });
+            // Notify the author of a new rating (not when rating your own post).
+            if (post.AuthorUserId != UserId)
+                _db.Notifications.Add(new Notification
+                {
+                    RecipientUserId = post.AuthorUserId,
+                    Type = NotificationType.PostRated,
+                    Text = $"{User.GetName()} rated your quiz {dto.Value}★",
+                    PostId = id,
+                });
+        }
+        else
+        {
+            rating.Value = dto.Value;
+        }
+
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}/rating")]
+    public async Task<IActionResult> Unrate(int id)
+    {
+        var rating = await _db.PostRatings
+            .FirstOrDefaultAsync(r => r.PostId == id && r.UserId == UserId);
+        if (rating is not null)
+        {
+            _db.PostRatings.Remove(rating);
             await _db.SaveChangesAsync();
         }
 
@@ -309,6 +380,7 @@ public class PostsController : ControllerBase
             p.Author!.Teacher!.FirstName + " " + p.Author.Teacher.LastName,
             p.Author.Teacher.AvatarFileObjectId,
             p.Subject,
+            p.GradeLevel,
             p.Text,
             p.CreatedAt,
             p.Likes.Count,
@@ -316,6 +388,16 @@ public class PostsController : ControllerBase
             p.Likes.Any(l => l.UserId == userId),
             p.AuthorUserId == userId,
             p.IsPinned,
+            p.SharedQuiz == null
+                ? null
+                : new SharedQuizPreviewDto(
+                    p.SharedQuiz.Id,
+                    p.SharedQuiz.Title,
+                    p.SharedQuiz.Category,
+                    p.SharedQuiz.Questions.Count),
+            p.Ratings.Any() ? p.Ratings.Average(r => (double)r.Value) : null,
+            p.Ratings.Count,
+            p.Ratings.Where(r => r.UserId == userId).Select(r => (int?)r.Value).FirstOrDefault(),
             p.Attachments
                 .Select(at => new PostAttachmentDto(
                     at.FileObject!.Id,

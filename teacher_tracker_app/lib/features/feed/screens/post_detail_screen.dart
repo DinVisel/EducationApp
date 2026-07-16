@@ -64,6 +64,20 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     }
   }
 
+  Future<void> _rate(int value) async {
+    final post = _post;
+    if (post == null) return;
+    try {
+      await ref.read(feedRepositoryProvider).ratePost(post.id, value);
+      await _load(); // refresh average/count/myRating from the server
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Could not rate: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GlassScaffold(
@@ -104,6 +118,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
           PostCard(
             post: _post!,
             onToggleLike: _toggleLike,
+            onRate: _rate,
             onDelete: () async {
               await ref.read(feedRepositoryProvider).delete(_post!.id);
               if (mounted) Navigator.of(context).pop();

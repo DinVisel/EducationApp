@@ -2,9 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../models/my_quiz.dart';
 import '../../../models/quiz.dart';
 import '../../../models/quiz_analytics.dart';
 import '../../../models/quiz_draft.dart';
+import '../../../models/quiz_preview.dart';
 
 /// Quizzes published to a class. Endpoints are nested under a classroom and
 /// scoped to the authenticated teacher server-side.
@@ -38,6 +40,30 @@ class QuizzesRepository {
     final res = await _dio.get<Map<String, dynamic>>(
         '/api/classrooms/$classroomId/quizzes/$quizId/analytics');
     return QuizAnalytics.fromJson(res.data!);
+  }
+
+  /// The signed-in teacher's own quizzes across all their classes (share picker).
+  Future<List<MyQuiz>> getMine() async {
+    final res = await _dio.get<List<dynamic>>('/api/quizzes/mine');
+    return (res.data ?? [])
+        .map((e) => MyQuiz.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Full content of a shared quiz, to preview before cloning.
+  Future<QuizPreview> getPreview(int quizId) async {
+    final res =
+        await _dio.get<Map<String, dynamic>>('/api/quizzes/$quizId/preview');
+    return QuizPreview.fromJson(res.data!);
+  }
+
+  /// Clones a shared quiz into one of the caller's classes ("Assign to My Class").
+  Future<Quiz> clone(int quizId, int classroomId) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/quizzes/$quizId/clone',
+      data: {'classroomId': classroomId},
+    );
+    return Quiz.fromJson(res.data!);
   }
 }
 

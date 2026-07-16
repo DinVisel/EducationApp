@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/design.dart';
 import '../classes/screens/classes_list_screen.dart';
 import '../feed/screens/feed_screen.dart';
+import '../search/screens/search_screen.dart';
 import '../teacher/screens/teacher_profile_screen.dart';
 
-/// App shell with bottom navigation — 3 tabs: Hub, Classes, Profile.
+/// App shell with bottom navigation — 4 tabs: Hub, Search, Classes, Profile.
 /// Students, homework, and reading are reached through a class (class detail).
 ///
 /// Owns the floating action button (swapped per tab) rather than letting
@@ -28,6 +29,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final pages = [
       const FeedScreen(),
+      const SearchScreen(),
       const ClassesListScreen(),
       const TeacherProfileScreen(),
     ];
@@ -44,6 +46,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icons.forum_outlined,
             selectedIcon: Icons.forum,
             label: 'Hub',
+          ),
+          GlassNavDestination(
+            icon: Icons.search,
+            selectedIcon: Icons.search,
+            label: 'Search',
           ),
           GlassNavDestination(
             icon: Icons.class_outlined,
@@ -69,7 +76,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           icon: const Icon(Icons.post_add),
           label: const Text('New Post'),
         );
-      case 1:
+      case 2:
         return FloatingActionButton.extended(
           key: const ValueKey('fab-new-class'),
           onPressed: () => createClass(context, ref),

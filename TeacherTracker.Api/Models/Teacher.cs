@@ -1,3 +1,5 @@
+using NpgsqlTypes;
+
 namespace TeacherTracker.Api.Models;
 
 /// A teacher's profile. Authentication (email/password) lives on the linked
@@ -19,4 +21,8 @@ public class Teacher
     public FileObject? CoverFileObject { get; set; }
 
     public List<Student> Students { get; set; } = new();
+
+    // Postgres full-text search vector generated from FirstName + LastName (see
+    // AppDbContext). Mapped only on Npgsql; unmapped (never set) on other providers.
+    public NpgsqlTsVector SearchVector { get; set; } = null!;
 }

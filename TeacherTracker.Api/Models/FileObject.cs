@@ -1,3 +1,5 @@
+using NpgsqlTypes;
+
 namespace TeacherTracker.Api.Models;
 
 /// Metadata for a file stored in R2. The bytes live in the bucket under
@@ -19,4 +21,8 @@ public class FileObject
     public User? Owner { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // Postgres full-text search vector generated from FileName (see AppDbContext).
+    // Mapped only on Npgsql; unmapped (never set) on other providers.
+    public NpgsqlTsVector SearchVector { get; set; } = null!;
 }

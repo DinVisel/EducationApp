@@ -27,6 +27,7 @@ public class AppDbContext : DbContext
     public DbSet<PostComment> PostComments { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Report> Reports { get; set; }
+    public DbSet<PostRating> PostRatings { get; set; }
     public DbSet<Quiz> Quizzes { get; set; }
     public DbSet<QuizQuestion> QuizQuestions { get; set; }
     public DbSet<QuizChoice> QuizChoices { get; set; }
@@ -242,6 +243,69 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(c => c.AuthorUserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Store the grade as readable text rather than an int.
+        modelBuilder.Entity<Post>()
+            .Property(p => p.GradeLevel)
+            .HasConversion<string>();
+
+        // A post can share one quiz; deleting the quiz just clears the link so
+        // the post (with its comments/ratings) survives as a historical record.
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.SharedQuiz)
+            .WithMany()
+            .HasForeignKey(p => p.SharedQuizId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Deleting a post removes its ratings.
+        modelBuilder.Entity<PostRating>()
+            .HasOne(r => r.Post)
+            .WithMany(p => p.Ratings)
+            .HasForeignKey(r => r.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting the account removes their ratings (second cascade path).
+        modelBuilder.Entity<PostRating>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // A teacher rates a given post at most once (re-rating updates the row).
+        modelBuilder.Entity<PostRating>()
+            .HasIndex(r => new { r.PostId, r.UserId })
+            .IsUnique();
+
+        // --- Full-text search (Postgres only) ---
+        // Generated tsvector columns + GIN indexes power the discovery search.
+        // SQLite (tests) can't host tsvector, so the columns are ignored there
+        // and SearchController falls back to LIKE.
+        if (Database.IsNpgsql())
+        {
+            modelBuilder.Entity<Quiz>()
+                .HasGeneratedTsVectorColumn(q => q.SearchVector, "english",
+                    q => new { q.Title, q.Description })
+                .HasIndex(q => q.SearchVector)
+                .HasMethod("GIN");
+
+            modelBuilder.Entity<FileObject>()
+                .HasGeneratedTsVectorColumn(f => f.SearchVector, "english",
+                    f => new { f.FileName })
+                .HasIndex(f => f.SearchVector)
+                .HasMethod("GIN");
+
+            modelBuilder.Entity<Teacher>()
+                .HasGeneratedTsVectorColumn(t => t.SearchVector, "english",
+                    t => new { t.FirstName, t.LastName })
+                .HasIndex(t => t.SearchVector)
+                .HasMethod("GIN");
+        }
+        else
+        {
+            modelBuilder.Entity<Quiz>().Ignore(q => q.SearchVector);
+            modelBuilder.Entity<FileObject>().Ignore(f => f.SearchVector);
+            modelBuilder.Entity<Teacher>().Ignore(t => t.SearchVector);
+        }
 
         // --- Notifications ---
 

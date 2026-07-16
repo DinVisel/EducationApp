@@ -4,10 +4,13 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/config.dart';
 import '../../../core/design.dart';
+import '../../../models/classroom.dart';
 import '../../../models/post.dart';
 import '../../../models/post_subject.dart';
+import '../../classes/state/classrooms_providers.dart';
 import '../../files/state/file_url_providers.dart';
 import '../../files/widgets/attachment_tile.dart';
+import '../../quizzes/data/quizzes_repository.dart';
 import '../data/feed_repository.dart';
 import '../screens/post_comments_screen.dart';
 import 'report_dialog.dart';
@@ -24,6 +27,7 @@ class PostCard extends ConsumerWidget {
     this.onDelete,
     this.onTogglePin,
     this.onTapAuthor,
+    this.onRate,
     this.showPinAction = false,
   });
 
@@ -32,6 +36,10 @@ class PostCard extends ConsumerWidget {
   final Future<void> Function()? onDelete;
   final VoidCallback? onTogglePin;
   final VoidCallback? onTapAuthor;
+
+  /// Called when the caller taps a star on a shared-quiz post. Null makes the
+  /// stars read-only (e.g. on a profile list).
+  final void Function(int value)? onRate;
   final bool showPinAction;
 
   @override
@@ -95,6 +103,14 @@ class PostCard extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(post.text, style: tt.bodyLarge?.copyWith(color: cs.onSurface)),
           ],
+          if (post.sharedQuiz != null) ...[
+            const SizedBox(height: 12),
+            _SharedQuizCard(
+              post: post,
+              onRate: onRate,
+              onAssign: () => _assignToClass(context, ref),
+            ),
+          ],
           for (final f in post.attachments)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -143,6 +159,29 @@ class PostCard extends ConsumerWidget {
   void _share(Post post) {
     final url = '$publicWebBaseUrl/post/${post.id}';
     Share.share(url, subject: '${post.authorName} shared a post');
+  }
+
+  // "Assign to My Class": pick one of the teacher's classes, then clone the
+  // shared quiz into it (fans out to that class's students).
+  Future<void> _assignToClass(BuildContext context, WidgetRef ref) async {
+    final quiz = post.sharedQuiz;
+    if (quiz == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+
+    final classroom = await showModalBottomSheet<Classroom>(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => const _ClassPickerSheet(),
+    );
+    if (classroom == null) return;
+
+    try {
+      await ref.read(quizzesRepositoryProvider).clone(quiz.quizId, classroom.id);
+      messenger.showSnackBar(SnackBar(
+          content: Text('Assigned "${quiz.title}" to ${classroom.name}')));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Could not assign: $e')));
+    }
   }
 
   static String _fmtWhen(DateTime d) {
@@ -305,6 +344,171 @@ class _ActionButton extends StatelessWidget {
             const SizedBox(width: 6),
             Text(label, style: tt.labelLarge?.copyWith(color: color)),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The shared-quiz preview inside a post: title, question count, a 1–5 star
+/// rating row, and an "Assign to My Class" button.
+class _SharedQuizCard extends StatelessWidget {
+  const _SharedQuizCard({
+    required this.post,
+    required this.onRate,
+    required this.onAssign,
+  });
+  final Post post;
+  final void Function(int value)? onRate;
+  final VoidCallback onAssign;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final quiz = post.sharedQuiz!;
+
+    return GlassCard(
+      fill: cs.tertiaryContainer.withValues(alpha: 0.18),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.quiz_outlined, color: cs.tertiary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(quiz.title,
+                    style: tt.titleSmall?.copyWith(
+                        color: cs.onSurface, fontWeight: FontWeight.w700),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text('${quiz.questionCount} question'
+              '${quiz.questionCount == 1 ? '' : 's'} · ${quiz.category.label}',
+              style: tt.labelMedium?.copyWith(color: cs.onSurfaceVariant)),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _StarRating(
+                rating: post.myRating ?? 0,
+                onRate: onRate,
+              ),
+              const SizedBox(width: 8),
+              if (post.ratingCount > 0)
+                Text(
+                  '${post.averageRating!.toStringAsFixed(1)} '
+                  '(${post.ratingCount})',
+                  style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+                )
+              else
+                Text('Not rated yet',
+                    style:
+                        tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.tonalIcon(
+              onPressed: onAssign,
+              icon: const Icon(Icons.add_task, size: 18),
+              label: const Text('Assign to My Class'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A row of five stars. Read-only when [onRate] is null.
+class _StarRating extends StatelessWidget {
+  const _StarRating({required this.rating, this.onRate});
+  final int rating;
+  final void Function(int value)? onRate;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    const amber = Color(0xFFF5A623);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 1; i <= 5; i++)
+          InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: onRate == null ? null : () => onRate!(i),
+            child: Padding(
+              padding: const EdgeInsets.all(2),
+              child: Icon(
+                i <= rating ? Icons.star : Icons.star_border,
+                size: 24,
+                color: i <= rating ? amber : cs.onSurfaceVariant,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Bottom sheet listing the teacher's classes to assign a cloned quiz to.
+class _ClassPickerSheet extends ConsumerWidget {
+  const _ClassPickerSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tt = Theme.of(context).textTheme;
+    final classesAsync = ref.watch(classroomsProvider);
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
+        child: classesAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.all(40),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) =>
+              Padding(padding: const EdgeInsets.all(24), child: Text('Error: $e')),
+          data: (classes) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                child: Text('Assign to which class?', style: tt.titleLarge),
+              ),
+              if (classes.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  child: Text('You have no classes yet. Create one first.'),
+                )
+              else
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: classes.length,
+                    itemBuilder: (ctx, i) {
+                      final c = classes[i];
+                      return ListTile(
+                        leading: const Icon(Icons.class_outlined),
+                        title: Text(c.name),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => Navigator.pop(ctx, c),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

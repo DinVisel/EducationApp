@@ -15,6 +15,14 @@ public class Post
     public string Text { get; set; } = string.Empty;
     public PostSubject Subject { get; set; }
 
+    // Optional grade the shared material targets (search/discovery filter).
+    public GradeLevel? GradeLevel { get; set; }
+
+    // When set, this post shares one of the author's quizzes to the feed, which
+    // other teachers can rate and clone. SetNull on quiz delete keeps the post.
+    public int? SharedQuizId { get; set; }
+    public Quiz? SharedQuiz { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Instagram-style: the author can pin their own posts to the top of their
@@ -24,4 +32,5 @@ public class Post
     public List<PostAttachment> Attachments { get; set; } = new();
     public List<PostLike> Likes { get; set; } = new();
     public List<PostComment> Comments { get; set; } = new();
+    public List<PostRating> Ratings { get; set; } = new();
 }

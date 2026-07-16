@@ -67,15 +67,52 @@ class FeedNotifier extends AsyncNotifier<List<Post>> {
   Future<Post> create({
     required String text,
     required String subject,
+    String? gradeLevel,
+    int? sharedQuizId,
     List<int> fileIds = const [],
   }) async {
     final created = await ref.read(feedRepositoryProvider).create(
           text: text,
           subject: subject,
+          gradeLevel: gradeLevel,
+          sharedQuizId: sharedQuizId,
           fileIds: fileIds,
         );
     await _reload();
     return created;
+  }
+
+  /// Rates a shared-quiz post 1–5 stars, updating the average optimistically and
+  /// rolling back if the request fails.
+  Future<void> rate(int id, int value) async {
+    final current = state.value;
+    if (current == null) return;
+    final idx = current.indexWhere((p) => p.id == id);
+    if (idx < 0) return;
+    final post = current[idx];
+
+    List<Post> withPost(Post p) {
+      final copy = [...current];
+      copy[idx] = p;
+      return copy;
+    }
+
+    // Optimistic: recompute average/count for a new-or-updated rating.
+    final hadRating = post.myRating != null;
+    final newCount = hadRating ? post.ratingCount : post.ratingCount + 1;
+    final prevSum = (post.averageRating ?? 0) * post.ratingCount;
+    final newSum = prevSum - (post.myRating ?? 0) + value;
+    state = AsyncData(withPost(post.copyWith(
+      myRating: value,
+      ratingCount: newCount,
+      averageRating: newCount == 0 ? null : newSum / newCount,
+    )));
+
+    try {
+      await ref.read(feedRepositoryProvider).ratePost(id, value);
+    } catch (_) {
+      state = AsyncData(withPost(post));
+    }
   }
 
   Future<void> remove(int id) async {

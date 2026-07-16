@@ -56,10 +56,13 @@ class FeedRepository {
   Future<void> unpin(int id) => _dio.delete<void>('/api/posts/$id/pin');
 
   /// Publishes a post to the global feed. [fileIds] are ids of files already
-  /// uploaded via the files endpoint.
+  /// uploaded via the files endpoint; [sharedQuizId] shares one of the author's
+  /// quizzes; [gradeLevel] tags the material for discovery.
   Future<Post> create({
     required String text,
     required String subject,
+    String? gradeLevel,
+    int? sharedQuizId,
     List<int> fileIds = const [],
   }) async {
     final res = await _dio.post<Map<String, dynamic>>(
@@ -67,6 +70,8 @@ class FeedRepository {
       data: {
         'text': text,
         'subject': subject,
+        'gradeLevel': ?gradeLevel,
+        'sharedQuizId': ?sharedQuizId,
         'fileIds': fileIds,
       },
     );
@@ -78,6 +83,13 @@ class FeedRepository {
   Future<void> like(int id) => _dio.post<void>('/api/posts/$id/like');
 
   Future<void> unlike(int id) => _dio.delete<void>('/api/posts/$id/like');
+
+  /// Rates a shared-quiz post 1–5 stars (upsert).
+  Future<void> ratePost(int id, int value) =>
+      _dio.put<void>('/api/posts/$id/rating', data: {'value': value});
+
+  Future<void> clearRating(int id) =>
+      _dio.delete<void>('/api/posts/$id/rating');
 
   Future<List<PostComment>> getComments(int postId) async {
     final res =

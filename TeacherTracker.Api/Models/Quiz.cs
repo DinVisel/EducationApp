@@ -1,3 +1,5 @@
+using NpgsqlTypes;
+
 namespace TeacherTracker.Api.Models;
 
 /// A multiple-choice quiz a teacher publishes to a whole <see cref="Classroom"/>.
@@ -29,4 +31,8 @@ public class Quiz
 
     public List<QuizQuestion> Questions { get; set; } = new();
     public List<StudentQuizAttempt> Attempts { get; set; } = new();
+
+    // Postgres full-text search vector generated from Title + Description (see
+    // AppDbContext). Mapped only on Npgsql; unmapped (never set) on other providers.
+    public NpgsqlTsVector SearchVector { get; set; } = null!;
 }

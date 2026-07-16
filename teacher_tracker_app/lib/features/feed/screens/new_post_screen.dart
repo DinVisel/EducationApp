@@ -4,16 +4,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
 import '../../../models/file_object.dart';
+import '../../../models/grade_level.dart';
+import '../../../models/my_quiz.dart';
 import '../../../models/post_subject.dart';
 import '../../files/data/files_repository.dart';
 import '../../files/mime.dart';
+import '../../quizzes/data/quizzes_repository.dart';
 import '../state/feed_providers.dart';
 
-/// Compose and publish a post to the global feed: text, a subject tag, and
-/// attachments. Files are uploaded to R2 as they are picked; publishing sends
-/// their ids with the post.
+/// Compose and publish a post to the global feed: text, a subject tag, an
+/// optional grade level, an optional shared quiz, and file attachments. Files
+/// are uploaded to R2 as they are picked; publishing sends their ids.
 class NewPostScreen extends ConsumerStatefulWidget {
-  const NewPostScreen({super.key});
+  const NewPostScreen({
+    super.key,
+    this.initialQuizId,
+    this.initialQuizTitle,
+  });
+
+  /// Pre-attach a quiz (used by "Share to Hub" from the class Quizzes tab).
+  final int? initialQuizId;
+  final String? initialQuizTitle;
 
   @override
   ConsumerState<NewPostScreen> createState() => _NewPostScreenState();
@@ -23,9 +34,19 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
   final _formKey = GlobalKey<FormState>();
   final _text = TextEditingController();
   String _subject = PostSubject.all.first.value;
+  String? _grade;
+  int? _sharedQuizId;
+  String? _sharedQuizTitle;
   final List<FileObject> _attachments = [];
   bool _uploading = false;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sharedQuizId = widget.initialQuizId;
+    _sharedQuizTitle = widget.initialQuizTitle;
+  }
 
   @override
   void dispose() {
@@ -71,6 +92,20 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
     }
   }
 
+  Future<void> _pickQuiz() async {
+    final quiz = await showModalBottomSheet<MyQuiz>(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => const _QuizPickerSheet(),
+    );
+    if (quiz != null) {
+      setState(() {
+        _sharedQuizId = quiz.id;
+        _sharedQuizTitle = quiz.title;
+      });
+    }
+  }
+
   Future<void> _publish() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
@@ -80,6 +115,8 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
       await ref.read(feedProvider.notifier).create(
             text: _text.text.trim(),
             subject: _subject,
+            gradeLevel: _grade,
+            sharedQuizId: _sharedQuizId,
             fileIds: _attachments.map((f) => f.id).toList(),
           );
       messenger.showSnackBar(const SnackBar(content: Text('Post published')));
@@ -139,6 +176,59 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
                   ),
               ],
             ),
+            const SizedBox(height: 20),
+            Text('Grade level (optional)',
+                style: tt.titleMedium?.copyWith(
+                    color: cs.onSurface, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final g in GradeLevel.all)
+                  ChoiceChip(
+                    label: Text(g.label),
+                    selected: _grade == g.value,
+                    onSelected: (sel) =>
+                        setState(() => _grade = sel ? g.value : null),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Text('Share a quiz (optional)',
+                style: tt.titleMedium?.copyWith(
+                    color: cs.onSurface, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            if (_sharedQuizId == null)
+              OutlinedButton.icon(
+                onPressed: _pickQuiz,
+                icon: const Icon(Icons.quiz_outlined),
+                label: const Text('Attach one of my quizzes'),
+              )
+            else
+              GlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.quiz, color: cs.tertiary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(_sharedQuizTitle ?? 'Quiz',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              tt.bodyMedium?.copyWith(color: cs.onSurface)),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: cs.onSurfaceVariant),
+                      onPressed: () => setState(() {
+                        _sharedQuizId = null;
+                        _sharedQuizTitle = null;
+                      }),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -214,3 +304,67 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
     return Icons.insert_drive_file_outlined;
   }
 }
+
+/// Bottom sheet listing the teacher's quizzes to attach to a post.
+class _QuizPickerSheet extends ConsumerWidget {
+  const _QuizPickerSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tt = Theme.of(context).textTheme;
+    final quizzesAsync = ref.watch(_myQuizzesProvider);
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
+        child: quizzesAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.all(40),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) =>
+              Padding(padding: const EdgeInsets.all(24), child: Text('Error: $e')),
+          data: (quizzes) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                child: Text('Share which quiz?', style: tt.titleLarge),
+              ),
+              if (quizzes.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  child: Text('You haven’t created any quizzes yet.'),
+                )
+              else
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: quizzes.length,
+                    itemBuilder: (ctx, i) {
+                      final q = quizzes[i];
+                      return ListTile(
+                        leading: const Icon(Icons.quiz_outlined),
+                        title: Text(q.title),
+                        subtitle: Text('${q.className} · ${q.questionCount} '
+                            'question${q.questionCount == 1 ? '' : 's'}'),
+                        onTap: () => Navigator.pop(ctx, q),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The signed-in teacher's quizzes for the share picker.
+final _myQuizzesProvider = FutureProvider.autoDispose<List<MyQuiz>>(
+  (ref) => ref.watch(quizzesRepositoryProvider).getMine(),
+);
