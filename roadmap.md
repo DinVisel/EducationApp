@@ -38,6 +38,7 @@ system. See `README.md` for run instructions.
 Groundwork only — no full feature UIs yet.
 
 **Backend**
+
 - Unified identity: `User` + `UserRole`; `Teacher` becomes a profile linked to a
   `User` (email/password move to `User`); `Student` gains a nullable `UserId`
   (ready for student login in Phase 4).
@@ -49,11 +50,13 @@ Groundwork only — no full feature UIs yet.
 - `UnifiedUserIdentity` EF migration.
 
 **Frontend**
+
 - `file_picker` dependency; `FileObject` model; `FilesRepository` + providers
   (upload / download URL / delete) on the shared dio.
 - `role` passthrough in the auth layer (defaults to Teacher; no UI change).
 
 **Done when**
+
 - [ ] Migration applies and the API builds.
 - [ ] Register → creates a `User(Role=Teacher)` + linked `Teacher`; login + `me` work.
 - [ ] Existing `GET /api/students` still works with a new token.
@@ -102,9 +105,10 @@ student on create; `AssignmentAttachment` links shared R2 files (owner-checked)
 to the assignment. `AssignmentsController` (nested under `classrooms/{id}`):
 list / detail / create (fan-out + attach) / delete, teacher-scoped.
 **Frontend** — `Assignment`/`AssignmentAttachment` models, `AssignmentsRepository`
-+ providers; class detail → **Assignments** screen listing published work with
-`done/total` progress and attachment chips; **New Assignment** form (title,
-description, due date, file_picker → R2 upload → publish with attachments).
+
+- providers; class detail → **Assignments** screen listing published work with
+  `done/total` progress and attachment chips; **New Assignment** form (title,
+  description, due date, file_picker → R2 upload → publish with attachments).
 
 **Done when** — publishing to a class creates work for every enrolled student,
 with downloadable attachments. ✅ Verified: fan-out creates one
@@ -176,8 +180,8 @@ PUT URL + an `uploads/{userId}/…` key) and `POST /api/files/confirm` (ownershi
 checked key, HEADs R2 for size, records the `FileObject`). The Phase 0 proxy
 upload stays as the small-file fallback. **Notifications**: `Notification` +
 `NotificationType`, created inline when a post is liked/commented (→ author, not
-self) and when an assignment is published (→ each enrolled student *with a login
-account*); `NotificationsController` (list / unread-count / `{id}/read` /
+self) and when an assignment is published (→ each enrolled student _with a login
+account_); `NotificationsController` (list / unread-count / `{id}/read` /
 `read-all`), all recipient-scoped.
 **Frontend** — `FilesRepository.uploadDirect` (presign → bare-`Dio` PUT to R2 →
 confirm) + a filename→MIME helper, used by both compose screens. A shared
@@ -229,13 +233,13 @@ deferred live media checks from Phases 4–6.
 Make the teacher UI class-centric and the profiles Instagram-style.
 
 **Navigation** — the teacher bottom nav collapses from 6 flat tabs to **3: Hub ·
-Classes · Profile**. Students, homework, and reading are reached *through* a
+Classes · Profile**. Students, homework, and reading are reached _through_ a
 class.
 
 **Class hub** — `ClassDetailScreen` becomes tabbed **Students / Homework /
 Reading**. The roster (Students) taps through to the existing tabbed
 `StudentDetailScreen` (info / notes / homework / reading log). Homework shows both
-the class's fan-out `Assignment`s *and* per-student homework; Reading aggregates
+the class's fan-out `Assignment`s _and_ per-student homework; Reading aggregates
 each roster student's books. All reuse existing providers
 (`classroomDetailProvider`, `classroomAssignmentsProvider`, `homeworkProvider`,
 `booksProvider`).
@@ -362,7 +366,8 @@ open-in-browser as the tap behavior.
 and permission denial is handled gracefully. ✅ `flutter analyze` clean (only the 4
 long-standing homework/reading lints). Deferred to a real device: the actual
 save-to-gallery / save-sheet drive and the permission prompts (needs a live R2 file
-+ a device, per the standing R2 note).
+
+- a device, per the standing R2 note).
 
 ---
 
@@ -372,3 +377,7 @@ save-to-gallery / save-sheet drive and the permission prompts (needs a live R2 f
 - **Multi-tenancy** — `Tenant` entity, tenant claim in `TokenService`, EF global
   query filters, tenant-scoped uniqueness/onboarding (touches every entity + a data
   migration). Skipped for now — Teacher/Student/Admin is sufficient.
+
+  {
+  For admin i am thinking creating a web app with same backend.
+  }
