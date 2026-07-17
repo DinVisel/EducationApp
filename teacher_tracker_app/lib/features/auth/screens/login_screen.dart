@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/design.dart';
 import '../../../core/utils/validators.dart';
+import '../../../l10n/app_localizations.dart';
 import '../state/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -38,7 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(_message(e))));
+            .showSnackBar(SnackBar(content: Text(_message(context, e))));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -48,6 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
     return GlassScaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -66,11 +68,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Icon(Icons.school,
                         size: 72, color: theme.colorScheme.primary),
                     const SizedBox(height: AppSpacing.md),
-                    Text('Teacher Tracker',
+                    Text(loc.loginTitle,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.headlineMedium),
                     const SizedBox(height: AppSpacing.xs),
-                    Text('Sign in to track your students',
+                    Text(loc.loginSubtitle,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant)),
@@ -79,11 +81,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                      decoration: InputDecoration(
+                        labelText: loc.loginEmailLabel,
+                        prefixIcon: const Icon(Icons.email_outlined),
                       ),
-                      validator: Validators.email,
+                      validator: (v) => Validators.email(
+                        v,
+                        requiredMessage: loc.commonRequired,
+                        invalidMessage: loc.commonInvalidEmail,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     TextFormField(
@@ -91,11 +97,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       obscureText: true,
                       autofillHints: const [AutofillHints.password],
                       onFieldSubmitted: (_) => _submit(),
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: Icon(Icons.lock_outline),
+                      decoration: InputDecoration(
+                        labelText: loc.loginPasswordLabel,
+                        prefixIcon: const Icon(Icons.lock_outline),
                       ),
-                      validator: Validators.required,
+                      validator: (v) =>
+                          Validators.required(v, message: loc.commonRequired),
                     ),
                     Align(
                       alignment: Alignment.centerRight,
@@ -103,7 +110,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onPressed: _submitting
                             ? null
                             : () => context.push('/forgot-password'),
-                        child: const Text('Forgot password?'),
+                        child: Text(loc.loginForgotPassword),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -115,13 +122,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Sign in'),
+                          : Text(loc.loginSignIn),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(
                       onPressed:
                           _submitting ? null : () => context.push('/register'),
-                      child: const Text("Don't have an account? Register"),
+                      child: Text(loc.loginNoAccount),
                     ),
                   ],
                 ),
@@ -133,13 +140,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  String _message(Object e) {
+  String _message(BuildContext context, Object e) {
+    final loc = AppLocalizations.of(context)!;
     if (e is DioException) {
       final data = e.response?.data;
       if (data is String && data.isNotEmpty) return data;
-      if (e.response?.statusCode == 401) return 'Invalid email or password.';
-      return 'Network error. Is the server running?';
+      if (e.response?.statusCode == 401) return loc.loginInvalidCredentials;
+      return loc.commonNetworkError;
     }
-    return 'Something went wrong.';
+    return loc.commonSomethingWentWrong;
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../core/locale/locale_controller.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/teacher.dart';
 import '../../auth/state/auth_controller.dart';
 
@@ -14,9 +16,10 @@ class TeacherSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final teacher = ref.watch(currentTeacherProvider);
+    final loc = AppLocalizations.of(context)!;
 
     return GlassScaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(loc.settingsTitle)),
       body: teacher == null
           ? const Center(child: CircularProgressIndicator())
           : _SettingsForm(teacher: teacher),
@@ -57,6 +60,7 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
   }
 
   Future<void> _save() async {
+    final loc = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     try {
@@ -69,13 +73,13 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile saved')),
+          SnackBar(content: Text(loc.settingsProfileSaved)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Save failed: $e')));
+            .showSnackBar(SnackBar(content: Text(loc.settingsSaveFailed('$e'))));
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -83,19 +87,20 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
   }
 
   Future<void> _confirmLogout() async {
+    final loc = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Sign out?'),
-        content: const Text('You will need to sign in again.'),
+        title: Text(loc.settingsSignOutConfirmTitle),
+        content: Text(loc.settingsSignOutConfirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(loc.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sign out'),
+            child: Text(loc.settingsSignOut),
           ),
         ],
       ),
@@ -109,12 +114,13 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     return ListView(
       padding: EdgeInsets.fromLTRB(
           20, MediaQuery.of(context).padding.top + 8, 20, 40),
       children: [
-        Text('Account',
+        Text(loc.settingsAccount,
             style: tt.titleMedium
                 ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w700)),
         const SizedBox(height: 12),
@@ -126,27 +132,27 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
                 TextFormField(
                   controller: _firstName,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'First name'),
+                  decoration: InputDecoration(labelText: loc.settingsFirstName),
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _lastName,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'Last name'),
+                  decoration: InputDecoration(labelText: loc.settingsLastName),
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(labelText: 'Email'),
+                  decoration: InputDecoration(labelText: loc.settingsEmail),
                   validator: (v) {
                     final value = v?.trim() ?? '';
-                    if (value.isEmpty) return 'Required';
-                    if (!value.contains('@')) return 'Enter a valid email';
+                    if (value.isEmpty) return loc.commonRequired;
+                    if (!value.contains('@')) return loc.commonInvalidEmail;
                     return null;
                   },
                 ),
@@ -161,7 +167,7 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Save changes'),
+                        : Text(loc.settingsSaveChanges),
                   ),
                 ),
               ],
@@ -169,12 +175,52 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
           ),
         ),
         const SizedBox(height: 24),
+        Text(loc.settingsLanguage,
+            style: tt.titleMedium
+                ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        const _LanguagePicker(),
+        const SizedBox(height: 24),
         OutlinedButton.icon(
           onPressed: _confirmLogout,
           icon: const Icon(Icons.logout),
-          label: const Text('Sign out'),
+          label: Text(loc.settingsSignOut),
         ),
       ],
+    );
+  }
+}
+
+/// Lets the teacher pick English or Türkçe, or follow the system locale.
+class _LanguagePicker extends ConsumerWidget {
+  const _LanguagePicker();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
+    final locale = ref.watch(localeControllerProvider).value;
+
+    return GlassCard(
+      child: Column(
+        children: [
+          RadioListTile<String?>(
+            title: Text(loc.settingsLanguageEnglish),
+            value: 'en',
+            groupValue: locale?.languageCode,
+            onChanged: (v) => ref
+                .read(localeControllerProvider.notifier)
+                .setLocale(const Locale('en')),
+          ),
+          RadioListTile<String?>(
+            title: Text(loc.settingsLanguageTurkish),
+            value: 'tr',
+            groupValue: locale?.languageCode,
+            onChanged: (v) => ref
+                .read(localeControllerProvider.notifier)
+                .setLocale(const Locale('tr')),
+          ),
+        ],
+      ),
     );
   }
 }

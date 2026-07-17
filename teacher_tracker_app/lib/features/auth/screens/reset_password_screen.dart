@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/design.dart';
 import '../../../core/utils/validators.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/auth_repository.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
@@ -33,6 +34,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
+    final loc = AppLocalizations.of(context)!;
     try {
       await ref.read(authRepositoryProvider).resetPassword(
             token: _token.text.trim(),
@@ -40,14 +42,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset. Sign in with your new password.')),
+          SnackBar(content: Text(loc.resetPasswordSuccess)),
         );
         context.go('/login');
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(_message(e))));
+            .showSnackBar(SnackBar(content: Text(_message(context, e))));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -57,6 +59,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
     return GlassScaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -74,12 +77,12 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   children: [
                     Icon(Icons.password, size: 72, color: theme.colorScheme.primary),
                     const SizedBox(height: AppSpacing.md),
-                    Text('Reset password',
+                    Text(loc.resetPasswordTitle,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.headlineMedium),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Enter the code we emailed you and choose a new password.',
+                      loc.resetPasswordSubtitle,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium
                           ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
@@ -87,32 +90,40 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                     const SizedBox(height: AppSpacing.xl),
                     TextFormField(
                       controller: _token,
-                      decoration: const InputDecoration(
-                        labelText: 'Reset code',
-                        prefixIcon: Icon(Icons.vpn_key_outlined),
+                      decoration: InputDecoration(
+                        labelText: loc.resetPasswordCodeLabel,
+                        prefixIcon: const Icon(Icons.vpn_key_outlined),
                       ),
-                      validator: Validators.required,
+                      validator: (v) =>
+                          Validators.required(v, message: loc.commonRequired),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       controller: _newPassword,
                       obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'New password',
-                        prefixIcon: Icon(Icons.lock_outline),
+                      decoration: InputDecoration(
+                        labelText: loc.resetPasswordNewPasswordLabel,
+                        prefixIcon: const Icon(Icons.lock_outline),
                       ),
-                      validator: Validators.password,
+                      validator: (v) => Validators.password(
+                        v,
+                        requiredMessage: loc.commonRequired,
+                        tooShortMessage: loc.commonPasswordTooShort,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       controller: _confirmPassword,
                       obscureText: true,
                       onFieldSubmitted: (_) => _submit(),
-                      decoration: const InputDecoration(
-                        labelText: 'Confirm new password',
-                        prefixIcon: Icon(Icons.lock_outline),
+                      decoration: InputDecoration(
+                        labelText: loc.resetPasswordConfirmLabel,
+                        prefixIcon: const Icon(Icons.lock_outline),
                       ),
-                      validator: Validators.confirms(_newPassword),
+                      validator: Validators.confirms(
+                        _newPassword,
+                        message: loc.commonPasswordsDoNotMatch,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     FilledButton(
@@ -123,12 +134,12 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Reset password'),
+                          : Text(loc.resetPasswordSubmit),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(
                       onPressed: _submitting ? null : () => context.go('/login'),
-                      child: const Text('Back to sign in'),
+                      child: Text(loc.resetPasswordBackToSignIn),
                     ),
                   ],
                 ),
@@ -140,12 +151,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     );
   }
 
-  String _message(Object e) {
+  String _message(BuildContext context, Object e) {
+    final loc = AppLocalizations.of(context)!;
     if (e is DioException) {
       final data = e.response?.data;
       if (data is String && data.isNotEmpty) return data;
-      return 'Network error. Is the server running?';
+      return loc.commonNetworkError;
     }
-    return 'Something went wrong.';
+    return loc.commonSomethingWentWrong;
   }
 }

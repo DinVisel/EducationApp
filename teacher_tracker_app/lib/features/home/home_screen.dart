@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/design.dart';
+import '../../l10n/app_localizations.dart';
 import '../classes/screens/classes_list_screen.dart';
 import '../feed/screens/feed_screen.dart';
 import '../search/screens/search_screen.dart';
@@ -27,6 +28,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final pages = [
       const FeedScreen(),
       const SearchScreen(),
@@ -36,52 +38,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return GlassScaffold(
       body: IndexedStack(index: _index, children: pages),
-      floatingActionButton: _fabForIndex(_index),
+      floatingActionButton: _fabForIndex(_index, loc),
       floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
       bottomNavigationBar: GlassNavBar(
         selectedIndex: _index,
         onDestinationSelected: _goTo,
-        destinations: const [
+        destinations: [
           GlassNavDestination(
             icon: Icons.forum_outlined,
             selectedIcon: Icons.forum,
-            label: 'Hub',
+            label: loc.navHub,
           ),
           GlassNavDestination(
             icon: Icons.search,
             selectedIcon: Icons.search,
-            label: 'Search',
+            label: loc.navSearch,
           ),
           GlassNavDestination(
             icon: Icons.class_outlined,
             selectedIcon: Icons.class_,
-            label: 'Classes',
+            label: loc.navClasses,
           ),
           GlassNavDestination(
             icon: Icons.person_outline,
             selectedIcon: Icons.person,
-            label: 'Profile',
+            label: loc.navProfile,
           ),
         ],
       ),
     );
   }
 
-  Widget? _fabForIndex(int index) {
+  Widget? _fabForIndex(int index, AppLocalizations loc) {
     switch (index) {
       case 0:
         return FloatingActionButton.extended(
           key: const ValueKey('fab-new-post'),
           onPressed: () => openNewPost(context),
           icon: const Icon(Icons.post_add),
-          label: const Text('New Post'),
+          label: Text(loc.navNewPost),
         );
       case 2:
         return FloatingActionButton.extended(
           key: const ValueKey('fab-new-class'),
           onPressed: () => createClass(context, ref),
           icon: const Icon(Icons.add),
-          label: const Text('New Class'),
+          label: Text(loc.navNewClass),
         );
       default:
         return null;

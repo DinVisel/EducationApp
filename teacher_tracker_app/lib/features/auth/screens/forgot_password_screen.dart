@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/design.dart';
 import '../../../core/utils/validators.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/auth_repository.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -36,7 +37,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(_message(e))));
+            .showSnackBar(SnackBar(content: Text(_message(context, e))));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -46,6 +47,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
     return GlassScaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -55,7 +57,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             child: GlassCard(
               float: true,
               padding: const EdgeInsets.all(AppSpacing.xl),
-              child: _submitted ? _buildConfirmation(theme) : _buildForm(theme),
+              child: _submitted
+                  ? _buildConfirmation(theme, loc)
+                  : _buildForm(theme, loc),
             ),
           ),
         ),
@@ -63,7 +67,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     );
   }
 
-  Widget _buildForm(ThemeData theme) {
+  Widget _buildForm(ThemeData theme, AppLocalizations loc) {
     return Form(
       key: _formKey,
       child: Column(
@@ -72,11 +76,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         children: [
           Icon(Icons.lock_reset, size: 72, color: theme.colorScheme.primary),
           const SizedBox(height: AppSpacing.md),
-          Text('Forgot password?',
+          Text(loc.forgotPasswordTitle,
               textAlign: TextAlign.center, style: theme.textTheme.headlineMedium),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            "Enter your account's email and we'll send you a reset code.",
+            loc.forgotPasswordSubtitle,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
@@ -86,12 +90,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             controller: _email,
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              prefixIcon: Icon(Icons.email_outlined),
+            decoration: InputDecoration(
+              labelText: loc.forgotPasswordEmailLabel,
+              prefixIcon: const Icon(Icons.email_outlined),
             ),
             onFieldSubmitted: (_) => _submit(),
-            validator: Validators.email,
+            validator: (v) => Validators.email(
+              v,
+              requiredMessage: loc.commonRequired,
+              invalidMessage: loc.commonInvalidEmail,
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           FilledButton(
@@ -102,19 +110,19 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Send reset code'),
+                : Text(loc.forgotPasswordSubmit),
           ),
           const SizedBox(height: AppSpacing.sm),
           TextButton(
             onPressed: _submitting ? null : () => context.go('/login'),
-            child: const Text('Back to sign in'),
+            child: Text(loc.forgotPasswordBackToSignIn),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildConfirmation(ThemeData theme) {
+  Widget _buildConfirmation(ThemeData theme, AppLocalizations loc) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -122,11 +130,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         Icon(Icons.mark_email_read_outlined,
             size: 72, color: theme.colorScheme.primary),
         const SizedBox(height: AppSpacing.md),
-        Text('Check your email',
+        Text(loc.forgotPasswordConfirmTitle,
             textAlign: TextAlign.center, style: theme.textTheme.headlineMedium),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          "If that email exists, we've sent a reset code to it.",
+          loc.forgotPasswordConfirmBody,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium
               ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
@@ -134,23 +142,24 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         const SizedBox(height: AppSpacing.xl),
         FilledButton(
           onPressed: () => context.push('/reset-password'),
-          child: const Text('I have a code'),
+          child: Text(loc.forgotPasswordHaveCode),
         ),
         const SizedBox(height: AppSpacing.sm),
         TextButton(
           onPressed: () => context.go('/login'),
-          child: const Text('Back to sign in'),
+          child: Text(loc.forgotPasswordBackToSignIn),
         ),
       ],
     );
   }
 
-  String _message(Object e) {
+  String _message(BuildContext context, Object e) {
+    final loc = AppLocalizations.of(context)!;
     if (e is DioException) {
       final data = e.response?.data;
       if (data is String && data.isNotEmpty) return data;
-      return 'Network error. Is the server running?';
+      return loc.commonNetworkError;
     }
-    return 'Something went wrong.';
+    return loc.commonSomethingWentWrong;
   }
 }

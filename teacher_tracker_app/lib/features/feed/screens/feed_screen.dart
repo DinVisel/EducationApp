@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../models/post_subject.dart';
 import '../../notifications/widgets/notification_bell.dart';
 import '../../profile/screens/teacher_profile_view_screen.dart';
@@ -60,6 +61,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final activeSubject = ref.watch(feedProvider.notifier).subject;
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return RefreshIndicator(
       onRefresh: () => ref.refresh(feedProvider.future),
@@ -74,7 +76,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text('Community Hub',
+                    child: Text(loc.feedTitle,
                         style: tt.headlineMedium?.copyWith(
                             color: cs.onSurface,
                             fontWeight: FontWeight.w700)),
@@ -164,6 +166,7 @@ class _SubjectFilterBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     void select(String? value) =>
         ref.read(feedProvider.notifier).setSubjectFilter(value);
 
@@ -176,7 +179,7 @@ class _SubjectFilterBar extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
-              label: const Text('All'),
+              label: Text(loc.feedFilterAll),
               selected: active == null,
               onSelected: (_) => select(null),
             ),
@@ -203,6 +206,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -210,13 +214,13 @@ class _Empty extends StatelessWidget {
           Icon(Icons.forum_outlined,
               size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          Text('No posts yet',
+          Text(loc.feedEmptyTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
                   ?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text('Tap “New Post” to share a resource with other teachers.',
+          Text(loc.feedEmptyBody,
               textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme

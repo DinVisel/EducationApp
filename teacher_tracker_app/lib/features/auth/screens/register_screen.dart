@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/validators.dart';
+import '../../../l10n/app_localizations.dart';
 import '../state/auth_controller.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -43,7 +44,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(_message(e))));
+            .showSnackBar(SnackBar(content: Text(_message(context, e))));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -52,8 +53,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Create account')),
+      appBar: AppBar(title: Text(loc.registerTitle)),
       body: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(
@@ -69,42 +71,52 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     TextFormField(
                       controller: _firstName,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'First name',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: loc.registerFirstName,
+                        border: const OutlineInputBorder(),
                       ),
-                      validator: Validators.required,
+                      validator: (v) =>
+                          Validators.required(v, message: loc.commonRequired),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _lastName,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Last name',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: loc.registerLastName,
+                        border: const OutlineInputBorder(),
                       ),
-                      validator: Validators.required,
+                      validator: (v) =>
+                          Validators.required(v, message: loc.commonRequired),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: loc.registerEmail,
+                        border: const OutlineInputBorder(),
                       ),
-                      validator: Validators.email,
+                      validator: (v) => Validators.email(
+                        v,
+                        requiredMessage: loc.commonRequired,
+                        invalidMessage: loc.commonInvalidEmail,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _password,
                       obscureText: true,
                       onFieldSubmitted: (_) => _submit(),
-                      decoration: const InputDecoration(
-                        labelText: 'Password (min 6 chars)',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: loc.registerPasswordHint,
+                        border: const OutlineInputBorder(),
                       ),
-                      validator: Validators.password,
+                      validator: (v) => Validators.password(
+                        v,
+                        requiredMessage: loc.commonRequired,
+                        tooShortMessage: loc.commonPasswordTooShort,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     FilledButton(
@@ -118,7 +130,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 child:
                                     CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('Create account'),
+                            : Text(loc.registerSubmit),
                       ),
                     ),
                   ],
@@ -131,15 +143,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  String _message(Object e) {
+  String _message(BuildContext context, Object e) {
+    final loc = AppLocalizations.of(context)!;
     if (e is DioException) {
       final data = e.response?.data;
       if (data is String && data.isNotEmpty) return data;
       if (e.response?.statusCode == 409) {
-        return 'That email is already registered.';
+        return loc.registerEmailTaken;
       }
-      return 'Network error. Is the server running?';
+      return loc.commonNetworkError;
     }
-    return 'Something went wrong.';
+    return loc.commonSomethingWentWrong;
   }
 }

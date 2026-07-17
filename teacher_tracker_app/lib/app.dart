@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/design.dart';
+import 'core/locale/locale_controller.dart';
+import 'l10n/app_localizations.dart';
 import 'features/auth/screens/forgot_password_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
@@ -109,11 +111,15 @@ class TeacherTrackerApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeControllerProvider).value;
     return _DeepLinkListener(
       child: MaterialApp.router(
         title: 'Teacher Tracker',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         routerConfig: ref.watch(routerProvider),
       ),
     );

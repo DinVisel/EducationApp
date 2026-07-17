@@ -1,0 +1,79 @@
+{
+  "@@locale": "en",
+
+  "commonCancel": "Cancel",
+  "commonRetry": "Retry",
+  "commonRequired": "Required",
+  "commonInvalidEmail": "Enter a valid email",
+  "commonPasswordTooShort": "Must be at least 6 characters",
+  "commonPasswordsDoNotMatch": "Passwords do not match",
+  "commonNetworkError": "Network error. Is the server running?",
+  "commonSomethingWentWrong": "Something went wrong.",
+
+  "loginTitle": "Teacher Tracker",
+  "loginSubtitle": "Sign in to track your students",
+  "loginEmailLabel": "Email",
+  "loginPasswordLabel": "Password",
+  "loginForgotPassword": "Forgot password?",
+  "loginSignIn": "Sign in",
+  "loginNoAccount": "Don't have an account? Register",
+  "loginInvalidCredentials": "Invalid email or password.",
+
+  "registerTitle": "Create account",
+  "registerFirstName": "First name",
+  "registerLastName": "Last name",
+  "registerEmail": "Email",
+  "registerPasswordHint": "Password (min 6 chars)",
+  "registerSubmit": "Create account",
+  "registerEmailTaken": "That email is already registered.",
+
+  "forgotPasswordTitle": "Forgot password?",
+  "forgotPasswordSubtitle": "Enter your account's email and we'll send you a reset code.",
+  "forgotPasswordEmailLabel": "Email",
+  "forgotPasswordSubmit": "Send reset code",
+  "forgotPasswordBackToSignIn": "Back to sign in",
+  "forgotPasswordConfirmTitle": "Check your email",
+  "forgotPasswordConfirmBody": "If that email exists, we've sent a reset code to it.",
+  "forgotPasswordHaveCode": "I have a code",
+
+  "resetPasswordTitle": "Reset password",
+  "resetPasswordSubtitle": "Enter the code we emailed you and choose a new password.",
+  "resetPasswordCodeLabel": "Reset code",
+  "resetPasswordNewPasswordLabel": "New password",
+  "resetPasswordConfirmLabel": "Confirm new password",
+  "resetPasswordSubmit": "Reset password",
+  "resetPasswordSuccess": "Password reset. Sign in with your new password.",
+  "resetPasswordBackToSignIn": "Back to sign in",
+
+  "navHub": "Hub",
+  "navSearch": "Search",
+  "navClasses": "Classes",
+  "navProfile": "Profile",
+  "navNewPost": "New Post",
+  "navNewClass": "New Class",
+
+  "feedTitle": "Community Hub",
+  "feedEmptyTitle": "No posts yet",
+  "feedEmptyBody": "Tap \"New Post\" to share a resource with other teachers.",
+  "feedFilterAll": "All",
+
+  "settingsTitle": "Settings",
+  "settingsAccount": "Account",
+  "settingsFirstName": "First name",
+  "settingsLastName": "Last name",
+  "settingsEmail": "Email",
+  "settingsSaveChanges": "Save changes",
+  "settingsProfileSaved": "Profile saved",
+  "settingsSaveFailed": "Save failed: {error}",
+  "@settingsSaveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "settingsSignOut": "Sign out",
+  "settingsSignOutConfirmTitle": "Sign out?",
+  "settingsSignOutConfirmBody": "You will need to sign in again.",
+  "settingsLanguage": "Language",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageTurkish": "Türkçe"
+}
