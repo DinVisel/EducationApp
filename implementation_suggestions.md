@@ -104,7 +104,7 @@ social platform where teachers expect instant feedback on likes/comments.
 
 ---
 
-### 5. 🟡 Password Reset / Forgot Password Flow
+### 5. 🟡 Password Reset / Forgot Password Flow ✅ Implemented
 
 There is no password recovery mechanism. Teachers (and students) who forget their password
 are locked out.
@@ -120,7 +120,7 @@ are locked out.
 
 ---
 
-### 6. 🟡 Input Validation & Form Polish
+### 6. 🟡 Input Validation & Form Polish ✅ Implemented
 
 Forms across the app could benefit from consistent client-side validation and UX
 improvements.
@@ -135,7 +135,7 @@ improvements.
 
 ---
 
-### 7. 🟡 Pagination on All List Screens
+### 7. 🟡 Pagination on All List Screens ✅ Implemented
 
 The feed uses cursor pagination, but other list endpoints (students, classrooms, homework,
 books, notifications) appear to return all records.
@@ -150,7 +150,7 @@ books, notifications) appear to return all records.
 
 ---
 
-### 8. 🟡 Localization (i18n)
+### 8. 🟡 Localization (i18n) ✅ Implemented
 
 The app has hardcoded Turkish (`"Teacher Tracker API Çalışıyor!"`) and English strings
 mixed throughout. No localization framework is set up.
@@ -303,7 +303,7 @@ No explicit accessibility work is documented.
 
 ---
 
-### 19. Onboarding Flow
+### 19. Onboarding Flow ✅ Implemented
 
 New teachers currently land on a blank home screen with no guidance.
 
@@ -341,7 +341,7 @@ In-app polling works but doesn't notify users when the app is backgrounded/close
 
 ---
 
-### 22. Soft Deletes & Audit Trail
+### 22. Soft Deletes & Audit Trail ✅ Implemented
 
 All deletes are currently hard deletes. No audit trail exists.
 
@@ -355,7 +355,7 @@ All deletes are currently hard deletes. No audit trail exists.
 
 ---
 
-### 23. API Versioning
+### 23. API Versioning ✅ Implemented
 
 The API has no versioning strategy. Breaking changes will affect all clients.
 

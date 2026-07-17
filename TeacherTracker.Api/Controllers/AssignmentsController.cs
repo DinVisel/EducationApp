@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,9 @@ namespace TeacherTracker.Api.Controllers;
 /// per-student copy to every currently enrolled student and attaches any
 /// already-uploaded R2 files. Scoped to the authenticated teacher's classes.
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Teacher))]
-[Route("api/classrooms/{classroomId:int}/assignments")]
+[Route("api/v{version:apiVersion}/classrooms/{classroomId:int}/assignments")]
 public class AssignmentsController : ControllerBase
 {
     private readonly AppDbContext _db;

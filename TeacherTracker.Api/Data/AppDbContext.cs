@@ -48,6 +48,11 @@ public class AppDbContext : DbContext
             .Property(u => u.Role)
             .HasConversion<string>();
 
+        // Soft delete: hide deleted rows from normal queries everywhere. Deletes
+        // for these entities set IsDeleted rather than removing the row, so the
+        // Cascade FK rules below never fire.
+        modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+
         // 1:1 User → Teacher profile.
         modelBuilder.Entity<Teacher>()
             .HasOne(t => t.User)
@@ -68,6 +73,8 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(t => t.CoverFileObjectId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Student>().HasQueryFilter(s => !s.IsDeleted);
 
         // Optional 1:1 User → Student profile (student login, Phase 4).
         modelBuilder.Entity<Student>()
@@ -184,6 +191,8 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Post>()
             .Property(p => p.Subject)
             .HasConversion<string>();
+
+        modelBuilder.Entity<Post>().HasQueryFilter(p => !p.IsDeleted);
 
         // Deleting the author account removes their posts.
         modelBuilder.Entity<Post>()

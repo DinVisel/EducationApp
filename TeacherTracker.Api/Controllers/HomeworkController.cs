@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TeacherTracker.Api.Data;
@@ -6,7 +7,8 @@ using TeacherTracker.Api.Models;
 
 namespace TeacherTracker.Api.Controllers;
 
-[Route("api/students/{studentId:int}/homework")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/students/{studentId:int}/homework")]
 public class HomeworkController : StudentScopedController
 {
     public HomeworkController(AppDbContext db) : base(db) { }

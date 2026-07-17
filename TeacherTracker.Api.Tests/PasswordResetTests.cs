@@ -12,7 +12,7 @@ public class PasswordResetTests
 {
     private static async Task<string> RegisterTeacherAsync(HttpClient c, string email, string password = "pass1234")
     {
-        var res = await c.PostAsJsonAsync("/api/auth/register", new
+        var res = await c.PostAsJsonAsync("/api/v1/auth/register", new
         {
             firstName = "Test",
             lastName = "Teacher",
@@ -38,20 +38,20 @@ public class PasswordResetTests
         var c = factory.CreateApiClient();
         await RegisterTeacherAsync(c, "a@t.com", "oldpass1");
 
-        var forgot = await c.PostAsJsonAsync("/api/auth/forgot-password", new { email = "a@t.com" });
+        var forgot = await c.PostAsJsonAsync("/api/v1/auth/forgot-password", new { email = "a@t.com" });
         Assert.Equal(HttpStatusCode.OK, forgot.StatusCode);
         Assert.Single(factory.EmailService.Sent);
         var token = ExtractToken(factory.EmailService.Sent[0].Body);
 
-        var reset = await c.PostAsJsonAsync("/api/auth/reset-password",
+        var reset = await c.PostAsJsonAsync("/api/v1/auth/reset-password",
             new { token, newPassword = "newpass1" });
         Assert.Equal(HttpStatusCode.OK, reset.StatusCode);
 
-        var oldLogin = await c.PostAsJsonAsync("/api/auth/login",
+        var oldLogin = await c.PostAsJsonAsync("/api/v1/auth/login",
             new { email = "a@t.com", password = "oldpass1" });
         Assert.Equal(HttpStatusCode.Unauthorized, oldLogin.StatusCode);
 
-        var newLogin = await c.PostAsJsonAsync("/api/auth/login",
+        var newLogin = await c.PostAsJsonAsync("/api/v1/auth/login",
             new { email = "a@t.com", password = "newpass1" });
         Assert.Equal(HttpStatusCode.OK, newLogin.StatusCode);
     }
@@ -62,7 +62,7 @@ public class PasswordResetTests
         using var factory = new TestApiFactory();
         var c = factory.CreateApiClient();
 
-        var res = await c.PostAsJsonAsync("/api/auth/forgot-password", new { email = "nobody@t.com" });
+        var res = await c.PostAsJsonAsync("/api/v1/auth/forgot-password", new { email = "nobody@t.com" });
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
         Assert.Empty(factory.EmailService.Sent);
     }
@@ -85,7 +85,7 @@ public class PasswordResetTests
             await db.SaveChangesAsync();
         });
 
-        var reset = await c.PostAsJsonAsync("/api/auth/reset-password",
+        var reset = await c.PostAsJsonAsync("/api/v1/auth/reset-password",
             new { token = rawToken, newPassword = "newpass1" });
         Assert.Equal(HttpStatusCode.BadRequest, reset.StatusCode);
     }
@@ -96,7 +96,7 @@ public class PasswordResetTests
         using var factory = new TestApiFactory();
         var c = factory.CreateApiClient();
 
-        var reset = await c.PostAsJsonAsync("/api/auth/reset-password",
+        var reset = await c.PostAsJsonAsync("/api/v1/auth/reset-password",
             new { token = "garbage", newPassword = "newpass1" });
         Assert.Equal(HttpStatusCode.BadRequest, reset.StatusCode);
     }

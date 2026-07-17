@@ -21,7 +21,7 @@ class FeedRepository {
     int limit = 20,
   }) async {
     final res = await _dio.get<List<dynamic>>(
-      '/api/posts',
+      '/api/v1/posts',
       queryParameters: {
         'subject': ?subject,
         'beforeId': ?beforeId,
@@ -36,14 +36,14 @@ class FeedRepository {
   /// A single post by id — used to open a shared/deep-linked post that isn't in
   /// the current feed page.
   Future<Post> getPost(int id) async {
-    final res = await _dio.get<Map<String, dynamic>>('/api/posts/$id');
+    final res = await _dio.get<Map<String, dynamic>>('/api/v1/posts/$id');
     return Post.fromJson(res.data!);
   }
 
   /// A teacher's own posts (their profile), pinned first then newest.
   Future<List<Post>> getByAuthor(int authorUserId, {int limit = 50}) async {
     final res = await _dio.get<List<dynamic>>(
-      '/api/posts',
+      '/api/v1/posts',
       queryParameters: {'authorUserId': authorUserId, 'limit': limit},
     );
     return (res.data ?? [])
@@ -51,9 +51,9 @@ class FeedRepository {
         .toList();
   }
 
-  Future<void> pin(int id) => _dio.post<void>('/api/posts/$id/pin');
+  Future<void> pin(int id) => _dio.post<void>('/api/v1/posts/$id/pin');
 
-  Future<void> unpin(int id) => _dio.delete<void>('/api/posts/$id/pin');
+  Future<void> unpin(int id) => _dio.delete<void>('/api/v1/posts/$id/pin');
 
   /// Publishes a post to the global feed. [fileIds] are ids of files already
   /// uploaded via the files endpoint; [sharedQuizId] shares one of the author's
@@ -66,7 +66,7 @@ class FeedRepository {
     List<int> fileIds = const [],
   }) async {
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/posts',
+      '/api/v1/posts',
       data: {
         'text': text,
         'subject': subject,
@@ -78,22 +78,22 @@ class FeedRepository {
     return Post.fromJson(res.data!);
   }
 
-  Future<void> delete(int id) => _dio.delete<void>('/api/posts/$id');
+  Future<void> delete(int id) => _dio.delete<void>('/api/v1/posts/$id');
 
-  Future<void> like(int id) => _dio.post<void>('/api/posts/$id/like');
+  Future<void> like(int id) => _dio.post<void>('/api/v1/posts/$id/like');
 
-  Future<void> unlike(int id) => _dio.delete<void>('/api/posts/$id/like');
+  Future<void> unlike(int id) => _dio.delete<void>('/api/v1/posts/$id/like');
 
   /// Rates a shared-quiz post 1–5 stars (upsert).
   Future<void> ratePost(int id, int value) =>
-      _dio.put<void>('/api/posts/$id/rating', data: {'value': value});
+      _dio.put<void>('/api/v1/posts/$id/rating', data: {'value': value});
 
   Future<void> clearRating(int id) =>
-      _dio.delete<void>('/api/posts/$id/rating');
+      _dio.delete<void>('/api/v1/posts/$id/rating');
 
   Future<List<PostComment>> getComments(int postId) async {
     final res =
-        await _dio.get<List<dynamic>>('/api/posts/$postId/comments');
+        await _dio.get<List<dynamic>>('/api/v1/posts/$postId/comments');
     return (res.data ?? [])
         .map((e) => PostComment.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -101,23 +101,23 @@ class FeedRepository {
 
   Future<PostComment> addComment(int postId, String text) async {
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/posts/$postId/comments',
+      '/api/v1/posts/$postId/comments',
       data: {'text': text},
     );
     return PostComment.fromJson(res.data!);
   }
 
   Future<void> deleteComment(int postId, int commentId) =>
-      _dio.delete<void>('/api/posts/$postId/comments/$commentId');
+      _dio.delete<void>('/api/v1/posts/$postId/comments/$commentId');
 
   Future<void> reportPost(int postId, String reason) => _dio.post<void>(
-        '/api/posts/$postId/report',
+        '/api/v1/posts/$postId/report',
         data: {'reason': reason},
       );
 
   Future<void> reportComment(int postId, int commentId, String reason) =>
       _dio.post<void>(
-        '/api/posts/$postId/comments/$commentId/report',
+        '/api/v1/posts/$postId/comments/$commentId/report',
         data: {'reason': reason},
       );
 }

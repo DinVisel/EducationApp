@@ -13,7 +13,7 @@ class StudentsRepository {
   /// newest first. Pass [beforeId] (the last-loaded student's id) to fetch the
   /// next page.
   Future<List<Student>> getAll({int? beforeId, int limit = 20}) async {
-    final res = await _dio.get<List<dynamic>>('/api/students', queryParameters: {
+    final res = await _dio.get<List<dynamic>>('/api/v1/students', queryParameters: {
       if (beforeId != null) 'beforeId': beforeId,
       'limit': limit,
     });
@@ -23,24 +23,24 @@ class StudentsRepository {
   }
 
   Future<Student> getById(int id) async {
-    final res = await _dio.get<Map<String, dynamic>>('/api/students/$id');
+    final res = await _dio.get<Map<String, dynamic>>('/api/v1/students/$id');
     return Student.fromJson(res.data!);
   }
 
   Future<Student> create(Student student) async {
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/students',
+      '/api/v1/students',
       data: student.toCreateJson(),
     );
     return Student.fromJson(res.data!);
   }
 
   Future<void> update(Student student) async {
-    await _dio.put('/api/students/${student.id}', data: student.toUpdateJson());
+    await _dio.put('/api/v1/students/${student.id}', data: student.toUpdateJson());
   }
 
   Future<void> delete(int id) async {
-    await _dio.delete('/api/students/$id');
+    await _dio.delete('/api/v1/students/$id');
   }
 }
 

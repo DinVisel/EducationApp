@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,9 @@ namespace TeacherTracker.Api.Controllers;
 /// classes they're enrolled in, and the assignments fanned out to them, and can
 /// mark work done. Everything is scoped to the student id carried in the token.
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Student))]
-[Route("api/student")]
+[Route("api/v{version:apiVersion}/student")]
 public class StudentModuleController : ControllerBase
 {
     private readonly AppDbContext _db;

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import 'core/design.dart';
 import 'core/locale/locale_controller.dart';
+import 'core/onboarding/onboarding_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'features/auth/screens/forgot_password_screen.dart';
 import 'features/auth/screens/login_screen.dart';
@@ -17,6 +18,7 @@ import 'features/admin/screens/admin_shell.dart';
 import 'features/auth/state/auth_controller.dart';
 import 'features/feed/screens/post_detail_screen.dart';
 import 'features/home/home_screen.dart';
+import 'features/onboarding/screens/onboarding_screen.dart';
 import 'features/student/screens/student_shell.dart';
 
 /// A `/post/:id` deep link that arrived before the user was signed in. Held until
@@ -28,6 +30,7 @@ final _pendingDeepLink = ValueNotifier<String?>(null);
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier(0);
   ref.listen(authControllerProvider, (_, _) => refresh.value++);
+  ref.listen(onboardingControllerProvider, (_, _) => refresh.value++);
   ref.onDispose(refresh.dispose);
 
   return GoRouter(
@@ -69,6 +72,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           : session.isAdmin
               ? '/admin'
               : '/home';
+
+      // First-login onboarding gate (teachers only).
+      if (session.isTeacher) {
+        final onboarding = ref.read(onboardingControllerProvider);
+        if (onboarding.isLoading || !onboarding.hasValue) {
+          return loc == '/' ? null : '/';
+        }
+        final needsOnboarding = !onboarding.value!;
+        if (needsOnboarding && loc != '/onboarding') return '/onboarding';
+        if (!needsOnboarding && loc == '/onboarding') return home;
+      }
+
       // Keep users out of the auth/splash pages and other roles' shells.
       const authOnlyPages = {
         '/',
@@ -93,6 +108,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           path: '/reset-password',
           builder: (_, _) => const ResetPasswordScreen()),
       GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
+      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
       GoRoute(path: '/student', builder: (_, _) => const StudentShell()),
       GoRoute(path: '/admin', builder: (_, _) => const AdminShell()),
       GoRoute(

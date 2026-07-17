@@ -25,7 +25,7 @@ class FilesRepository {
       'file': MultipartFile.fromBytes(bytes, filename: fileName),
     });
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/files',
+      '/api/v1/files',
       data: form,
     );
     return FileObject.fromJson(res.data!);
@@ -40,7 +40,7 @@ class FilesRepository {
   }) async {
     // 1. Ask the API for a presigned PUT URL + the key it issued us.
     final presign = await _dio.post<Map<String, dynamic>>(
-      '/api/files/presign',
+      '/api/v1/files/presign',
       data: {'fileName': fileName, 'contentType': contentType},
     );
     final uploadUrl = presign.data!['uploadUrl'] as String;
@@ -62,7 +62,7 @@ class FilesRepository {
 
     // 3. Confirm — the API HEADs the object and stores its metadata.
     final confirm = await _dio.post<Map<String, dynamic>>(
-      '/api/files/confirm',
+      '/api/v1/files/confirm',
       data: {'key': key, 'fileName': fileName, 'contentType': contentType},
     );
     return FileObject.fromJson(confirm.data!);
@@ -70,7 +70,7 @@ class FilesRepository {
 
   /// A short-lived direct-download URL for the file (presigned by the API).
   Future<String> getDownloadUrl(int id) async {
-    final res = await _dio.get<Map<String, dynamic>>('/api/files/$id');
+    final res = await _dio.get<Map<String, dynamic>>('/api/v1/files/$id');
     return res.data!['url'] as String;
   }
 
@@ -107,7 +107,7 @@ class FilesRepository {
     return 'Ready to save "$fileName"';
   }
 
-  Future<void> delete(int id) => _dio.delete<void>('/api/files/$id');
+  Future<void> delete(int id) => _dio.delete<void>('/api/v1/files/$id');
 }
 
 final filesRepositoryProvider = Provider<FilesRepository>(

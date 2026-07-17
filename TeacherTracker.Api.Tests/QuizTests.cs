@@ -15,7 +15,7 @@ public class QuizTests
 
     private static async Task<string> RegisterTeacherAsync(HttpClient c, string email)
     {
-        var res = await c.PostAsJsonAsync("/api/auth/register", new
+        var res = await c.PostAsJsonAsync("/api/v1/auth/register", new
         {
             firstName = "Test",
             lastName = "Teacher",
@@ -37,14 +37,14 @@ public class QuizTests
 
     private static async Task<int> CreateClassroomAsync(HttpClient c, string token, string name = "Class A")
     {
-        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/classrooms", token, new { name }));
+        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/classrooms", token, new { name }));
         res.EnsureSuccessStatusCode();
         return (await res.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetInt32();
     }
 
     private static async Task<int> CreateStudentAsync(HttpClient c, string token, string first = "Sam")
     {
-        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/students", token, new
+        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/students", token, new
         {
             firstName = first,
             lastName = "Student",
@@ -58,11 +58,11 @@ public class QuizTests
     private static async Task<string> StudentTokenAsync(
         HttpClient c, string teacherToken, int studentId, string email)
     {
-        var acct = await c.SendAsync(Req(HttpMethod.Post, $"/api/students/{studentId}/account",
+        var acct = await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/students/{studentId}/account",
             teacherToken, new { email, password = "pass1234" }));
         acct.EnsureSuccessStatusCode();
 
-        var login = await c.PostAsJsonAsync("/api/auth/login", new { email, password = "pass1234" });
+        var login = await c.PostAsJsonAsync("/api/v1/auth/login", new { email, password = "pass1234" });
         login.EnsureSuccessStatusCode();
         return (await login.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("token").GetString()!;
     }
@@ -100,7 +100,7 @@ public class QuizTests
     private static async Task<int> CreateQuizAsync(HttpClient c, string token, int classroomId, object? quiz = null)
     {
         var res = await c.SendAsync(Req(HttpMethod.Post,
-            $"/api/classrooms/{classroomId}/quizzes", token, quiz ?? SampleQuiz()));
+            $"/api/v1/classrooms/{classroomId}/quizzes", token, quiz ?? SampleQuiz()));
         res.EnsureSuccessStatusCode();
         return (await res.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetInt32();
     }
@@ -116,12 +116,12 @@ public class QuizTests
         var classId = await CreateClassroomAsync(c, teacher);
         var s1 = await CreateStudentAsync(c, teacher, "A");
         var s2 = await CreateStudentAsync(c, teacher, "B");
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{classId}/students/{s1}", teacher));
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{classId}/students/{s2}", teacher));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{classId}/students/{s1}", teacher));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{classId}/students/{s2}", teacher));
 
         var quizId = await CreateQuizAsync(c, teacher, classId);
 
-        var get = await c.SendAsync(Req(HttpMethod.Get, $"/api/classrooms/{classId}/quizzes/{quizId}", teacher));
+        var get = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/classrooms/{classId}/quizzes/{quizId}", teacher));
         get.EnsureSuccessStatusCode();
         var q = await get.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(2, q.GetProperty("questionCount").GetInt32());
@@ -139,11 +139,11 @@ public class QuizTests
         var classId = await CreateClassroomAsync(c, owner);
         var quizId = await CreateQuizAsync(c, owner, classId);
 
-        var list = await c.SendAsync(Req(HttpMethod.Get, $"/api/classrooms/{classId}/quizzes", intruder));
+        var list = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/classrooms/{classId}/quizzes", intruder));
         Assert.Equal(HttpStatusCode.NotFound, list.StatusCode);
 
         var analytics = await c.SendAsync(Req(HttpMethod.Get,
-            $"/api/classrooms/{classId}/quizzes/{quizId}/analytics", intruder));
+            $"/api/v1/classrooms/{classId}/quizzes/{quizId}/analytics", intruder));
         Assert.Equal(HttpStatusCode.NotFound, analytics.StatusCode);
     }
 
@@ -173,7 +173,7 @@ public class QuizTests
             },
         };
 
-        var res = await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{classId}/quizzes", teacher, bad));
+        var res = await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{classId}/quizzes", teacher, bad));
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
@@ -185,19 +185,19 @@ public class QuizTests
         var teacher = await RegisterTeacherAsync(c, "t@t.com");
         var classId = await CreateClassroomAsync(c, teacher);
         var studentId = await CreateStudentAsync(c, teacher);
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{classId}/students/{studentId}", teacher));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{classId}/students/{studentId}", teacher));
         var student = await StudentTokenAsync(c, teacher, studentId, "sam@s.com");
         await CreateQuizAsync(c, teacher, classId);
 
         // Student sees the quiz in their list.
-        var list = await c.SendAsync(Req(HttpMethod.Get, "/api/student/quizzes", student));
+        var list = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/student/quizzes", student));
         list.EnsureSuccessStatusCode();
         var quizzes = await list.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(1, quizzes.GetArrayLength());
         var attemptId = quizzes[0].GetProperty("attemptId").GetInt32();
 
         // Fetch the detail (choices include isCorrect for immediate feedback).
-        var detail = await c.SendAsync(Req(HttpMethod.Get, $"/api/student/quizzes/{attemptId}", student));
+        var detail = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/student/quizzes/{attemptId}", student));
         detail.EnsureSuccessStatusCode();
         var dj = await detail.Content.ReadFromJsonAsync<JsonElement>();
         var questions = dj.GetProperty("questions");
@@ -209,7 +209,7 @@ public class QuizTests
         int q2Id = questions[1].GetProperty("questionId").GetInt32();
         int q2Wrong = FindChoice(questions[1], correct: false);
 
-        var submit = await c.SendAsync(Req(HttpMethod.Post, $"/api/student/quizzes/{attemptId}/submit", student,
+        var submit = await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/student/quizzes/{attemptId}/submit", student,
             new { answers = new[] { new { questionId = q1Id, choiceId = q1Correct },
                                     new { questionId = q2Id, choiceId = q2Wrong } } }));
         submit.EnsureSuccessStatusCode();
@@ -226,24 +226,24 @@ public class QuizTests
         var teacher = await RegisterTeacherAsync(c, "t@t.com");
         var classId = await CreateClassroomAsync(c, teacher);
         var studentId = await CreateStudentAsync(c, teacher);
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{classId}/students/{studentId}", teacher));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{classId}/students/{studentId}", teacher));
         var student = await StudentTokenAsync(c, teacher, studentId, "sam@s.com");
         await CreateQuizAsync(c, teacher, classId);
 
-        var list = await c.SendAsync(Req(HttpMethod.Get, "/api/student/quizzes", student));
+        var list = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/student/quizzes", student));
         var attemptId = (await list.Content.ReadFromJsonAsync<JsonElement>())[0]
             .GetProperty("attemptId").GetInt32();
-        var detail = await c.SendAsync(Req(HttpMethod.Get, $"/api/student/quizzes/{attemptId}", student));
+        var detail = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/student/quizzes/{attemptId}", student));
         var questions = (await detail.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("questions");
         var answers = new List<object>();
         foreach (var q in questions.EnumerateArray())
             answers.Add(new { questionId = q.GetProperty("questionId").GetInt32(), choiceId = FindChoice(q, true) });
 
-        var first = await c.SendAsync(Req(HttpMethod.Post, $"/api/student/quizzes/{attemptId}/submit", student,
+        var first = await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/student/quizzes/{attemptId}/submit", student,
             new { answers }));
         first.EnsureSuccessStatusCode();
 
-        var second = await c.SendAsync(Req(HttpMethod.Post, $"/api/student/quizzes/{attemptId}/submit", student,
+        var second = await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/student/quizzes/{attemptId}/submit", student,
             new { answers }));
         Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
     }
@@ -257,19 +257,19 @@ public class QuizTests
         var classId = await CreateClassroomAsync(c, teacher);
         var s1 = await CreateStudentAsync(c, teacher, "A");
         var s2 = await CreateStudentAsync(c, teacher, "B");
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{classId}/students/{s1}", teacher));
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{classId}/students/{s2}", teacher));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{classId}/students/{s1}", teacher));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{classId}/students/{s2}", teacher));
         var t1 = await StudentTokenAsync(c, teacher, s1, "a@s.com");
         var t2 = await StudentTokenAsync(c, teacher, s2, "b@s.com");
         await CreateQuizAsync(c, teacher, classId);
 
         // s1's attempt id.
-        var list = await c.SendAsync(Req(HttpMethod.Get, "/api/student/quizzes", t1));
+        var list = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/student/quizzes", t1));
         var attemptId = (await list.Content.ReadFromJsonAsync<JsonElement>())[0]
             .GetProperty("attemptId").GetInt32();
 
         // s2 must not be able to read it.
-        var foreign = await c.SendAsync(Req(HttpMethod.Get, $"/api/student/quizzes/{attemptId}", t2));
+        var foreign = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/student/quizzes/{attemptId}", t2));
         Assert.Equal(HttpStatusCode.NotFound, foreign.StatusCode);
     }
 
@@ -281,24 +281,24 @@ public class QuizTests
         var teacher = await RegisterTeacherAsync(c, "t@t.com");
         var classId = await CreateClassroomAsync(c, teacher);
         var studentId = await CreateStudentAsync(c, teacher);
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{classId}/students/{studentId}", teacher));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{classId}/students/{studentId}", teacher));
         var student = await StudentTokenAsync(c, teacher, studentId, "sam@s.com");
         var quizId = await CreateQuizAsync(c, teacher, classId);
 
-        var list = await c.SendAsync(Req(HttpMethod.Get, "/api/student/quizzes", student));
+        var list = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/student/quizzes", student));
         var attemptId = (await list.Content.ReadFromJsonAsync<JsonElement>())[0]
             .GetProperty("attemptId").GetInt32();
-        var detail = await c.SendAsync(Req(HttpMethod.Get, $"/api/student/quizzes/{attemptId}", student));
+        var detail = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/student/quizzes/{attemptId}", student));
         var questions = (await detail.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("questions");
 
         // Answer everything correctly → 100%.
         var answers = new List<object>();
         foreach (var q in questions.EnumerateArray())
             answers.Add(new { questionId = q.GetProperty("questionId").GetInt32(), choiceId = FindChoice(q, true) });
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/student/quizzes/{attemptId}/submit", student, new { answers }));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/student/quizzes/{attemptId}/submit", student, new { answers }));
 
         var analytics = await c.SendAsync(Req(HttpMethod.Get,
-            $"/api/classrooms/{classId}/quizzes/{quizId}/analytics", teacher));
+            $"/api/v1/classrooms/{classId}/quizzes/{quizId}/analytics", teacher));
         analytics.EnsureSuccessStatusCode();
         var a = await analytics.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(1, a.GetProperty("submittedCount").GetInt32());

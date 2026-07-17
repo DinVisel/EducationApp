@@ -13,7 +13,7 @@ class AdminRepository {
 
   Future<List<AdminReport>> getReports({bool resolved = false}) async {
     final res = await _dio.get<List<dynamic>>(
-      '/api/admin/reports',
+      '/api/v1/admin/reports',
       queryParameters: {'resolved': resolved},
     );
     return (res.data ?? [])
@@ -22,13 +22,13 @@ class AdminRepository {
   }
 
   Future<void> dismiss(int reportId) =>
-      _dio.post<void>('/api/admin/reports/$reportId/dismiss');
+      _dio.post<void>('/api/v1/admin/reports/$reportId/dismiss');
 
   Future<void> removeContent(int reportId) =>
-      _dio.post<void>('/api/admin/reports/$reportId/remove');
+      _dio.post<void>('/api/v1/admin/reports/$reportId/remove');
 
   Future<List<AdminUser>> getUsers() async {
-    final res = await _dio.get<List<dynamic>>('/api/admin/users');
+    final res = await _dio.get<List<dynamic>>('/api/v1/admin/users');
     return (res.data ?? [])
         .map((e) => AdminUser.fromJson(e as Map<String, dynamic>))
         .toList();

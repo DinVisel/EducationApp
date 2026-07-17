@@ -13,7 +13,7 @@ class ProfileRepository {
 
   Future<Teacher> getTeacher(int userId) async {
     final res =
-        await _dio.get<Map<String, dynamic>>('/api/teachers/$userId/profile');
+        await _dio.get<Map<String, dynamic>>('/api/v1/teachers/$userId/profile');
     return Teacher.fromJson(res.data!);
   }
 }

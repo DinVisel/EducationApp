@@ -9,7 +9,7 @@ class NotesRepository {
 
   final Dio _dio;
 
-  String _base(int studentId) => '/api/students/$studentId/notes';
+  String _base(int studentId) => '/api/v1/students/$studentId/notes';
 
   Future<List<TrackingNote>> getForStudent(int studentId) async {
     final res = await _dio.get<List<dynamic>>(_base(studentId));

@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +10,9 @@ using TeacherTracker.Api.Models;
 namespace TeacherTracker.Api.Controllers;
 
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Teacher))]
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class ClassroomsController : ControllerBase
 {
     private readonly AppDbContext _db;

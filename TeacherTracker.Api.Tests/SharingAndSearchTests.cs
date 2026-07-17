@@ -15,7 +15,7 @@ public class SharingAndSearchTests
     private static async Task<string> RegisterTeacherAsync(
         HttpClient c, string email, string first = "Test", string last = "Teacher")
     {
-        var res = await c.PostAsJsonAsync("/api/auth/register", new
+        var res = await c.PostAsJsonAsync("/api/v1/auth/register", new
         {
             firstName = first,
             lastName = last,
@@ -36,14 +36,14 @@ public class SharingAndSearchTests
 
     private static async Task<int> CreateClassroomAsync(HttpClient c, string token, string name = "Class A")
     {
-        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/classrooms", token, new { name }));
+        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/classrooms", token, new { name }));
         res.EnsureSuccessStatusCode();
         return (await res.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetInt32();
     }
 
     private static async Task<int> CreateStudentAsync(HttpClient c, string token, string first = "Sam")
     {
-        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/students", token, new
+        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/students", token, new
         {
             firstName = first,
             lastName = "Student",
@@ -75,7 +75,7 @@ public class SharingAndSearchTests
     private static async Task<int> CreateQuizAsync(HttpClient c, string token, int classroomId, object? quiz = null)
     {
         var res = await c.SendAsync(Req(HttpMethod.Post,
-            $"/api/classrooms/{classroomId}/quizzes", token, quiz ?? SampleQuiz()));
+            $"/api/v1/classrooms/{classroomId}/quizzes", token, quiz ?? SampleQuiz()));
         res.EnsureSuccessStatusCode();
         return (await res.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetInt32();
     }
@@ -85,7 +85,7 @@ public class SharingAndSearchTests
         HttpClient c, string token, int quizId,
         string subject = "Science", string grade = "Grade3", string text = "Check out my quiz!")
     {
-        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/posts", token, new
+        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/posts", token, new
         {
             text,
             subject,
@@ -98,12 +98,12 @@ public class SharingAndSearchTests
 
     private static async Task<int> SeedPdfFileAsync(TestApiFactory factory, HttpClient c, string token, string name)
     {
-        var presign = await c.SendAsync(Req(HttpMethod.Post, "/api/files/presign", token,
+        var presign = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/files/presign", token,
             new { fileName = name, contentType = "application/pdf" }));
         presign.EnsureSuccessStatusCode();
         var key = (await presign.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("key").GetString()!;
         factory.Storage.Seed(key, 2048);
-        var ok = await c.SendAsync(Req(HttpMethod.Post, "/api/files/confirm", token,
+        var ok = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/files/confirm", token,
             new { key, fileName = name, contentType = "application/pdf" }));
         ok.EnsureSuccessStatusCode();
         return (await ok.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetInt32();
@@ -121,7 +121,7 @@ public class SharingAndSearchTests
         var quizId = await CreateQuizAsync(c, teacher, classId);
         var postId = await ShareQuizAsync(c, teacher, quizId);
 
-        var get = await c.SendAsync(Req(HttpMethod.Get, $"/api/posts/{postId}", teacher));
+        var get = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/posts/{postId}", teacher));
         get.EnsureSuccessStatusCode();
         var p = await get.Content.ReadFromJsonAsync<JsonElement>();
         var shared = p.GetProperty("sharedQuiz");
@@ -142,19 +142,19 @@ public class SharingAndSearchTests
         var quizId = await CreateQuizAsync(c, author, classId);
         var postId = await ShareQuizAsync(c, author, quizId);
 
-        var rate = await c.SendAsync(Req(HttpMethod.Put, $"/api/posts/{postId}/rating", rater, new { value = 4 }));
+        var rate = await c.SendAsync(Req(HttpMethod.Put, $"/api/v1/posts/{postId}/rating", rater, new { value = 4 }));
         Assert.Equal(HttpStatusCode.NoContent, rate.StatusCode);
         // Re-rating updates rather than duplicating.
-        await c.SendAsync(Req(HttpMethod.Put, $"/api/posts/{postId}/rating", rater, new { value = 5 }));
+        await c.SendAsync(Req(HttpMethod.Put, $"/api/v1/posts/{postId}/rating", rater, new { value = 5 }));
 
-        var get = await c.SendAsync(Req(HttpMethod.Get, $"/api/posts/{postId}", rater));
+        var get = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/posts/{postId}", rater));
         var p = await get.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(1, p.GetProperty("ratingCount").GetInt32());
         Assert.Equal(5, p.GetProperty("myRating").GetInt32());
         Assert.Equal(5, p.GetProperty("averageRating").GetDouble());
 
         // Author gets a PostRated notification.
-        var notifs = await c.SendAsync(Req(HttpMethod.Get, "/api/notifications", author));
+        var notifs = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/notifications", author));
         var list = await notifs.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Contains(list.EnumerateArray(), n => n.GetProperty("type").GetString() == "PostRated");
     }
@@ -165,11 +165,11 @@ public class SharingAndSearchTests
         using var factory = new TestApiFactory();
         var c = factory.CreateApiClient();
         var teacher = await RegisterTeacherAsync(c, "t@t.com");
-        var post = await c.SendAsync(Req(HttpMethod.Post, "/api/posts", teacher,
+        var post = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/posts", teacher,
             new { text = "just a text post", subject = "General" }));
         var postId = (await post.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetInt32();
 
-        var rate = await c.SendAsync(Req(HttpMethod.Put, $"/api/posts/{postId}/rating", teacher, new { value = 3 }));
+        var rate = await c.SendAsync(Req(HttpMethod.Put, $"/api/v1/posts/{postId}/rating", teacher, new { value = 3 }));
         Assert.Equal(HttpStatusCode.BadRequest, rate.StatusCode);
     }
 
@@ -183,7 +183,7 @@ public class SharingAndSearchTests
         var classId = await CreateClassroomAsync(c, owner);
         var quizId = await CreateQuizAsync(c, owner, classId);
 
-        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/posts", intruder,
+        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/posts", intruder,
             new { text = "not mine", subject = "General", sharedQuizId = quizId }));
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
@@ -206,10 +206,10 @@ public class SharingAndSearchTests
         var bClass = await CreateClassroomAsync(c, cloner, "Cloner Class");
         var s1 = await CreateStudentAsync(c, cloner, "A");
         var s2 = await CreateStudentAsync(c, cloner, "B");
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{bClass}/students/{s1}", cloner));
-        await c.SendAsync(Req(HttpMethod.Post, $"/api/classrooms/{bClass}/students/{s2}", cloner));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{bClass}/students/{s1}", cloner));
+        await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/classrooms/{bClass}/students/{s2}", cloner));
 
-        var clone = await c.SendAsync(Req(HttpMethod.Post, $"/api/quizzes/{quizId}/clone", cloner,
+        var clone = await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/quizzes/{quizId}/clone", cloner,
             new { classroomId = bClass }));
         clone.EnsureSuccessStatusCode();
         var cloned = await clone.Content.ReadFromJsonAsync<JsonElement>();
@@ -217,13 +217,13 @@ public class SharingAndSearchTests
         Assert.Equal(2, cloned.GetProperty("assignedCount").GetInt32());
 
         // The cloned quiz lives under the cloner's class.
-        var list = await c.SendAsync(Req(HttpMethod.Get, $"/api/classrooms/{bClass}/quizzes", cloner));
+        var list = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/classrooms/{bClass}/quizzes", cloner));
         var quizzes = await list.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(1, quizzes.GetArrayLength());
         Assert.Equal("Photosynthesis Basics", quizzes[0].GetProperty("title").GetString());
 
         // The original author is notified their quiz was cloned.
-        var notifs = await c.SendAsync(Req(HttpMethod.Get, "/api/notifications", author));
+        var notifs = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/notifications", author));
         var notifList = await notifs.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Contains(notifList.EnumerateArray(), n => n.GetProperty("type").GetString() == "QuizCloned");
     }
@@ -239,10 +239,10 @@ public class SharingAndSearchTests
         var quizId = await CreateQuizAsync(c, owner, ownerClass); // NOT shared
         var otherClass = await CreateClassroomAsync(c, other, "Other Class");
 
-        var preview = await c.SendAsync(Req(HttpMethod.Get, $"/api/quizzes/{quizId}/preview", other));
+        var preview = await c.SendAsync(Req(HttpMethod.Get, $"/api/v1/quizzes/{quizId}/preview", other));
         Assert.Equal(HttpStatusCode.NotFound, preview.StatusCode);
 
-        var clone = await c.SendAsync(Req(HttpMethod.Post, $"/api/quizzes/{quizId}/clone", other,
+        var clone = await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/quizzes/{quizId}/clone", other,
             new { classroomId = otherClass }));
         Assert.Equal(HttpStatusCode.NotFound, clone.StatusCode);
     }
@@ -257,7 +257,7 @@ public class SharingAndSearchTests
         await RegisterTeacherAsync(c, "alice@t.com", "Alice", "Anderson");
         var seeker = await RegisterTeacherAsync(c, "seeker@t.com", "Bob", "Brown");
 
-        var res = await c.SendAsync(Req(HttpMethod.Get, "/api/search?q=Alice&type=teachers", seeker));
+        var res = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/search?q=Alice&type=teachers", seeker));
         res.EnsureSuccessStatusCode();
         var results = await res.Content.ReadFromJsonAsync<JsonElement>();
         var teachers = results.GetProperty("teachers");
@@ -278,7 +278,7 @@ public class SharingAndSearchTests
 
         // Matching filter returns the material.
         var hit = await c.SendAsync(Req(HttpMethod.Get,
-            "/api/search?q=Fractions&type=quizzes&subject=Math&grade=Grade4", seeker));
+            "/api/v1/search?q=Fractions&type=quizzes&subject=Math&grade=Grade4", seeker));
         hit.EnsureSuccessStatusCode();
         var hitMaterials = (await hit.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("materials");
         Assert.Equal(1, hitMaterials.GetArrayLength());
@@ -287,7 +287,7 @@ public class SharingAndSearchTests
 
         // Non-matching grade filter excludes it.
         var miss = await c.SendAsync(Req(HttpMethod.Get,
-            "/api/search?q=Fractions&type=quizzes&subject=Math&grade=Grade1", seeker));
+            "/api/v1/search?q=Fractions&type=quizzes&subject=Math&grade=Grade1", seeker));
         var missMaterials = (await miss.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("materials");
         Assert.Equal(0, missMaterials.GetArrayLength());
     }
@@ -301,12 +301,12 @@ public class SharingAndSearchTests
         var seeker = await RegisterTeacherAsync(c, "seeker@t.com");
 
         var fileId = await SeedPdfFileAsync(factory, c, author, "geometry-worksheet.pdf");
-        var post = await c.SendAsync(Req(HttpMethod.Post, "/api/posts", author,
+        var post = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/posts", author,
             new { text = "worksheet", subject = "Math", gradeLevel = "Grade5", fileIds = new[] { fileId } }));
         post.EnsureSuccessStatusCode();
 
         var res = await c.SendAsync(Req(HttpMethod.Get,
-            "/api/search?q=geometry&type=documents", seeker));
+            "/api/v1/search?q=geometry&type=documents", seeker));
         res.EnsureSuccessStatusCode();
         var materials = (await res.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("materials");
         Assert.Equal(1, materials.GetArrayLength());

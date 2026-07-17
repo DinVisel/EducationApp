@@ -2,6 +2,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using Amazon.Rekognition;
 using Amazon.S3;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
@@ -24,8 +25,24 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// --- API versioning: every route is under /api/v{version}/... ---
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+}).AddMvc().AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+});
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<AuditInterceptor>();
+
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+    options
+        .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .AddInterceptors(sp.GetRequiredService<AuditInterceptor>()));
 
 // --- Authentication (JWT) ---
 builder.Services.Configure<JwtOptions>(

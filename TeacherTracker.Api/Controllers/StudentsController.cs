@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +11,9 @@ using TeacherTracker.Api.Models;
 namespace TeacherTracker.Api.Controllers;
 
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Teacher))]
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class StudentsController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -116,7 +118,8 @@ public class StudentsController : ControllerBase
         if (student is null)
             return NotFound();
 
-        _db.Students.Remove(student);
+        student.IsDeleted = true;
+        student.DeletedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         return NoContent();
     }
@@ -174,11 +177,12 @@ public class StudentsController : ControllerBase
         if (student is null || student.User is null)
             return NotFound();
 
-        // Unlink first so the SetNull FK doesn't fight the delete, then remove.
+        // Unlink first, then soft-delete the login account (profile/work stays).
         var user = student.User;
         student.User = null;
         student.UserId = null;
-        _db.Users.Remove(user);
+        user.IsDeleted = true;
+        user.DeletedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         return NoContent();
     }

@@ -9,7 +9,7 @@ public class PaginationTests
 {
     private static async Task<string> RegisterTeacherAsync(HttpClient c, string email)
     {
-        var res = await c.PostAsJsonAsync("/api/auth/register", new
+        var res = await c.PostAsJsonAsync("/api/v1/auth/register", new
         {
             firstName = "Test",
             lastName = "Teacher",
@@ -31,7 +31,7 @@ public class PaginationTests
 
     private static async Task<int> CreateStudentAsync(HttpClient c, string token, int n)
     {
-        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/students", token, new
+        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/students", token, new
         {
             firstName = $"Student{n}",
             lastName = "Test",
@@ -44,7 +44,7 @@ public class PaginationTests
 
     private static async Task<int> CreateClassroomAsync(HttpClient c, string token, int n)
     {
-        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/classrooms", token, new { name = $"Class{n}" }));
+        var res = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/classrooms", token, new { name = $"Class{n}" }));
         res.EnsureSuccessStatusCode();
         var json = await res.Content.ReadFromJsonAsync<JsonElement>();
         return json.GetProperty("id").GetInt32();
@@ -69,15 +69,15 @@ public class PaginationTests
         for (var i = 0; i < 25; i++) ids.Add(await CreateStudentAsync(c, token, i));
         ids.Reverse(); // newest (highest id) first, matching OrderByDescending(Id)
 
-        var page1 = await GetIdsAsync(c, "/api/students?limit=10", token);
+        var page1 = await GetIdsAsync(c, "/api/v1/students?limit=10", token);
         Assert.Equal(ids.Take(10), page1);
 
-        var page2 = await GetIdsAsync(c, $"/api/students?limit=10&beforeId={page1[^1]}", token);
+        var page2 = await GetIdsAsync(c, $"/api/v1/students?limit=10&beforeId={page1[^1]}", token);
         Assert.Equal(ids.Skip(10).Take(10), page2);
         Assert.Empty(page1.Intersect(page2));
 
         // limit is clamped to [1, 50].
-        var overLimit = await GetIdsAsync(c, "/api/students?limit=999", token);
+        var overLimit = await GetIdsAsync(c, "/api/v1/students?limit=999", token);
         Assert.Equal(25, overLimit.Count);
     }
 
@@ -92,10 +92,10 @@ public class PaginationTests
         for (var i = 0; i < 25; i++) ids.Add(await CreateClassroomAsync(c, token, i));
         ids.Reverse();
 
-        var page1 = await GetIdsAsync(c, "/api/classrooms?limit=10", token);
+        var page1 = await GetIdsAsync(c, "/api/v1/classrooms?limit=10", token);
         Assert.Equal(ids.Take(10), page1);
 
-        var page2 = await GetIdsAsync(c, $"/api/classrooms?limit=10&beforeId={page1[^1]}", token);
+        var page2 = await GetIdsAsync(c, $"/api/v1/classrooms?limit=10&beforeId={page1[^1]}", token);
         Assert.Equal(ids.Skip(10).Take(10), page2);
         Assert.Empty(page1.Intersect(page2));
     }
@@ -111,7 +111,7 @@ public class PaginationTests
         var ids = new List<int>();
         for (var i = 0; i < 25; i++)
         {
-            var res = await c.SendAsync(Req(HttpMethod.Post, $"/api/students/{studentId}/homework", token,
+            var res = await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/students/{studentId}/homework", token,
                 new { title = $"HW{i}", description = "d", isDone = false }));
             res.EnsureSuccessStatusCode();
             var json = await res.Content.ReadFromJsonAsync<JsonElement>();
@@ -119,11 +119,11 @@ public class PaginationTests
         }
         ids.Reverse();
 
-        var page1 = await GetIdsAsync(c, $"/api/students/{studentId}/homework?limit=10", token);
+        var page1 = await GetIdsAsync(c, $"/api/v1/students/{studentId}/homework?limit=10", token);
         Assert.Equal(ids.Take(10), page1);
 
         var page2 = await GetIdsAsync(c,
-            $"/api/students/{studentId}/homework?limit=10&beforeId={page1[^1]}", token);
+            $"/api/v1/students/{studentId}/homework?limit=10&beforeId={page1[^1]}", token);
         Assert.Equal(ids.Skip(10).Take(10), page2);
         Assert.Empty(page1.Intersect(page2));
     }
@@ -139,7 +139,7 @@ public class PaginationTests
         var ids = new List<int>();
         for (var i = 0; i < 25; i++)
         {
-            var res = await c.SendAsync(Req(HttpMethod.Post, $"/api/students/{studentId}/books", token,
+            var res = await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/students/{studentId}/books", token,
                 new { title = $"Book{i}", author = "Author", status = "Reading" }));
             res.EnsureSuccessStatusCode();
             var json = await res.Content.ReadFromJsonAsync<JsonElement>();
@@ -147,11 +147,11 @@ public class PaginationTests
         }
         ids.Reverse();
 
-        var page1 = await GetIdsAsync(c, $"/api/students/{studentId}/books?limit=10", token);
+        var page1 = await GetIdsAsync(c, $"/api/v1/students/{studentId}/books?limit=10", token);
         Assert.Equal(ids.Take(10), page1);
 
         var page2 = await GetIdsAsync(c,
-            $"/api/students/{studentId}/books?limit=10&beforeId={page1[^1]}", token);
+            $"/api/v1/students/{studentId}/books?limit=10&beforeId={page1[^1]}", token);
         Assert.Equal(ids.Skip(10).Take(10), page2);
         Assert.Empty(page1.Intersect(page2));
     }
@@ -167,7 +167,7 @@ public class PaginationTests
         var postIds = new List<int>();
         for (var i = 0; i < 25; i++)
         {
-            var res = await c.SendAsync(Req(HttpMethod.Post, "/api/posts", author,
+            var res = await c.SendAsync(Req(HttpMethod.Post, "/api/v1/posts", author,
                 new { text = $"Post {i}", subject = "Math" }));
             res.EnsureSuccessStatusCode();
             var json = await res.Content.ReadFromJsonAsync<JsonElement>();
@@ -175,12 +175,12 @@ public class PaginationTests
         }
         // Each like creates one notification for the author, in the same order.
         foreach (var postId in postIds)
-            await c.SendAsync(Req(HttpMethod.Post, $"/api/posts/{postId}/like", liker));
+            await c.SendAsync(Req(HttpMethod.Post, $"/api/v1/posts/{postId}/like", liker));
 
-        var page1 = await GetIdsAsync(c, "/api/notifications?limit=10", author);
+        var page1 = await GetIdsAsync(c, "/api/v1/notifications?limit=10", author);
         Assert.Equal(10, page1.Count);
 
-        var page2 = await GetIdsAsync(c, $"/api/notifications?limit=10&beforeId={page1[^1]}", author);
+        var page2 = await GetIdsAsync(c, $"/api/v1/notifications?limit=10&beforeId={page1[^1]}", author);
         Assert.Equal(10, page2.Count);
         Assert.Empty(page1.Intersect(page2));
         Assert.All(page2, id => Assert.True(id < page1[^1]));

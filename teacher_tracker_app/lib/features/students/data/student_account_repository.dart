@@ -23,7 +23,7 @@ class StudentAccountRepository {
 
   Future<StudentAccount> get(int studentId) async {
     final res = await _dio
-        .get<Map<String, dynamic>>('/api/students/$studentId/account');
+        .get<Map<String, dynamic>>('/api/v1/students/$studentId/account');
     return StudentAccount.fromJson(res.data!);
   }
 
@@ -33,14 +33,14 @@ class StudentAccountRepository {
     required String password,
   }) async {
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/students/$studentId/account',
+      '/api/v1/students/$studentId/account',
       data: {'email': email, 'password': password},
     );
     return StudentAccount.fromJson(res.data!);
   }
 
   Future<void> delete(int studentId) =>
-      _dio.delete<void>('/api/students/$studentId/account');
+      _dio.delete<void>('/api/v1/students/$studentId/account');
 }
 
 final studentAccountRepositoryProvider = Provider<StudentAccountRepository>(

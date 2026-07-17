@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +13,9 @@ namespace TeacherTracker.Api.Controllers;
 /// the social hub and either dismiss them or remove the offending content, and
 /// can list all accounts.
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Admin))]
-[Route("api/admin")]
+[Route("api/v{version:apiVersion}/admin")]
 public class AdminController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -80,7 +82,11 @@ public class AdminController : ControllerBase
         if (report.PostId is int postId)
         {
             var post = await _db.Posts.FirstOrDefaultAsync(p => p.Id == postId);
-            if (post is not null) _db.Posts.Remove(post);
+            if (post is not null)
+            {
+                post.IsDeleted = true;
+                post.DeletedAt = DateTime.UtcNow;
+            }
         }
         else if (report.PostCommentId is int commentId)
         {

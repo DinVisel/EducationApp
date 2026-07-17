@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -16,8 +17,9 @@ namespace TeacherTracker.Api.Controllers;
 /// `confirm`; only clean files are promoted to `uploads/` and recorded. The proxy
 /// path scans the stream before it is ever written to R2.
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [EnableRateLimiting("uploads")]
 public class FilesController : ControllerBase
 {

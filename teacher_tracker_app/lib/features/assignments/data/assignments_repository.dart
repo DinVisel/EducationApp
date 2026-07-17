@@ -13,7 +13,7 @@ class AssignmentsRepository {
 
   Future<List<Assignment>> getForClass(int classroomId) async {
     final res = await _dio
-        .get<List<dynamic>>('/api/classrooms/$classroomId/assignments');
+        .get<List<dynamic>>('/api/v1/classrooms/$classroomId/assignments');
     return (res.data ?? [])
         .map((e) => Assignment.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -29,7 +29,7 @@ class AssignmentsRepository {
     List<int> fileIds = const [],
   }) async {
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/classrooms/$classroomId/assignments',
+      '/api/v1/classrooms/$classroomId/assignments',
       data: {
         'title': title,
         if (description != null && description.isNotEmpty)
@@ -44,7 +44,7 @@ class AssignmentsRepository {
   }
 
   Future<void> delete(int classroomId, int id) =>
-      _dio.delete<void>('/api/classrooms/$classroomId/assignments/$id');
+      _dio.delete<void>('/api/v1/classrooms/$classroomId/assignments/$id');
 }
 
 final assignmentsRepositoryProvider = Provider<AssignmentsRepository>(

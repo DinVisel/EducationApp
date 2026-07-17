@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +13,9 @@ namespace TeacherTracker.Api.Controllers;
 /// Uses PostgreSQL full-text search (generated tsvector + GIN) in production and
 /// a translatable LIKE fallback on the SQLite test provider.
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Teacher))]
-[Route("api/search")]
+[Route("api/v{version:apiVersion}/search")]
 public class SearchController : ControllerBase
 {
     private readonly AppDbContext _db;

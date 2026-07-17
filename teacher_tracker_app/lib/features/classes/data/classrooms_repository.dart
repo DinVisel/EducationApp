@@ -14,7 +14,7 @@ class ClassroomsRepository {
   /// Newest first. Pass [beforeId] (the last-loaded classroom's id) to fetch
   /// the next page.
   Future<List<Classroom>> getAll({int? beforeId, int limit = 20}) async {
-    final res = await _dio.get<List<dynamic>>('/api/classrooms', queryParameters: {
+    final res = await _dio.get<List<dynamic>>('/api/v1/classrooms', queryParameters: {
       if (beforeId != null) 'beforeId': beforeId,
       'limit': limit,
     });
@@ -24,28 +24,28 @@ class ClassroomsRepository {
   }
 
   Future<ClassroomDetail> getById(int id) async {
-    final res = await _dio.get<Map<String, dynamic>>('/api/classrooms/$id');
+    final res = await _dio.get<Map<String, dynamic>>('/api/v1/classrooms/$id');
     return ClassroomDetail.fromJson(res.data!);
   }
 
   Future<Classroom> create(String name) async {
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/classrooms',
+      '/api/v1/classrooms',
       data: {'name': name},
     );
     return Classroom.fromJson(res.data!);
   }
 
   Future<void> rename(int id, String name) =>
-      _dio.put<void>('/api/classrooms/$id', data: {'name': name});
+      _dio.put<void>('/api/v1/classrooms/$id', data: {'name': name});
 
-  Future<void> delete(int id) => _dio.delete<void>('/api/classrooms/$id');
+  Future<void> delete(int id) => _dio.delete<void>('/api/v1/classrooms/$id');
 
   Future<void> enroll(int classroomId, int studentId) =>
-      _dio.post<void>('/api/classrooms/$classroomId/students/$studentId');
+      _dio.post<void>('/api/v1/classrooms/$classroomId/students/$studentId');
 
   Future<void> unenroll(int classroomId, int studentId) =>
-      _dio.delete<void>('/api/classrooms/$classroomId/students/$studentId');
+      _dio.delete<void>('/api/v1/classrooms/$classroomId/students/$studentId');
 }
 
 final classroomsRepositoryProvider = Provider<ClassroomsRepository>(

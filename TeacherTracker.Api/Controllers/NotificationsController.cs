@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,8 +12,9 @@ namespace TeacherTracker.Api.Controllers;
 /// the account id in the token; notifications are created inline by the actions
 /// that trigger them (post likes/comments, new assignments).
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize]
-[Route("api/notifications")]
+[Route("api/v{version:apiVersion}/notifications")]
 public class NotificationsController : ControllerBase
 {
     private readonly AppDbContext _db;

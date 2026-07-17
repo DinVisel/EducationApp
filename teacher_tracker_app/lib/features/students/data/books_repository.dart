@@ -9,7 +9,7 @@ class BooksRepository {
 
   final Dio _dio;
 
-  String _base(int studentId) => '/api/students/$studentId/books';
+  String _base(int studentId) => '/api/v1/students/$studentId/books';
 
   /// Newest first. Pass [beforeId] (the last-loaded item's id) to fetch the
   /// next page.

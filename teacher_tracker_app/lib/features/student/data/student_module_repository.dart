@@ -13,14 +13,14 @@ class StudentModuleRepository {
   final Dio _dio;
 
   Future<List<StudentAssignmentItem>> getAssignments() async {
-    final res = await _dio.get<List<dynamic>>('/api/student/assignments');
+    final res = await _dio.get<List<dynamic>>('/api/v1/student/assignments');
     return (res.data ?? [])
         .map((e) => StudentAssignmentItem.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
   Future<List<StudentClass>> getClasses() async {
-    final res = await _dio.get<List<dynamic>>('/api/student/classes');
+    final res = await _dio.get<List<dynamic>>('/api/v1/student/classes');
     return (res.data ?? [])
         .map((e) => StudentClass.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -28,12 +28,12 @@ class StudentModuleRepository {
 
   /// Marks the student's copy ([studentAssignmentId]) done or not done.
   Future<void> setDone(int studentAssignmentId, bool done) => _dio.post<void>(
-        '/api/student/assignments/$studentAssignmentId/'
+        '/api/v1/student/assignments/$studentAssignmentId/'
         '${done ? 'complete' : 'uncomplete'}',
       );
 
   Future<List<StudentQuizSummary>> getQuizzes() async {
-    final res = await _dio.get<List<dynamic>>('/api/student/quizzes');
+    final res = await _dio.get<List<dynamic>>('/api/v1/student/quizzes');
     return (res.data ?? [])
         .map((e) => StudentQuizSummary.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -42,7 +42,7 @@ class StudentModuleRepository {
   /// The full quiz for one [attemptId] (the student's own attempt).
   Future<StudentQuizDetail> getQuiz(int attemptId) async {
     final res =
-        await _dio.get<Map<String, dynamic>>('/api/student/quizzes/$attemptId');
+        await _dio.get<Map<String, dynamic>>('/api/v1/student/quizzes/$attemptId');
     return StudentQuizDetail.fromJson(res.data!);
   }
 
@@ -50,7 +50,7 @@ class StudentModuleRepository {
   /// returns the score. [answers] maps question id → chosen choice id.
   Future<QuizResult> submitQuiz(int attemptId, Map<int, int> answers) async {
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/student/quizzes/$attemptId/submit',
+      '/api/v1/student/quizzes/$attemptId/submit',
       data: {
         'answers': answers.entries
             .map((e) => {'questionId': e.key, 'choiceId': e.value})

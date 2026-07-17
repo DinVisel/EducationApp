@@ -22,6 +22,19 @@ public class Student
     public int? UserId { get; set; }
     public User? User { get; set; }
 
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // Soft delete: rows are never physically removed, just hidden from normal
+    // queries (see AppDbContext's global query filter) so audit history and
+    // FK-referencing child rows (notes, homework, books) survive.
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+
+    // Audit trail: auto-populated by AuditInterceptor on save.
+    public int? CreatedBy { get; set; }
+    public DateTime? ModifiedAt { get; set; }
+    public int? ModifiedBy { get; set; }
+
     public List<TrackingNote> TrackingNotes { get; set; } = new();
     public List<Homework> Homeworks { get; set; } = new();
     public List<Book> Books { get; set; } = new();

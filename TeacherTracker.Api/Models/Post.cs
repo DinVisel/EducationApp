@@ -29,6 +29,17 @@ public class Post
     // profile. Does not affect the global feed order.
     public bool IsPinned { get; set; }
 
+    // Soft delete: rows are never physically removed, just hidden from normal
+    // queries (see AppDbContext's global query filter) so audit history and
+    // FK-referencing child rows (comments, likes, ratings) survive.
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+
+    // Audit trail: auto-populated by AuditInterceptor on save.
+    public int? CreatedBy { get; set; }
+    public DateTime? ModifiedAt { get; set; }
+    public int? ModifiedBy { get; set; }
+
     public List<PostAttachment> Attachments { get; set; } = new();
     public List<PostLike> Likes { get; set; } = new();
     public List<PostComment> Comments { get; set; } = new();

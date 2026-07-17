@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,9 @@ namespace TeacherTracker.Api.Controllers;
 /// quiz into one of the caller's classrooms. Unlike <see cref="QuizzesController"/>
 /// these are not nested under a classroom.
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Teacher))]
-[Route("api/quizzes")]
+[Route("api/v{version:apiVersion}/quizzes")]
 public class SharedQuizzesController : ControllerBase
 {
     private readonly AppDbContext _db;

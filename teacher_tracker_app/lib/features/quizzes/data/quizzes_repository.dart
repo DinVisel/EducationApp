@@ -17,7 +17,7 @@ class QuizzesRepository {
 
   Future<List<Quiz>> getForClass(int classroomId) async {
     final res =
-        await _dio.get<List<dynamic>>('/api/classrooms/$classroomId/quizzes');
+        await _dio.get<List<dynamic>>('/api/v1/classrooms/$classroomId/quizzes');
     return (res.data ?? [])
         .map((e) => Quiz.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -27,24 +27,24 @@ class QuizzesRepository {
   /// student.
   Future<Quiz> create(int classroomId, QuizDraft draft) async {
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/classrooms/$classroomId/quizzes',
+      '/api/v1/classrooms/$classroomId/quizzes',
       data: draft.toJson(),
     );
     return Quiz.fromJson(res.data!);
   }
 
   Future<void> delete(int classroomId, int id) =>
-      _dio.delete<void>('/api/classrooms/$classroomId/quizzes/$id');
+      _dio.delete<void>('/api/v1/classrooms/$classroomId/quizzes/$id');
 
   Future<QuizAnalytics> getAnalytics(int classroomId, int quizId) async {
     final res = await _dio.get<Map<String, dynamic>>(
-        '/api/classrooms/$classroomId/quizzes/$quizId/analytics');
+        '/api/v1/classrooms/$classroomId/quizzes/$quizId/analytics');
     return QuizAnalytics.fromJson(res.data!);
   }
 
   /// The signed-in teacher's own quizzes across all their classes (share picker).
   Future<List<MyQuiz>> getMine() async {
-    final res = await _dio.get<List<dynamic>>('/api/quizzes/mine');
+    final res = await _dio.get<List<dynamic>>('/api/v1/quizzes/mine');
     return (res.data ?? [])
         .map((e) => MyQuiz.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -53,14 +53,14 @@ class QuizzesRepository {
   /// Full content of a shared quiz, to preview before cloning.
   Future<QuizPreview> getPreview(int quizId) async {
     final res =
-        await _dio.get<Map<String, dynamic>>('/api/quizzes/$quizId/preview');
+        await _dio.get<Map<String, dynamic>>('/api/v1/quizzes/$quizId/preview');
     return QuizPreview.fromJson(res.data!);
   }
 
   /// Clones a shared quiz into one of the caller's classes ("Assign to My Class").
   Future<Quiz> clone(int quizId, int classroomId) async {
     final res = await _dio.post<Map<String, dynamic>>(
-      '/api/quizzes/$quizId/clone',
+      '/api/v1/quizzes/$quizId/clone',
       data: {'classroomId': classroomId},
     );
     return Quiz.fromJson(res.data!);

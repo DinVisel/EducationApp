@@ -22,6 +22,17 @@ public class User
     public string? PasswordResetTokenHash { get; set; }
     public DateTime? PasswordResetTokenExpiresAtUtc { get; set; }
 
+    // Soft delete: rows are never physically removed, just hidden from normal
+    // queries (see AppDbContext's global query filter) so audit history and
+    // FK-referencing child rows survive.
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+
+    // Audit trail: auto-populated by AuditInterceptor on save.
+    public int? CreatedBy { get; set; }
+    public DateTime? ModifiedAt { get; set; }
+    public int? ModifiedBy { get; set; }
+
     // Linked profiles (at most one is set, matching Role).
     public Teacher? Teacher { get; set; }
     public Student? Student { get; set; }

@@ -56,7 +56,9 @@ public class TestApiFactory : WebApplicationFactory<Program>
                 (d.ServiceType.FullName?.Contains("IDbContextOptionsConfiguration") ?? false))
                 .ToList();
             foreach (var d in toRemove) services.Remove(d);
-            services.AddDbContext<AppDbContext>(o => o.UseSqlite(_connection));
+            services.AddDbContext<AppDbContext>((sp, o) => o
+                .UseSqlite(_connection)
+                .AddInterceptors(sp.GetRequiredService<AuditInterceptor>()));
 
             // Swap R2 for the in-memory fake.
             services.RemoveAll<IFileStorage>();

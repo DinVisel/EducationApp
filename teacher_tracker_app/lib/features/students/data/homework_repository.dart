@@ -9,7 +9,7 @@ class HomeworkRepository {
 
   final Dio _dio;
 
-  String _base(int studentId) => '/api/students/$studentId/homework';
+  String _base(int studentId) => '/api/v1/students/$studentId/homework';
 
   /// Newest first. Pass [beforeId] (the last-loaded item's id) to fetch the
   /// next page.

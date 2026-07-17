@@ -39,7 +39,7 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    final res = await _dio.post<Map<String, dynamic>>('/api/auth/register', data: {
+    final res = await _dio.post<Map<String, dynamic>>('/api/v1/auth/register', data: {
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
@@ -52,7 +52,7 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    final res = await _dio.post<Map<String, dynamic>>('/api/auth/login', data: {
+    final res = await _dio.post<Map<String, dynamic>>('/api/v1/auth/login', data: {
       'email': email,
       'password': password,
     });
@@ -61,7 +61,7 @@ class AuthRepository {
 
   /// Restores the current identity (any role) from the saved token.
   Future<Session> session() async {
-    final res = await _dio.get<Map<String, dynamic>>('/api/auth/session');
+    final res = await _dio.get<Map<String, dynamic>>('/api/v1/auth/session');
     final json = res.data!;
     final teacher = json['teacher'];
     final student = json['student'];
@@ -77,14 +77,14 @@ class AuthRepository {
   }
 
   Future<void> forgotPassword(String email) async {
-    await _dio.post('/api/auth/forgot-password', data: {'email': email});
+    await _dio.post('/api/v1/auth/forgot-password', data: {'email': email});
   }
 
   Future<void> resetPassword({
     required String token,
     required String newPassword,
   }) async {
-    await _dio.post('/api/auth/reset-password', data: {
+    await _dio.post('/api/v1/auth/reset-password', data: {
       'token': token,
       'newPassword': newPassword,
     });
@@ -92,7 +92,7 @@ class AuthRepository {
 
   Future<Teacher> updateProfile(Teacher teacher) async {
     final res = await _dio.put<Map<String, dynamic>>(
-      '/api/auth/me',
+      '/api/v1/auth/me',
       data: teacher.toWriteJson(),
     );
     return Teacher.fromJson(res.data!);

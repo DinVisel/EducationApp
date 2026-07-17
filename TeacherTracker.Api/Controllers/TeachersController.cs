@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +10,11 @@ namespace TeacherTracker.Api.Controllers;
 
 /// Read-only public profiles of other teachers, so the feed's author can be
 /// tapped to view their profile (name, avatar, cover). Posts come from
-/// `GET /api/posts?authorUserId=`.
+/// `GET /api/v1/posts?authorUserId=`.
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Teacher))]
-[Route("api/teachers")]
+[Route("api/v{version:apiVersion}/teachers")]
 public class TeachersController : ControllerBase
 {
     private readonly AppDbContext _db;

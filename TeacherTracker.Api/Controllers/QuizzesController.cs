@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,9 @@ namespace TeacherTracker.Api.Controllers;
 /// a per-student <see cref="StudentQuizAttempt"/> to every currently enrolled
 /// student. Scoped to the authenticated teacher's classes.
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Teacher))]
-[Route("api/classrooms/{classroomId:int}/quizzes")]
+[Route("api/v{version:apiVersion}/classrooms/{classroomId:int}/quizzes")]
 public class QuizzesController : ControllerBase
 {
     private readonly AppDbContext _db;

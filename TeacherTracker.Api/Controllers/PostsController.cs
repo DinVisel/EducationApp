@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -15,8 +16,9 @@ namespace TeacherTracker.Api.Controllers;
 /// + R2 attachments) to one shared feed and others can view, like, and comment.
 /// Unlike assignments, the feed is not scoped to a single teacher's students.
 [ApiController]
+[ApiVersion("1.0")]
 [Authorize(Roles = nameof(UserRole.Teacher))]
-[Route("api/posts")]
+[Route("api/v{version:apiVersion}/posts")]
 public class PostsController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -128,7 +130,8 @@ public class PostsController : ControllerBase
         if (post is null)
             return NotFound();
 
-        _db.Posts.Remove(post);
+        post.IsDeleted = true;
+        post.DeletedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         return NoContent();
     }

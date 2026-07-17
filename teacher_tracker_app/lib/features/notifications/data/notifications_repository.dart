@@ -14,7 +14,7 @@ class NotificationsRepository {
   /// Newest first. Pass [beforeId] (the last-loaded notification's id) to
   /// fetch the next page.
   Future<List<AppNotification>> getAll({int? beforeId, int limit = 20}) async {
-    final res = await _dio.get<List<dynamic>>('/api/notifications', queryParameters: {
+    final res = await _dio.get<List<dynamic>>('/api/v1/notifications', queryParameters: {
       if (beforeId != null) 'beforeId': beforeId,
       'limit': limit,
     });
@@ -25,15 +25,15 @@ class NotificationsRepository {
 
   Future<int> unreadCount() async {
     final res =
-        await _dio.get<Map<String, dynamic>>('/api/notifications/unread-count');
+        await _dio.get<Map<String, dynamic>>('/api/v1/notifications/unread-count');
     return (res.data?['count'] as num?)?.toInt() ?? 0;
   }
 
   Future<void> markRead(int id) =>
-      _dio.post<void>('/api/notifications/$id/read');
+      _dio.post<void>('/api/v1/notifications/$id/read');
 
   Future<void> markAllRead() =>
-      _dio.post<void>('/api/notifications/read-all');
+      _dio.post<void>('/api/v1/notifications/read-all');
 }
 
 final notificationsRepositoryProvider = Provider<NotificationsRepository>(

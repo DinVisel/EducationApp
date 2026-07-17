@@ -18,7 +18,7 @@ class SearchRepository {
     String? grade,
   }) async {
     final res = await _dio.get<Map<String, dynamic>>(
-      '/api/search',
+      '/api/v1/search',
       queryParameters: {
         'q': ?q,
         'type': type,
