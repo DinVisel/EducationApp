@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using TeacherTracker.Api.Data;
+using TeacherTracker.Api.Email;
 using TeacherTracker.Api.Moderation;
 using TeacherTracker.Api.Storage;
 
@@ -22,6 +23,8 @@ public class TestApiFactory : WebApplicationFactory<Program>
     public FakeFileStorage Storage { get; } = new();
 
     public FakeImageModerator ImageModerator { get; } = new();
+
+    public FakeEmailService EmailService { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -62,6 +65,10 @@ public class TestApiFactory : WebApplicationFactory<Program>
             // Swap the image moderator for a switchable fake (no AWS Rekognition).
             services.RemoveAll<IImageModerator>();
             services.AddSingleton<IImageModerator>(ImageModerator);
+
+            // Swap email delivery for a fake that captures sent messages.
+            services.RemoveAll<IEmailService>();
+            services.AddSingleton<IEmailService>(EmailService);
         });
     }
 

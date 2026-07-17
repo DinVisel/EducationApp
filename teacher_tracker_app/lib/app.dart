@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/design.dart';
+import 'features/auth/screens/forgot_password_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
+import 'features/auth/screens/reset_password_screen.dart';
 import 'features/admin/screens/admin_shell.dart';
 import 'features/auth/state/auth_controller.dart';
 import 'features/feed/screens/post_detail_screen.dart';
@@ -47,7 +49,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           _pendingDeepLink.value = loc;
           return '/login';
         }
-        return (loc == '/login' || loc == '/register') ? null : '/login';
+        const signedOutAllowed = {
+          '/login',
+          '/register',
+          '/forgot-password',
+          '/reset-password',
+        };
+        return signedOutAllowed.contains(loc) ? null : '/login';
       }
 
       // Signed in: a shared post opens directly, regardless of the role shell.
@@ -60,7 +68,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               ? '/admin'
               : '/home';
       // Keep users out of the auth/splash pages and other roles' shells.
-      if (loc == '/' || loc == '/login' || loc == '/register') return home;
+      const authOnlyPages = {
+        '/',
+        '/login',
+        '/register',
+        '/forgot-password',
+        '/reset-password',
+      };
+      if (authOnlyPages.contains(loc)) return home;
       const shells = {'/home', '/student', '/admin'};
       if (shells.contains(loc) && loc != home) return home;
       return null;
@@ -69,6 +84,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/', builder: (_, _) => const _SplashScreen()),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
+      GoRoute(
+          path: '/forgot-password',
+          builder: (_, _) => const ForgotPasswordScreen()),
+      GoRoute(
+          path: '/reset-password',
+          builder: (_, _) => const ResetPasswordScreen()),
       GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
       GoRoute(path: '/student', builder: (_, _) => const StudentShell()),
       GoRoute(path: '/admin', builder: (_, _) => const AdminShell()),

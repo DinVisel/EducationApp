@@ -7,19 +7,40 @@ import '../data/students_repository.dart';
 /// The authenticated teacher's students, with mutation helpers that refresh
 /// the list after each change. Rebuilds when the session changes.
 class StudentsNotifier extends AsyncNotifier<List<Student>> {
+  static const _pageSize = 20;
+
+  bool _hasMore = true;
+  bool get hasMore => _hasMore;
+
   @override
   Future<List<Student>> build() async {
     // Rebuild on login/logout; only load when signed in.
     final auth = ref.watch(authControllerProvider).value;
     if (auth == null) return [];
-    return ref.read(studentsRepositoryProvider).getAll();
+    final page = await ref.read(studentsRepositoryProvider).getAll(limit: _pageSize);
+    _hasMore = page.length == _pageSize;
+    return page;
   }
 
   Future<void> _reload() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(studentsRepositoryProvider).getAll(),
-    );
+    state = await AsyncValue.guard(() async {
+      final page = await ref.read(studentsRepositoryProvider).getAll(limit: _pageSize);
+      _hasMore = page.length == _pageSize;
+      return page;
+    });
+  }
+
+  /// Appends the next page after the last-loaded student.
+  Future<void> loadMore() async {
+    final current = state.value;
+    if (current == null || current.isEmpty || !_hasMore) return;
+
+    final next = await ref
+        .read(studentsRepositoryProvider)
+        .getAll(beforeId: current.last.id, limit: _pageSize);
+    _hasMore = next.length == _pageSize;
+    state = AsyncData([...current, ...next]);
   }
 
   Future<Student> add(Student draft) async {

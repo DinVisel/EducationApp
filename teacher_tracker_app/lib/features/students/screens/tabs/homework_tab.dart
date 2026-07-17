@@ -6,13 +6,53 @@ import '../../../../models/student.dart' show formatDateOnly;
 import '../../state/homework_providers.dart';
 import '../../widgets/async_list.dart';
 
-class HomeworkTab extends ConsumerWidget {
+class HomeworkTab extends ConsumerStatefulWidget {
   const HomeworkTab({super.key, required this.studentId});
 
   final int studentId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeworkTab> createState() => _HomeworkTabState();
+}
+
+class _HomeworkTabState extends ConsumerState<HomeworkTab> {
+  final _scroll = ScrollController();
+  bool _loadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_loadingMore) return;
+    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    final notifier = ref.read(homeworkProvider(widget.studentId).notifier);
+    if (!notifier.hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      await notifier.loadMore();
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final studentId = widget.studentId;
     final async = ref.watch(homeworkProvider(studentId));
 
     return Scaffold(
@@ -26,6 +66,8 @@ class HomeworkTab extends ConsumerWidget {
         onRetry: () => ref.invalidate(homeworkProvider(studentId)),
         emptyIcon: Icons.assignment_outlined,
         emptyText: 'No homework yet',
+        scrollController: _scroll,
+        loadingMore: _loadingMore,
         itemBuilder: (hw) => Card(
           child: ListTile(
             leading: Checkbox(
@@ -71,7 +113,7 @@ class HomeworkTab extends ConsumerWidget {
     );
     if (result == null) return;
     try {
-      await ref.read(homeworkProvider(studentId).notifier).add(
+      await ref.read(homeworkProvider(widget.studentId).notifier).add(
             title: result.title,
             description: result.description,
             dueDate: result.dueDate,

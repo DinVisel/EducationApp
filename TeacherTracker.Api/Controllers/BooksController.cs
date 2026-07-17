@@ -12,15 +12,20 @@ public class BooksController : StudentScopedController
     public BooksController(AppDbContext db) : base(db) { }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<BookDto>>> GetAll(int studentId)
+    public async Task<ActionResult<IEnumerable<BookDto>>> GetAll(
+        int studentId, [FromQuery] int? beforeId, [FromQuery] int limit = 20)
     {
         if (!await OwnsStudentAsync(studentId))
             return NotFound();
 
+        var take = Math.Clamp(limit, 1, 50);
+
         var books = await Db.Books
             .AsNoTracking()
             .Where(b => b.StudentId == studentId)
-            .OrderByDescending(b => b.CreatedAt)
+            .Where(b => beforeId == null || b.Id < beforeId)
+            .OrderByDescending(b => b.Id)
+            .Take(take)
             .Select(b => ToDto(b))
             .ToListAsync();
 

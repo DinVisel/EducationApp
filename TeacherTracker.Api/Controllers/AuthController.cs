@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
+using TeacherTracker.Api.Email;
 using TeacherTracker.Api.Models;
 
 namespace TeacherTracker.Api.Controllers;
@@ -14,14 +17,18 @@ namespace TeacherTracker.Api.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
+    private const int ResetTokenExpiryMinutes = 45;
+
     private readonly AppDbContext _db;
     private readonly TokenService _tokens;
+    private readonly IEmailService _email;
     private readonly PasswordHasher<User> _hasher = new();
 
-    public AuthController(AppDbContext db, TokenService tokens)
+    public AuthController(AppDbContext db, TokenService tokens, IEmailService email)
     {
         _db = db;
         _tokens = tokens;
+        _email = email;
     }
 
     [EnableRateLimiting("auth")]
@@ -72,6 +79,52 @@ public class AuthController : ControllerBase
 
         return Ok(BuildResponse(user));
     }
+
+    [EnableRateLimiting("auth")]
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+    {
+        var email = dto.Email.Trim().ToLowerInvariant();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is not null)
+        {
+            var rawToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+            user.PasswordResetTokenHash = HashToken(rawToken);
+            user.PasswordResetTokenExpiresAtUtc = DateTime.UtcNow.AddMinutes(ResetTokenExpiryMinutes);
+            await _db.SaveChangesAsync();
+
+            await _email.SendAsync(user.Email, "Reset your password",
+                $"Use this code to reset your password: {rawToken}\n" +
+                $"This code expires in {ResetTokenExpiryMinutes} minutes.");
+        }
+
+        // Always 200, whether or not the account exists, so callers can't probe
+        // which emails are registered.
+        return Ok();
+    }
+
+    [EnableRateLimiting("auth")]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+    {
+        var tokenHash = HashToken(dto.Token);
+        var user = await _db.Users.FirstOrDefaultAsync(u =>
+            u.PasswordResetTokenHash == tokenHash &&
+            u.PasswordResetTokenExpiresAtUtc != null &&
+            u.PasswordResetTokenExpiresAtUtc > DateTime.UtcNow);
+        if (user is null)
+            return BadRequest("This reset code is invalid or has expired.");
+
+        user.PasswordHash = _hasher.HashPassword(user, dto.NewPassword);
+        user.PasswordResetTokenHash = null;
+        user.PasswordResetTokenExpiresAtUtc = null;
+        await _db.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    private static string HashToken(string rawToken) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(rawToken)));
 
     /// The current identity (any role), used to restore a session from a saved
     /// token at startup. Returns the profile matching the account's role.

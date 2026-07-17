@@ -9,9 +9,14 @@ class StudentsRepository {
 
   final Dio _dio;
 
-  /// Students belonging to the authenticated teacher (scoped server-side).
-  Future<List<Student>> getAll() async {
-    final res = await _dio.get<List<dynamic>>('/api/students');
+  /// Students belonging to the authenticated teacher (scoped server-side),
+  /// newest first. Pass [beforeId] (the last-loaded student's id) to fetch the
+  /// next page.
+  Future<List<Student>> getAll({int? beforeId, int limit = 20}) async {
+    final res = await _dio.get<List<dynamic>>('/api/students', queryParameters: {
+      if (beforeId != null) 'beforeId': beforeId,
+      'limit': limit,
+    });
     return (res.data ?? [])
         .map((e) => Student.fromJson(e as Map<String, dynamic>))
         .toList();

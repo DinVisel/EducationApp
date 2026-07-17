@@ -7,17 +7,44 @@ import '../data/homework_repository.dart';
 class HomeworkNotifier extends AsyncNotifier<List<Homework>> {
   HomeworkNotifier(this.studentId);
 
+  static const _pageSize = 20;
+
   final int studentId;
+  bool _hasMore = true;
+  bool get hasMore => _hasMore;
 
   @override
-  Future<List<Homework>> build() =>
-      ref.read(homeworkRepositoryProvider).getForStudent(studentId);
+  Future<List<Homework>> build() async {
+    final page = await ref
+        .read(homeworkRepositoryProvider)
+        .getForStudent(studentId, limit: _pageSize);
+    _hasMore = page.length == _pageSize;
+    return page;
+  }
 
   Future<void> _reload() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(homeworkRepositoryProvider).getForStudent(studentId),
-    );
+    state = await AsyncValue.guard(() async {
+      final page = await ref
+          .read(homeworkRepositoryProvider)
+          .getForStudent(studentId, limit: _pageSize);
+      _hasMore = page.length == _pageSize;
+      return page;
+    });
+  }
+
+  /// Appends the next page after the last-loaded homework item.
+  Future<void> loadMore() async {
+    final current = state.value;
+    if (current == null || current.isEmpty || !_hasMore) return;
+
+    final next = await ref.read(homeworkRepositoryProvider).getForStudent(
+          studentId,
+          beforeId: current.last.id,
+          limit: _pageSize,
+        );
+    _hasMore = next.length == _pageSize;
+    state = AsyncData([...current, ...next]);
   }
 
   Future<void> add({

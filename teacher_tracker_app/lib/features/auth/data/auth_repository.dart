@@ -76,6 +76,20 @@ class AuthRepository {
     );
   }
 
+  Future<void> forgotPassword(String email) async {
+    await _dio.post('/api/auth/forgot-password', data: {'email': email});
+  }
+
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    await _dio.post('/api/auth/reset-password', data: {
+      'token': token,
+      'newPassword': newPassword,
+    });
+  }
+
   Future<Teacher> updateProfile(Teacher teacher) async {
     final res = await _dio.put<Map<String, dynamic>>(
       '/api/auth/me',

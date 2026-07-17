@@ -7,17 +7,44 @@ import '../data/books_repository.dart';
 class BooksNotifier extends AsyncNotifier<List<Book>> {
   BooksNotifier(this.studentId);
 
+  static const _pageSize = 20;
+
   final int studentId;
+  bool _hasMore = true;
+  bool get hasMore => _hasMore;
 
   @override
-  Future<List<Book>> build() =>
-      ref.read(booksRepositoryProvider).getForStudent(studentId);
+  Future<List<Book>> build() async {
+    final page = await ref
+        .read(booksRepositoryProvider)
+        .getForStudent(studentId, limit: _pageSize);
+    _hasMore = page.length == _pageSize;
+    return page;
+  }
 
   Future<void> _reload() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(booksRepositoryProvider).getForStudent(studentId),
-    );
+    state = await AsyncValue.guard(() async {
+      final page = await ref
+          .read(booksRepositoryProvider)
+          .getForStudent(studentId, limit: _pageSize);
+      _hasMore = page.length == _pageSize;
+      return page;
+    });
+  }
+
+  /// Appends the next page after the last-loaded book.
+  Future<void> loadMore() async {
+    final current = state.value;
+    if (current == null || current.isEmpty || !_hasMore) return;
+
+    final next = await ref.read(booksRepositoryProvider).getForStudent(
+          studentId,
+          beforeId: current.last.id,
+          limit: _pageSize,
+        );
+    _hasMore = next.length == _pageSize;
+    state = AsyncData([...current, ...next]);
   }
 
   Future<void> add({

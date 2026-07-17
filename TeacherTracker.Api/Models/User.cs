@@ -17,6 +17,11 @@ public class User
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    // SHA-256 hex hash of an active password-reset token; null when none is
+    // pending. Never store the raw token (mirrors why passwords are hashed).
+    public string? PasswordResetTokenHash { get; set; }
+    public DateTime? PasswordResetTokenExpiresAtUtc { get; set; }
+
     // Linked profiles (at most one is set, matching Role).
     public Teacher? Teacher { get; set; }
     public Student? Student { get; set; }

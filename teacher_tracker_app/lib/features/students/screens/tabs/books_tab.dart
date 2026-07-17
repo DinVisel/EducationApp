@@ -5,13 +5,53 @@ import '../../../../models/book.dart';
 import '../../state/books_providers.dart';
 import '../../widgets/async_list.dart';
 
-class BooksTab extends ConsumerWidget {
+class BooksTab extends ConsumerStatefulWidget {
   const BooksTab({super.key, required this.studentId});
 
   final int studentId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BooksTab> createState() => _BooksTabState();
+}
+
+class _BooksTabState extends ConsumerState<BooksTab> {
+  final _scroll = ScrollController();
+  bool _loadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_loadingMore) return;
+    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    final notifier = ref.read(booksProvider(widget.studentId).notifier);
+    if (!notifier.hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      await notifier.loadMore();
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final studentId = widget.studentId;
     final async = ref.watch(booksProvider(studentId));
 
     return Scaffold(
@@ -25,6 +65,8 @@ class BooksTab extends ConsumerWidget {
         onRetry: () => ref.invalidate(booksProvider(studentId)),
         emptyIcon: Icons.menu_book_outlined,
         emptyText: 'No books yet',
+        scrollController: _scroll,
+        loadingMore: _loadingMore,
         itemBuilder: (book) => Card(
           child: ListTile(
             leading: Icon(
@@ -65,7 +107,7 @@ class BooksTab extends ConsumerWidget {
       builder: (_) => _BookDialog(existing: existing),
     );
     if (result == null) return;
-    final notifier = ref.read(booksProvider(studentId).notifier);
+    final notifier = ref.read(booksProvider(widget.studentId).notifier);
     try {
       if (existing == null) {
         await notifier.add(

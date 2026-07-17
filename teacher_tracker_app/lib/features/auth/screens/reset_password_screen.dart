@@ -5,25 +5,28 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/design.dart';
 import '../../../core/utils/validators.dart';
-import '../state/auth_controller.dart';
+import '../data/auth_repository.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class ResetPasswordScreen extends ConsumerStatefulWidget {
+  const ResetPasswordScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<ResetPasswordScreen> createState() =>
+      _ResetPasswordScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController();
-  final _password = TextEditingController();
+  final _token = TextEditingController();
+  final _newPassword = TextEditingController();
+  final _confirmPassword = TextEditingController();
   bool _submitting = false;
 
   @override
   void dispose() {
-    _email.dispose();
-    _password.dispose();
+    _token.dispose();
+    _newPassword.dispose();
+    _confirmPassword.dispose();
     super.dispose();
   }
 
@@ -31,10 +34,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
     try {
-      await ref
-          .read(authControllerProvider.notifier)
-          .login(_email.text, _password.text);
-      // Router redirect takes over once authenticated.
+      await ref.read(authRepositoryProvider).resetPassword(
+            token: _token.text.trim(),
+            newPassword: _newPassword.text,
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password reset. Sign in with your new password.')),
+        );
+        context.go('/login');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -63,50 +72,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.school,
-                        size: 72, color: theme.colorScheme.primary),
+                    Icon(Icons.password, size: 72, color: theme.colorScheme.primary),
                     const SizedBox(height: AppSpacing.md),
-                    Text('Teacher Tracker',
+                    Text('Reset password',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.headlineMedium),
                     const SizedBox(height: AppSpacing.xs),
-                    Text('Sign in to track your students',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant)),
+                    Text(
+                      'Enter the code we emailed you and choose a new password.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    ),
                     const SizedBox(height: AppSpacing.xl),
                     TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
+                      controller: _token,
                       decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                      validator: Validators.email,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    TextFormField(
-                      controller: _password,
-                      obscureText: true,
-                      autofillHints: const [AutofillHints.password],
-                      onFieldSubmitted: (_) => _submit(),
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: Icon(Icons.lock_outline),
+                        labelText: 'Reset code',
+                        prefixIcon: Icon(Icons.vpn_key_outlined),
                       ),
                       validator: Validators.required,
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: _submitting
-                            ? null
-                            : () => context.push('/forgot-password'),
-                        child: const Text('Forgot password?'),
+                    const SizedBox(height: AppSpacing.md),
+                    TextFormField(
+                      controller: _newPassword,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'New password',
+                        prefixIcon: Icon(Icons.lock_outline),
                       ),
+                      validator: Validators.password,
                     ),
-                    const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.md),
+                    TextFormField(
+                      controller: _confirmPassword,
+                      obscureText: true,
+                      onFieldSubmitted: (_) => _submit(),
+                      decoration: const InputDecoration(
+                        labelText: 'Confirm new password',
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                      validator: Validators.confirms(_newPassword),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                     FilledButton(
                       onPressed: _submitting ? null : _submit,
                       child: _submitting
@@ -115,13 +123,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Sign in'),
+                          : const Text('Reset password'),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(
-                      onPressed:
-                          _submitting ? null : () => context.push('/register'),
-                      child: const Text("Don't have an account? Register"),
+                      onPressed: _submitting ? null : () => context.go('/login'),
+                      child: const Text('Back to sign in'),
                     ),
                   ],
                 ),
@@ -137,7 +144,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (e is DioException) {
       final data = e.response?.data;
       if (data is String && data.isNotEmpty) return data;
-      if (e.response?.statusCode == 401) return 'Invalid email or password.';
       return 'Network error. Is the server running?';
     }
     return 'Something went wrong.';

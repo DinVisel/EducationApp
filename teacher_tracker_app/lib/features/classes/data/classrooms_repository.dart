@@ -11,8 +11,13 @@ class ClassroomsRepository {
 
   final Dio _dio;
 
-  Future<List<Classroom>> getAll() async {
-    final res = await _dio.get<List<dynamic>>('/api/classrooms');
+  /// Newest first. Pass [beforeId] (the last-loaded classroom's id) to fetch
+  /// the next page.
+  Future<List<Classroom>> getAll({int? beforeId, int limit = 20}) async {
+    final res = await _dio.get<List<dynamic>>('/api/classrooms', queryParameters: {
+      if (beforeId != null) 'beforeId': beforeId,
+      'limit': limit,
+    });
     return (res.data ?? [])
         .map((e) => Classroom.fromJson(e as Map<String, dynamic>))
         .toList();

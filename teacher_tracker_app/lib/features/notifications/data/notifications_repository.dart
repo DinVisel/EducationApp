@@ -11,8 +11,13 @@ class NotificationsRepository {
 
   final Dio _dio;
 
-  Future<List<AppNotification>> getAll() async {
-    final res = await _dio.get<List<dynamic>>('/api/notifications');
+  /// Newest first. Pass [beforeId] (the last-loaded notification's id) to
+  /// fetch the next page.
+  Future<List<AppNotification>> getAll({int? beforeId, int limit = 20}) async {
+    final res = await _dio.get<List<dynamic>>('/api/notifications', queryParameters: {
+      if (beforeId != null) 'beforeId': beforeId,
+      'limit': limit,
+    });
     return (res.data ?? [])
         .map((e) => AppNotification.fromJson(e as Map<String, dynamic>))
         .toList();

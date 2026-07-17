@@ -6,11 +6,50 @@ import '../state/students_providers.dart';
 import 'student_detail_screen.dart';
 import 'student_form_screen.dart';
 
-class StudentsListScreen extends ConsumerWidget {
+class StudentsListScreen extends ConsumerStatefulWidget {
   const StudentsListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StudentsListScreen> createState() => _StudentsListScreenState();
+}
+
+class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
+  final _scroll = ScrollController();
+  bool _loadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_loadingMore) return;
+    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    final notifier = ref.read(studentsProvider.notifier);
+    if (!notifier.hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      await notifier.loadMore();
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final studentsAsync = ref.watch(studentsProvider);
 
     return Scaffold(
@@ -31,10 +70,17 @@ class StudentsListScreen extends ConsumerWidget {
           data: (students) => students.isEmpty
               ? const _EmptyState()
               : ListView.separated(
+                  controller: _scroll,
                   physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: students.length,
+                  itemCount: students.length + (_loadingMore ? 1 : 0),
                   separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (context, i) {
+                    if (i >= students.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
                     final s = students[i];
                     return ListTile(
                       leading: CircleAvatar(child: Text(_initials(s))),

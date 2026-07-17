@@ -12,6 +12,8 @@ class AsyncList<T> extends StatelessWidget {
     required this.onRetry,
     required this.emptyIcon,
     required this.emptyText,
+    this.scrollController,
+    this.loadingMore = false,
   });
 
   final AsyncValue<List<T>> value;
@@ -20,6 +22,12 @@ class AsyncList<T> extends StatelessWidget {
   final VoidCallback onRetry;
   final IconData emptyIcon;
   final String emptyText;
+
+  /// Attach to drive "load more" near the bottom; omit for non-paginated lists.
+  final ScrollController? scrollController;
+
+  /// Shows a trailing spinner row while the next page is loading.
+  final bool loadingMore;
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +39,16 @@ class AsyncList<T> extends StatelessWidget {
         child: items.isEmpty
             ? _EmptyState(icon: emptyIcon, text: emptyText)
             : ListView(
+                controller: scrollController,
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 88),
-                children: [for (final item in items) itemBuilder(item)],
+                children: [
+                  for (final item in items) itemBuilder(item),
+                  if (loadingMore)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                ],
               ),
       ),
     );

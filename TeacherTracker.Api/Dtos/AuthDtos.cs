@@ -12,6 +12,13 @@ public record LoginDto(
     [Required, EmailAddress] string Email,
     [Required] string Password);
 
+public record ForgotPasswordDto(
+    [Required, EmailAddress, MaxLength(256)] string Email);
+
+public record ResetPasswordDto(
+    [Required] string Token,
+    [Required, MinLength(6), MaxLength(100)] string NewPassword);
+
 public record UpdateProfileDto(
     [Required, MaxLength(100)] string FirstName,
     [Required, MaxLength(100)] string LastName,

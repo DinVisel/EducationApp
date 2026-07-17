@@ -12,16 +12,20 @@ public class HomeworkController : StudentScopedController
     public HomeworkController(AppDbContext db) : base(db) { }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<HomeworkDto>>> GetAll(int studentId)
+    public async Task<ActionResult<IEnumerable<HomeworkDto>>> GetAll(
+        int studentId, [FromQuery] int? beforeId, [FromQuery] int limit = 20)
     {
         if (!await OwnsStudentAsync(studentId))
             return NotFound();
 
+        var take = Math.Clamp(limit, 1, 50);
+
         var items = await Db.Homeworks
             .AsNoTracking()
             .Where(h => h.StudentId == studentId)
-            .OrderBy(h => h.IsDone)
-            .ThenBy(h => h.DueDate ?? DateOnly.MaxValue)
+            .Where(h => beforeId == null || h.Id < beforeId)
+            .OrderByDescending(h => h.Id)
+            .Take(take)
             .Select(h => ToDto(h))
             .ToListAsync();
 

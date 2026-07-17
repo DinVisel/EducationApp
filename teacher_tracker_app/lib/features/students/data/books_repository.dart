@@ -11,8 +11,17 @@ class BooksRepository {
 
   String _base(int studentId) => '/api/students/$studentId/books';
 
-  Future<List<Book>> getForStudent(int studentId) async {
-    final res = await _dio.get<List<dynamic>>(_base(studentId));
+  /// Newest first. Pass [beforeId] (the last-loaded item's id) to fetch the
+  /// next page.
+  Future<List<Book>> getForStudent(
+    int studentId, {
+    int? beforeId,
+    int limit = 20,
+  }) async {
+    final res = await _dio.get<List<dynamic>>(_base(studentId), queryParameters: {
+      if (beforeId != null) 'beforeId': beforeId,
+      'limit': limit,
+    });
     return (res.data ?? [])
         .map((e) => Book.fromJson(e as Map<String, dynamic>))
         .toList();

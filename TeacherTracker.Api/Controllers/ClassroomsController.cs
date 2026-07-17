@@ -24,12 +24,17 @@ public class ClassroomsController : ControllerBase
     private int TeacherId => User.GetTeacherId();
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ClassroomDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<ClassroomDto>>> GetAll(
+        [FromQuery] int? beforeId, [FromQuery] int limit = 20)
     {
+        var take = Math.Clamp(limit, 1, 50);
+
         var classrooms = await _db.Classrooms
             .AsNoTracking()
             .Where(c => c.TeacherId == TeacherId)
-            .OrderBy(c => c.Name)
+            .Where(c => beforeId == null || c.Id < beforeId)
+            .OrderByDescending(c => c.Id)
+            .Take(take)
             .Select(c => new ClassroomDto(c.Id, c.Name, c.Enrollments.Count))
             .ToListAsync();
 

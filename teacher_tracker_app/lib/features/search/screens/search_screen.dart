@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../core/utils/debouncer.dart';
 import '../../../models/grade_level.dart';
 import '../../../models/post_subject.dart';
 import '../../../models/search_result.dart';
@@ -22,18 +21,17 @@ class SearchScreen extends ConsumerStatefulWidget {
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _controller = TextEditingController();
-  Timer? _debounce;
+  final _debouncer = Debouncer();
 
   @override
   void dispose() {
-    _debounce?.cancel();
+    _debouncer.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   void _onChanged(String value) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
+    _debouncer(() {
       final cur = ref.read(searchQueryProvider);
       ref.read(searchQueryProvider.notifier).update((
         q: value,

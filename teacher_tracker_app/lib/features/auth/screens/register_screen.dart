@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/validators.dart';
 import '../state/auth_controller.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -72,8 +73,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         labelText: 'First name',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      validator: Validators.required,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -83,8 +83,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         labelText: 'Last name',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      validator: Validators.required,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -94,12 +93,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         labelText: 'Email',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (v) {
-                        final value = v?.trim() ?? '';
-                        if (value.isEmpty) return 'Required';
-                        if (!value.contains('@')) return 'Enter a valid email';
-                        return null;
-                      },
+                      validator: Validators.email,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -110,9 +104,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         labelText: 'Password (min 6 chars)',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (v) => (v == null || v.length < 6)
-                          ? 'At least 6 characters'
-                          : null,
+                      validator: Validators.password,
                     ),
                     const SizedBox(height: 24),
                     FilledButton(

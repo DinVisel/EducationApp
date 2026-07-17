@@ -27,11 +27,14 @@ public class StudentsController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<StudentDto>>> GetAll(
-        [FromQuery] int? classroomId)
+        [FromQuery] int? classroomId, [FromQuery] int? beforeId, [FromQuery] int limit = 20)
     {
+        var take = Math.Clamp(limit, 1, 50);
+
         var query = _db.Students
             .AsNoTracking()
-            .Where(s => s.TeacherId == TeacherId);
+            .Where(s => s.TeacherId == TeacherId)
+            .Where(s => beforeId == null || s.Id < beforeId);
 
         // Optionally restrict to students enrolled in one of the teacher's classes.
         if (classroomId is int cid)
@@ -42,7 +45,8 @@ public class StudentsController : ControllerBase
         }
 
         var students = await query
-            .OrderBy(s => s.FirstName).ThenBy(s => s.LastName)
+            .OrderByDescending(s => s.Id)
+            .Take(take)
             .Select(s => ToDto(s))
             .ToListAsync();
 

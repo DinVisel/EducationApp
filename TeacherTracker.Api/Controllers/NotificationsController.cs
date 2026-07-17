@@ -25,13 +25,17 @@ public class NotificationsController : ControllerBase
     private int UserId => User.GetUserId();
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<NotificationDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<NotificationDto>>> GetAll(
+        [FromQuery] int? beforeId, [FromQuery] int limit = 20)
     {
+        var take = Math.Clamp(limit, 1, 50);
+
         var notifications = await _db.Notifications
             .AsNoTracking()
             .Where(n => n.RecipientUserId == UserId)
-            .OrderByDescending(n => n.CreatedAt)
-            .Take(50)
+            .Where(n => beforeId == null || n.Id < beforeId)
+            .OrderByDescending(n => n.Id)
+            .Take(take)
             .Select(n => new NotificationDto(
                 n.Id, n.Type, n.Text, n.PostId, n.CreatedAt, n.ReadAt != null))
             .ToListAsync();

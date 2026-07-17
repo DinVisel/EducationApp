@@ -13,6 +13,7 @@ using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Models;
 using TeacherTracker.Api.Moderation;
 using TeacherTracker.Api.Storage;
+using TeacherTracker.Api.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +97,12 @@ else
 // Text moderation (profanity / sensitive keywords) applied per-action via the filter.
 builder.Services.AddSingleton<ProfanityGuard>();
 builder.Services.AddScoped<ProfanityFilterAttribute>();
+
+// --- Email (password reset, etc.) ---
+builder.Services.Configure<EmailOptions>(
+    builder.Configuration.GetSection(EmailOptions.SectionName));
+// No real provider is configured yet; logs the message instead of sending.
+builder.Services.AddSingleton<IEmailService, ConsoleEmailService>();
 
 // --- Deep linking (shareable post links) ---
 builder.Services.Configure<TeacherTracker.Api.Links.DeepLinkOptions>(

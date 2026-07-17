@@ -7,11 +7,50 @@ import '../state/classrooms_providers.dart';
 import 'class_detail_screen.dart';
 
 /// Lists the teacher's classes with enrolled counts; create / rename / delete.
-class ClassesListScreen extends ConsumerWidget {
+class ClassesListScreen extends ConsumerStatefulWidget {
   const ClassesListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ClassesListScreen> createState() => _ClassesListScreenState();
+}
+
+class _ClassesListScreenState extends ConsumerState<ClassesListScreen> {
+  final _scroll = ScrollController();
+  bool _loadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_loadingMore) return;
+    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    final notifier = ref.read(classroomsProvider.notifier);
+    if (!notifier.hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      await notifier.loadMore();
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final classroomsAsync = ref.watch(classroomsProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -25,6 +64,7 @@ class ClassesListScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(classroomsProvider),
         ),
         data: (classes) => CustomScrollView(
+          controller: _scroll,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
@@ -45,16 +85,24 @@ class ClassesListScreen extends ConsumerWidget {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
                 sliver: SliverList.separated(
-                  itemCount: classes.length,
+                  itemCount: classes.length + (_loadingMore ? 1 : 0),
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (ctx, i) => _ClassCard(
-                    classroom: classes[i],
-                    cs: cs,
-                    tt: tt,
-                    onTap: () => _openDetail(ctx, classes[i]),
-                    onRename: () => _renameClass(ctx, ref, classes[i]),
-                    onDelete: () => _deleteClass(ctx, ref, classes[i]),
-                  ),
+                  itemBuilder: (ctx, i) {
+                    if (i >= classes.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    return _ClassCard(
+                      classroom: classes[i],
+                      cs: cs,
+                      tt: tt,
+                      onTap: () => _openDetail(ctx, classes[i]),
+                      onRename: () => _renameClass(ctx, ref, classes[i]),
+                      onDelete: () => _deleteClass(ctx, ref, classes[i]),
+                    );
+                  },
                 ),
               ),
           ],

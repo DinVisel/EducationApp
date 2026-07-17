@@ -16,11 +16,22 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
+  final _scroll = ScrollController();
+  bool _loadingMore = false;
+
   @override
   void initState() {
     super.initState();
     // Mark all read shortly after open, then refresh the badge + list.
     WidgetsBinding.instance.addPostFrameCallback((_) => _markAllRead());
+    _scroll.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
+    super.dispose();
   }
 
   Future<void> _markAllRead() async {
@@ -32,6 +43,24 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     if (!mounted) return;
     ref.invalidate(unreadCountProvider);
     ref.invalidate(notificationsProvider);
+  }
+
+  void _onScroll() {
+    if (_loadingMore) return;
+    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    final notifier = ref.read(notificationsProvider.notifier);
+    if (!notifier.hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      await notifier.loadMore();
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
+    }
   }
 
   @override
@@ -51,11 +80,20 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           return RefreshIndicator(
             onRefresh: () => ref.refresh(notificationsProvider.future),
             child: ListView.separated(
+              controller: _scroll,
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              itemCount: items.length,
+              itemCount: items.length + (_loadingMore ? 1 : 0),
               separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (_, i) => _NotificationCard(item: items[i]),
+              itemBuilder: (_, i) {
+                if (i >= items.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return _NotificationCard(item: items[i]);
+              },
             ),
           );
         },
