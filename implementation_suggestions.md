@@ -268,7 +268,7 @@ JWTs currently have a 7-day expiry (`ExpiryMinutes: 10080`) with no refresh mech
 
 ## Lower-Priority / Nice-to-Have Suggestions
 
-### 16. Dark Mode
+### 16. Dark Mode ✅ Implemented
 
 The design system defines a "Liquid Glass" light theme but no dark variant.
 
@@ -279,7 +279,7 @@ The design system defines a "Liquid Glass" light theme but no dark variant.
 
 ---
 
-### 17. Image Cropping & Compression
+### 17. Image Cropping & Compression ✅ Implemented
 
 Profile avatar/cover uploads currently go raw to R2.
 
