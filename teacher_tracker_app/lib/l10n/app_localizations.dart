@@ -254,6 +254,18 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get commonEmail;
 
+  /// No description provided for @commonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get commonTitle;
+
+  /// No description provided for @commonDescriptionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get commonDescriptionOptional;
+
   /// No description provided for @commonNotAvailable.
   ///
   /// In en, this message translates to:
@@ -1711,6 +1723,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Author (optional)'**
   String get readingAuthorOptional;
+
+  /// No description provided for @hwTrackerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework Tracking'**
+  String get hwTrackerTitle;
+
+  /// No description provided for @hwTrackerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor your students\' progress.'**
+  String get hwTrackerSubtitle;
+
+  /// No description provided for @hwTrackerNewAssignment.
+  ///
+  /// In en, this message translates to:
+  /// **'New Assignment'**
+  String get hwTrackerNewAssignment;
+
+  /// No description provided for @hwTrackerThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get hwTrackerThisWeek;
+
+  /// No description provided for @hwTrackerAllStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'All Students'**
+  String get hwTrackerAllStudents;
+
+  /// No description provided for @hwTrackerAssignmentChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment'**
+  String get hwTrackerAssignmentChip;
+
+  /// No description provided for @hwTrackerCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get hwTrackerCompleted;
+
+  /// No description provided for @hwTrackerInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get hwTrackerInProgress;
+
+  /// No description provided for @hwTrackerNoDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No due date'**
+  String get hwTrackerNoDueDate;
+
+  /// No description provided for @hwTrackerDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String hwTrackerDue(String date);
+
+  /// No description provided for @hwTrackerMarkDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Done'**
+  String get hwTrackerMarkDone;
+
+  /// No description provided for @hwTrackerMarkUndone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Undone'**
+  String get hwTrackerMarkUndone;
+
+  /// No description provided for @hwTrackerPickDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick due date'**
+  String get hwTrackerPickDueDate;
 }
 
 class _AppLocalizationsDelegate

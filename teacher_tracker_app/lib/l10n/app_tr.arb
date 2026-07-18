@@ -29,6 +29,8 @@
   "commonAll": "Tümü",
   "commonCreate": "Oluştur",
   "commonEmail": "E-posta",
+  "commonTitle": "Başlık",
+  "commonDescriptionOptional": "Açıklama (isteğe bağlı)",
   "commonNotAvailable": "Yok",
   "commonCouldNotDelete": "Silinemedi: {error}",
   "@commonCouldNotDelete": { "placeholders": { "error": { "type": "String" } } },
@@ -331,5 +333,20 @@
   "readingStatusReading": "Okuyor",
   "readingStudent": "Öğrenci",
   "readingBookTitle": "Kitap Adı",
-  "readingAuthorOptional": "Yazar (isteğe bağlı)"
+  "readingAuthorOptional": "Yazar (isteğe bağlı)",
+
+  "hwTrackerTitle": "Ödev Takibi",
+  "hwTrackerSubtitle": "Öğrencilerinizin ilerlemesini izleyin.",
+  "hwTrackerNewAssignment": "Yeni Ödev",
+  "hwTrackerThisWeek": "Bu Hafta",
+  "hwTrackerAllStudents": "Tüm Öğrenciler",
+  "hwTrackerAssignmentChip": "Ödev",
+  "hwTrackerCompleted": "Tamamlandı",
+  "hwTrackerInProgress": "Devam Ediyor",
+  "hwTrackerNoDueDate": "Son tarih yok",
+  "hwTrackerDue": "Son tarih {date}",
+  "@hwTrackerDue": { "placeholders": { "date": { "type": "String" } } },
+  "hwTrackerMarkDone": "Yapıldı işaretle",
+  "hwTrackerMarkUndone": "Yapılmadı işaretle",
+  "hwTrackerPickDueDate": "Son tarih seç"
 }

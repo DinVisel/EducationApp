@@ -29,6 +29,8 @@
   "commonAll": "All",
   "commonCreate": "Create",
   "commonEmail": "Email",
+  "commonTitle": "Title",
+  "commonDescriptionOptional": "Description (optional)",
   "commonNotAvailable": "N/A",
   "commonCouldNotDelete": "Could not delete: {error}",
   "@commonCouldNotDelete": { "placeholders": { "error": { "type": "String" } } },
@@ -341,5 +343,20 @@
   "readingStatusReading": "Reading",
   "readingStudent": "Student",
   "readingBookTitle": "Book Title",
-  "readingAuthorOptional": "Author (optional)"
+  "readingAuthorOptional": "Author (optional)",
+
+  "hwTrackerTitle": "Homework Tracking",
+  "hwTrackerSubtitle": "Monitor your students' progress.",
+  "hwTrackerNewAssignment": "New Assignment",
+  "hwTrackerThisWeek": "This Week",
+  "hwTrackerAllStudents": "All Students",
+  "hwTrackerAssignmentChip": "Assignment",
+  "hwTrackerCompleted": "Completed",
+  "hwTrackerInProgress": "In Progress",
+  "hwTrackerNoDueDate": "No due date",
+  "hwTrackerDue": "Due {date}",
+  "@hwTrackerDue": { "placeholders": { "date": { "type": "String" } } },
+  "hwTrackerMarkDone": "Mark Done",
+  "hwTrackerMarkUndone": "Mark Undone",
+  "hwTrackerPickDueDate": "Pick due date"
 }

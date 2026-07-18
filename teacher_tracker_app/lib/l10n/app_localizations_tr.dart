@@ -91,6 +91,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonEmail => 'E-posta';
 
   @override
+  String get commonTitle => 'Başlık';
+
+  @override
+  String get commonDescriptionOptional => 'Açıklama (isteğe bağlı)';
+
+  @override
   String get commonNotAvailable => 'Yok';
 
   @override
@@ -936,4 +942,45 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get readingAuthorOptional => 'Yazar (isteğe bağlı)';
+
+  @override
+  String get hwTrackerTitle => 'Ödev Takibi';
+
+  @override
+  String get hwTrackerSubtitle => 'Öğrencilerinizin ilerlemesini izleyin.';
+
+  @override
+  String get hwTrackerNewAssignment => 'Yeni Ödev';
+
+  @override
+  String get hwTrackerThisWeek => 'Bu Hafta';
+
+  @override
+  String get hwTrackerAllStudents => 'Tüm Öğrenciler';
+
+  @override
+  String get hwTrackerAssignmentChip => 'Ödev';
+
+  @override
+  String get hwTrackerCompleted => 'Tamamlandı';
+
+  @override
+  String get hwTrackerInProgress => 'Devam Ediyor';
+
+  @override
+  String get hwTrackerNoDueDate => 'Son tarih yok';
+
+  @override
+  String hwTrackerDue(String date) {
+    return 'Son tarih $date';
+  }
+
+  @override
+  String get hwTrackerMarkDone => 'Yapıldı işaretle';
+
+  @override
+  String get hwTrackerMarkUndone => 'Yapılmadı işaretle';
+
+  @override
+  String get hwTrackerPickDueDate => 'Son tarih seç';
 }

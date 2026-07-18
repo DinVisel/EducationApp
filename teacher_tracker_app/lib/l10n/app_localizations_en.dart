@@ -91,6 +91,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonEmail => 'Email';
 
   @override
+  String get commonTitle => 'Title';
+
+  @override
+  String get commonDescriptionOptional => 'Description (optional)';
+
+  @override
   String get commonNotAvailable => 'N/A';
 
   @override
@@ -933,4 +939,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readingAuthorOptional => 'Author (optional)';
+
+  @override
+  String get hwTrackerTitle => 'Homework Tracking';
+
+  @override
+  String get hwTrackerSubtitle => 'Monitor your students\' progress.';
+
+  @override
+  String get hwTrackerNewAssignment => 'New Assignment';
+
+  @override
+  String get hwTrackerThisWeek => 'This Week';
+
+  @override
+  String get hwTrackerAllStudents => 'All Students';
+
+  @override
+  String get hwTrackerAssignmentChip => 'Assignment';
+
+  @override
+  String get hwTrackerCompleted => 'Completed';
+
+  @override
+  String get hwTrackerInProgress => 'In Progress';
+
+  @override
+  String get hwTrackerNoDueDate => 'No due date';
+
+  @override
+  String hwTrackerDue(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String get hwTrackerMarkDone => 'Mark Done';
+
+  @override
+  String get hwTrackerMarkUndone => 'Mark Undone';
+
+  @override
+  String get hwTrackerPickDueDate => 'Pick due date';
 }

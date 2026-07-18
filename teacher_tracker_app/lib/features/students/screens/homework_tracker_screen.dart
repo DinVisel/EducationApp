@@ -2,8 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/homework.dart';
 import '../../../models/student.dart';
 import '../state/homework_providers.dart';
@@ -34,6 +36,7 @@ class _HomeworkTrackerScreenState extends ConsumerState<HomeworkTrackerScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final studentsAsync = ref.watch(studentsProvider);
 
     return Scaffold(
@@ -53,12 +56,12 @@ class _HomeworkTrackerScreenState extends ConsumerState<HomeworkTrackerScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Homework Tracking',
+                        Text(loc.hwTrackerTitle,
                             style: tt.displaySmall?.copyWith(
                                 color: cs.onSurface,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 32)),
-                        Text('Monitor student progress for Grade 3-B.',
+                        Text(loc.hwTrackerSubtitle,
                             style: tt.bodyLarge
                                 ?.copyWith(color: cs.onSurfaceVariant)),
                       ],
@@ -67,7 +70,7 @@ class _HomeworkTrackerScreenState extends ConsumerState<HomeworkTrackerScreen> {
                   FilledButton.icon(
                     onPressed: () => _addAssignment(context, ref),
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('New Assignment'),
+                    label: Text(loc.hwTrackerNewAssignment),
                     style: FilledButton.styleFrom(
                         minimumSize: const Size(0, 40)),
                   ),
@@ -84,7 +87,7 @@ class _HomeworkTrackerScreenState extends ConsumerState<HomeworkTrackerScreen> {
                   children: [
                     Row(
                       children: [
-                        Text('This Week',
+                        Text(loc.hwTrackerThisWeek,
                             style: tt.titleLarge?.copyWith(
                                 color: cs.onSurface,
                                 fontWeight: FontWeight.w600)),
@@ -127,7 +130,7 @@ class _HomeworkTrackerScreenState extends ConsumerState<HomeworkTrackerScreen> {
                   child: Row(
                     children: [
                       _FilterChip(
-                        label: 'All Students',
+                        label: loc.hwTrackerAllStudents,
                         selected: _selectedStudentId == null,
                         onTap: () => setState(() => _selectedStudentId = null),
                         cs: cs,
@@ -179,8 +182,8 @@ class _HomeworkTrackerScreenState extends ConsumerState<HomeworkTrackerScreen> {
     final students = ref.read(studentsProvider).maybeWhen(
           data: (list) => list, orElse: () => <dynamic>[]);
     if (students.isEmpty) {
-      ScaffoldMessenger.of(ctx).showSnackBar(
-          const SnackBar(content: Text('Add students first')));
+      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+          content: Text(AppLocalizations.of(ctx)!.readingAddStudentsFirst)));
       return;
     }
     // Default to first student or selected
@@ -229,7 +232,7 @@ class _HomeworkAppBar extends StatelessWidget {
             children: [
               Icon(Icons.menu_book, color: cs.primary),
               const SizedBox(width: 12),
-              Text('Homework',
+              Text(AppLocalizations.of(context)!.classTabHomework,
                   style: tt.headlineMedium?.copyWith(
                       color: cs.primary, fontWeight: FontWeight.w700)),
               const Spacer(),
@@ -262,7 +265,8 @@ class _WeekdayPickerState extends State<_WeekdayPicker> {
 
   @override
   Widget build(BuildContext context) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final dayFormat = DateFormat('EEE', localeName);
     return Row(
       children: List.generate(5, (i) {
         final date = widget.weekStart.add(Duration(days: i));
@@ -290,7 +294,7 @@ class _WeekdayPickerState extends State<_WeekdayPicker> {
               ),
               child: Column(
                 children: [
-                  Text(days[i],
+                  Text(dayFormat.format(date),
                       style: widget.tt.labelSmall?.copyWith(
                           color: isSelected
                               ? widget.cs.primary
@@ -444,6 +448,7 @@ class _HomeworkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final isDone = hw.isDone;
     final progress = isDone ? 1.0 : 0.5;
 
@@ -492,7 +497,7 @@ class _HomeworkCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Text(isDone ? '20/20 Completed' : 'In Progress',
+                  Text(isDone ? loc.hwTrackerCompleted : loc.hwTrackerInProgress,
                       style: tt.labelMedium
                           ?.copyWith(color: cs.onSurface)),
                   const Spacer(),
@@ -511,7 +516,8 @@ class _HomeworkCard extends StatelessWidget {
                       onPressed: () => onToggle(!isDone),
                       style: OutlinedButton.styleFrom(
                           minimumSize: const Size(0, 36)),
-                      child: Text(isDone ? 'Mark Undone' : 'Mark Done'),
+                      child: Text(
+                          isDone ? loc.hwTrackerMarkUndone : loc.hwTrackerMarkDone),
                     ),
                   ),
                 ],
@@ -538,7 +544,7 @@ class _SubjectChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(99),
         border: Border.all(color: cs.primary.withValues(alpha: 0.2)),
       ),
-      child: Text('Assignment',
+      child: Text(AppLocalizations.of(context)!.hwTrackerAssignmentChip,
           style: tt.labelSmall?.copyWith(color: cs.primary)),
     );
   }
@@ -557,11 +563,12 @@ class _DueChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final label = isDone
-        ? 'Done'
+        ? loc.commonDone
         : dueDate == null
-            ? 'No due date'
-            : 'Due ${formatDateOnly(dueDate!)}';
+            ? loc.hwTrackerNoDueDate
+            : loc.hwTrackerDue(formatDateOnly(dueDate!));
     final color = isDone ? cs.primary : cs.onSurfaceVariant;
 
     return Container(
@@ -626,8 +633,9 @@ class _NewAssignmentDialogState extends State<_NewAssignmentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('New Assignment'),
+      title: Text(loc.hwTrackerNewAssignment),
       content: Form(
         key: _key,
         child: Column(
@@ -635,7 +643,7 @@ class _NewAssignmentDialogState extends State<_NewAssignmentDialog> {
           children: [
             DropdownButtonFormField<int>(
               value: _studentId,
-              decoration: const InputDecoration(labelText: 'Student'),
+              decoration: InputDecoration(labelText: loc.readingStudent),
               items: widget.students
                   .map<DropdownMenuItem<int>>((s) => DropdownMenuItem(
                         value: s.id as int,
@@ -647,15 +655,15 @@ class _NewAssignmentDialogState extends State<_NewAssignmentDialog> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _title,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: InputDecoration(labelText: loc.commonTitle),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _desc,
               decoration:
-                  const InputDecoration(labelText: 'Description (optional)'),
+                  InputDecoration(labelText: loc.commonDescriptionOptional),
               maxLines: 2,
             ),
             const SizedBox(height: 12),
@@ -672,8 +680,8 @@ class _NewAssignmentDialogState extends State<_NewAssignmentDialog> {
               },
               icon: const Icon(Icons.event),
               label: Text(_due == null
-                  ? 'Pick due date'
-                  : 'Due ${formatDateOnly(_due!)}'),
+                  ? loc.hwTrackerPickDueDate
+                  : loc.hwTrackerDue(formatDateOnly(_due!))),
             ),
           ],
         ),
@@ -681,7 +689,7 @@ class _NewAssignmentDialogState extends State<_NewAssignmentDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(loc.commonCancel),
         ),
         FilledButton(
           onPressed: _loading
@@ -700,7 +708,7 @@ class _NewAssignmentDialogState extends State<_NewAssignmentDialog> {
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error: $e')));
+                          SnackBar(content: Text(loc.commonError('$e'))));
                     }
                   } finally {
                     if (mounted) setState(() => _loading = false);
@@ -711,7 +719,7 @@ class _NewAssignmentDialogState extends State<_NewAssignmentDialog> {
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Add'),
+              : Text(loc.commonAdd),
         ),
       ],
     );
