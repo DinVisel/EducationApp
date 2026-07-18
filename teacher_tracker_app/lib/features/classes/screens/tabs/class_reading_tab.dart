@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../models/book.dart';
 import '../../../../models/classroom.dart';
 import '../../../../models/student.dart';
@@ -18,10 +19,11 @@ class ClassReadingTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(classroomDetailProvider(classroom.id));
+    final loc = AppLocalizations.of(context)!;
 
     return detailAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(loc.commonError('$e'))),
       data: (detail) {
         final students = detail.students;
         return RefreshIndicator(
@@ -34,7 +36,7 @@ class ClassReadingTab extends ConsumerWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text('Reading',
+                    child: Text(loc.classTabReading,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w700)),
                   ),
@@ -43,14 +45,14 @@ class ClassReadingTab extends ConsumerWidget {
                         ? null
                         : () => _addBook(context, ref, students),
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add Book'),
+                    label: Text(loc.classReadingAddBook),
                     style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               if (students.isEmpty)
-                const _EmptyHint(text: 'No students in this class yet.')
+                _EmptyHint(text: loc.attendanceEmptyRoster)
               else
                 for (final s in students)
                   _StudentBooks(student: s),
@@ -134,7 +136,9 @@ class _BookRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final done = book.status == BookStatus.completed;
+    final statusLabel = done ? loc.readingCompleted : loc.readingStatusReading;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -156,8 +160,8 @@ class _BookRow extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis),
                   Text(
                     book.author?.isNotEmpty == true
-                        ? '${book.author} · ${done ? 'Completed' : 'Reading'}'
-                        : (done ? 'Completed' : 'Reading'),
+                        ? '${book.author} · $statusLabel'
+                        : statusLabel,
                     style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
@@ -166,7 +170,7 @@ class _BookRow extends ConsumerWidget {
             if (!done)
               IconButton(
                 icon: Icon(Icons.done_all, size: 20, color: cs.primary),
-                tooltip: 'Mark completed',
+                tooltip: loc.classReadingMarkCompleted,
                 onPressed: () => ref.read(booksProvider(studentId).notifier).save(
                       Book(
                         id: book.id,
@@ -181,7 +185,7 @@ class _BookRow extends ConsumerWidget {
               ),
             IconButton(
               icon: Icon(Icons.delete_outline, size: 20, color: cs.error),
-              tooltip: 'Remove',
+              tooltip: loc.commonRemove,
               onPressed: () =>
                   ref.read(booksProvider(studentId).notifier).remove(book.id),
             ),
@@ -252,8 +256,9 @@ class _AddBookDialogState extends State<_AddBookDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Add Book'),
+      title: Text(loc.classReadingAddBook),
       content: Form(
         key: _key,
         child: Column(
@@ -261,7 +266,7 @@ class _AddBookDialogState extends State<_AddBookDialog> {
           children: [
             DropdownButtonFormField<int>(
               initialValue: _studentId,
-              decoration: const InputDecoration(labelText: 'Student'),
+              decoration: InputDecoration(labelText: loc.readingStudent),
               items: widget.students
                   .map((s) => DropdownMenuItem(
                         value: s.id,
@@ -273,21 +278,24 @@ class _AddBookDialogState extends State<_AddBookDialog> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _title,
-              decoration: const InputDecoration(labelText: 'Book Title'),
+              decoration: InputDecoration(labelText: loc.readingBookTitle),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _author,
-              decoration: const InputDecoration(labelText: 'Author (optional)'),
+              decoration: InputDecoration(labelText: loc.readingAuthorOptional),
             ),
             const SizedBox(height: 12),
             SegmentedButton<BookStatus>(
-              segments: const [
-                ButtonSegment(value: BookStatus.reading, label: Text('Reading')),
+              segments: [
                 ButtonSegment(
-                    value: BookStatus.completed, label: Text('Completed')),
+                    value: BookStatus.reading,
+                    label: Text(loc.readingStatusReading)),
+                ButtonSegment(
+                    value: BookStatus.completed,
+                    label: Text(loc.readingCompleted)),
               ],
               selected: {_status},
               onSelectionChanged: (s) => setState(() => _status = s.first),
@@ -298,7 +306,7 @@ class _AddBookDialogState extends State<_AddBookDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(loc.commonCancel),
         ),
         FilledButton(
           onPressed: _loading
@@ -317,7 +325,7 @@ class _AddBookDialogState extends State<_AddBookDialog> {
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error: $e')));
+                          SnackBar(content: Text(loc.commonError('$e'))));
                     }
                   } finally {
                     if (mounted) setState(() => _loading = false);
@@ -328,7 +336,7 @@ class _AddBookDialogState extends State<_AddBookDialog> {
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Add'),
+              : Text(loc.commonAdd),
         ),
       ],
     );

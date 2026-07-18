@@ -2119,6 +2119,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exercises, videos, or files students can download.'**
   String get newAssignmentAttachmentsHint;
+
+  /// No description provided for @classHwAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Assignments'**
+  String get classHwAssignments;
+
+  /// No description provided for @classHwNoAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'No assignments published to this class yet.'**
+  String get classHwNoAssignments;
+
+  /// No description provided for @classHwStudentHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Homework'**
+  String get classHwStudentHomework;
+
+  /// No description provided for @classHwStudentHomeworkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual homework per student (add from a student’s page).'**
+  String get classHwStudentHomeworkHint;
+
+  /// No description provided for @classReadingAddBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Book'**
+  String get classReadingAddBook;
+
+  /// No description provided for @classReadingMarkCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark completed'**
+  String get classReadingMarkCompleted;
 }
 
 class _AppLocalizationsDelegate

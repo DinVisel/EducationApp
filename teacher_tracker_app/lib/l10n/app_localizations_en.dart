@@ -1173,4 +1173,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get newAssignmentAttachmentsHint =>
       'Exercises, videos, or files students can download.';
+
+  @override
+  String get classHwAssignments => 'Class Assignments';
+
+  @override
+  String get classHwNoAssignments =>
+      'No assignments published to this class yet.';
+
+  @override
+  String get classHwStudentHomework => 'Student Homework';
+
+  @override
+  String get classHwStudentHomeworkHint =>
+      'Individual homework per student (add from a student’s page).';
+
+  @override
+  String get classReadingAddBook => 'Add Book';
+
+  @override
+  String get classReadingMarkCompleted => 'Mark completed';
 }

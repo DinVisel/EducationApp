@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../models/assignment.dart';
 import '../../../../models/classroom.dart';
 import '../../../../models/homework.dart';
@@ -22,6 +23,7 @@ class ClassHomeworkTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final assignmentsAsync = ref.watch(classroomAssignmentsProvider(classroom.id));
     final detailAsync = ref.watch(classroomDetailProvider(classroom.id));
 
@@ -39,7 +41,7 @@ class ClassHomeworkTab extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text('Class Assignments',
+                child: Text(loc.classHwAssignments,
                     style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
               ),
               FilledButton.icon(
@@ -49,7 +51,7 @@ class ClassHomeworkTab extends ConsumerWidget {
                   ),
                 ),
                 icon: const Icon(Icons.post_add, size: 18),
-                label: const Text('New'),
+                label: Text(loc.commonNew),
                 style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
               ),
             ],
@@ -57,10 +59,10 @@ class ClassHomeworkTab extends ConsumerWidget {
           const SizedBox(height: 12),
           assignmentsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Text('Error: $e'),
+            error: (e, _) => Text(loc.commonError('$e')),
             data: (assignments) {
               if (assignments.isEmpty) {
-                return const _Hint(text: 'No assignments published to this class yet.');
+                return _Hint(text: loc.classHwNoAssignments);
               }
               return Column(
                 children: [
@@ -76,19 +78,19 @@ class ClassHomeworkTab extends ConsumerWidget {
 
           // ── Per-student homework ───────────────────────────────────────
           const SizedBox(height: 24),
-          Text('Student Homework',
+          Text(loc.classHwStudentHomework,
               style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          Text('Individual homework per student (add from a student’s page).',
+          Text(loc.classHwStudentHomeworkHint,
               style: tt.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant)),
           const SizedBox(height: 12),
           detailAsync.when(
             loading: () => const SizedBox.shrink(),
-            error: (e, _) => Text('Error: $e'),
+            error: (e, _) => Text(loc.commonError('$e')),
             data: (detail) {
               if (detail.students.isEmpty) {
-                return const _Hint(text: 'No students in this class yet.');
+                return _Hint(text: loc.attendanceEmptyRoster);
               }
               return Column(
                 children: [
@@ -105,19 +107,19 @@ class ClassHomeworkTab extends ConsumerWidget {
   Future<void> _deleteAssignment(
       BuildContext ctx, WidgetRef ref, Assignment a) async {
     final messenger = ScaffoldMessenger.of(ctx);
+    final loc = AppLocalizations.of(ctx)!;
     final ok = await showDialog<bool>(
       context: ctx,
       builder: (d) => AlertDialog(
-        title: const Text('Delete assignment?'),
-        content: Text('Remove "${a.title}"? This clears it for all '
-            '${a.studentCount} student${a.studentCount == 1 ? '' : 's'}.'),
+        title: Text(loc.assignmentsDeleteTitle),
+        content: Text(loc.assignmentsDeleteBody(a.title, a.studentCount)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(d, false),
-              child: const Text('Cancel')),
+              child: Text(loc.commonCancel)),
           FilledButton(
               onPressed: () => Navigator.pop(d, true),
-              child: const Text('Delete')),
+              child: Text(loc.commonDelete)),
         ],
       ),
     );
@@ -125,7 +127,8 @@ class ClassHomeworkTab extends ConsumerWidget {
     try {
       await ref.read(assignmentActionsProvider).delete(classroom.id, a.id);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not delete: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.commonCouldNotDelete('$e'))));
     }
   }
 }
@@ -139,6 +142,7 @@ class _AssignmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final a = assignment;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -157,7 +161,7 @@ class _AssignmentCard extends StatelessWidget {
                 ),
                 IconButton(
                   icon: Icon(Icons.delete_outline, color: cs.error),
-                  tooltip: 'Delete',
+                  tooltip: loc.commonDelete,
                   visualDensity: VisualDensity.compact,
                   onPressed: onDelete,
                 ),
@@ -175,11 +179,12 @@ class _AssignmentCard extends StatelessWidget {
               children: [
                 _MiniChip(
                     icon: Icons.people_alt_outlined,
-                    label: '${a.completedCount}/${a.studentCount} done'),
+                    label:
+                        loc.assignmentsDone(a.completedCount, a.studentCount)),
                 if (a.dueDate != null)
                   _MiniChip(
                       icon: Icons.event_outlined,
-                      label: 'Due ${_fmtDate(a.dueDate!)}'),
+                      label: loc.hwTrackerDue(_fmtDate(a.dueDate!))),
               ],
             ),
             if (a.attachments.isNotEmpty) ...[
@@ -271,6 +276,7 @@ class _HomeworkRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final done = hw.isDone;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -283,7 +289,7 @@ class _HomeworkRow extends StatelessWidget {
                 done ? Icons.check_circle : Icons.radio_button_unchecked,
                 color: done ? cs.primary : cs.onSurfaceVariant,
               ),
-              tooltip: done ? 'Mark undone' : 'Mark done',
+              tooltip: done ? loc.hwTrackerMarkUndone : loc.hwTrackerMarkDone,
               onPressed: () => onToggle(!done),
             ),
             Expanded(
@@ -296,7 +302,7 @@ class _HomeworkRow extends StatelessWidget {
                           decoration:
                               done ? TextDecoration.lineThrough : null)),
                   if (hw.dueDate != null)
-                    Text('Due ${formatDateOnly(hw.dueDate!)}',
+                    Text(loc.hwTrackerDue(formatDateOnly(hw.dueDate!)),
                         style: tt.labelSmall
                             ?.copyWith(color: cs.onSurfaceVariant)),
                 ],
@@ -304,7 +310,7 @@ class _HomeworkRow extends StatelessWidget {
             ),
             IconButton(
               icon: Icon(Icons.delete_outline, size: 20, color: cs.error),
-              tooltip: 'Remove',
+              tooltip: loc.commonRemove,
               onPressed: onDelete,
             ),
           ],

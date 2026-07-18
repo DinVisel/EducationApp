@@ -418,5 +418,13 @@
   "newAssignmentTitleHint": "örn. 3. bölümü oku",
   "newAssignmentSetDueDate": "Son tarih belirle (isteğe bağlı)",
   "newAssignmentPublished": "Ödev yayınlandı",
-  "newAssignmentAttachmentsHint": "Öğrencilerin indirebileceği alıştırmalar, videolar veya dosyalar."
+  "newAssignmentAttachmentsHint": "Öğrencilerin indirebileceği alıştırmalar, videolar veya dosyalar.",
+
+  "classHwAssignments": "Sınıf Ödevleri",
+  "classHwNoAssignments": "Bu sınıfa henüz ödev yayınlanmadı.",
+  "classHwStudentHomework": "Öğrenci Ödevleri",
+  "classHwStudentHomeworkHint": "Öğrenci başına bireysel ödev (öğrencinin sayfasından ekleyin).",
+
+  "classReadingAddBook": "Kitap Ekle",
+  "classReadingMarkCompleted": "Tamamlandı işaretle"
 }

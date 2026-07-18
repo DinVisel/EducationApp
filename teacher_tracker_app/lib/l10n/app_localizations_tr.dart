@@ -1176,4 +1176,23 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get newAssignmentAttachmentsHint =>
       'Öğrencilerin indirebileceği alıştırmalar, videolar veya dosyalar.';
+
+  @override
+  String get classHwAssignments => 'Sınıf Ödevleri';
+
+  @override
+  String get classHwNoAssignments => 'Bu sınıfa henüz ödev yayınlanmadı.';
+
+  @override
+  String get classHwStudentHomework => 'Öğrenci Ödevleri';
+
+  @override
+  String get classHwStudentHomeworkHint =>
+      'Öğrenci başına bireysel ödev (öğrencinin sayfasından ekleyin).';
+
+  @override
+  String get classReadingAddBook => 'Kitap Ekle';
+
+  @override
+  String get classReadingMarkCompleted => 'Tamamlandı işaretle';
 }

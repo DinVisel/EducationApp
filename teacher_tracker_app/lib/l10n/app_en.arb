@@ -428,5 +428,13 @@
   "newAssignmentTitleHint": "e.g. Read chapter 3",
   "newAssignmentSetDueDate": "Set a due date (optional)",
   "newAssignmentPublished": "Assignment published",
-  "newAssignmentAttachmentsHint": "Exercises, videos, or files students can download."
+  "newAssignmentAttachmentsHint": "Exercises, videos, or files students can download.",
+
+  "classHwAssignments": "Class Assignments",
+  "classHwNoAssignments": "No assignments published to this class yet.",
+  "classHwStudentHomework": "Student Homework",
+  "classHwStudentHomeworkHint": "Individual homework per student (add from a student’s page).",
+
+  "classReadingAddBook": "Add Book",
+  "classReadingMarkCompleted": "Mark completed"
 }
