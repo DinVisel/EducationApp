@@ -82,6 +82,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonNew => 'Yeni';
 
   @override
+  String get commonAll => 'Tümü';
+
+  @override
   String get commonCreate => 'Oluştur';
 
   @override
@@ -864,4 +867,73 @@ class AppLocalizationsTr extends AppLocalizations {
   String studentProfileCouldNotRevoke(String error) {
     return 'İptal edilemedi: $error';
   }
+
+  @override
+  String get studentsTitle => 'Öğrenciler';
+
+  @override
+  String get studentsAdd => 'Öğrenci ekle';
+
+  @override
+  String get studentsDeleteTitle => 'Öğrenci silinsin mi?';
+
+  @override
+  String studentsDeleteBody(String name) {
+    return '$name kaldırılsın mı? Bu geri alınamaz.';
+  }
+
+  @override
+  String studentsDeleted(String name) {
+    return '$name silindi';
+  }
+
+  @override
+  String get studentsEmptyTitle => 'Henüz öğrenci yok';
+
+  @override
+  String get studentsEmptySubtitle =>
+      'İlk öğrencinizi oluşturmak için “Öğrenci ekle”ye dokunun.';
+
+  @override
+  String get studentsLoadError => 'Öğrenciler yüklenemedi';
+
+  @override
+  String get readingTitle => 'Okuma Günlüğü';
+
+  @override
+  String get readingSubtitle =>
+      'Öğrencilerinizin okuma maceralarını takip edin.';
+
+  @override
+  String get readingAddBook => 'Yeni Kitap Ekle';
+
+  @override
+  String get readingAddStudentsFirst => 'Önce öğrenci ekleyin';
+
+  @override
+  String get readingFinished => 'Bitti!';
+
+  @override
+  String get readingInProgress => 'Devam ediyor';
+
+  @override
+  String get readingComplete => 'Tamamlandı';
+
+  @override
+  String get readingCompleted => 'Tamamlandı';
+
+  @override
+  String get readingUpdateProgress => 'İlerlemeyi Güncelle';
+
+  @override
+  String get readingStatusReading => 'Okuyor';
+
+  @override
+  String get readingStudent => 'Öğrenci';
+
+  @override
+  String get readingBookTitle => 'Kitap Adı';
+
+  @override
+  String get readingAuthorOptional => 'Yazar (isteğe bağlı)';
 }

@@ -236,6 +236,12 @@ abstract class AppLocalizations {
   /// **'New'**
   String get commonNew;
 
+  /// No description provided for @commonAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get commonAll;
+
   /// No description provided for @commonCreate.
   ///
   /// In en, this message translates to:
@@ -1579,6 +1585,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not revoke: {error}'**
   String studentProfileCouldNotRevoke(String error);
+
+  /// No description provided for @studentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students'**
+  String get studentsTitle;
+
+  /// No description provided for @studentsAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add student'**
+  String get studentsAdd;
+
+  /// No description provided for @studentsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete student?'**
+  String get studentsDeleteTitle;
+
+  /// No description provided for @studentsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}? This cannot be undone.'**
+  String studentsDeleteBody(String name);
+
+  /// No description provided for @studentsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {name}'**
+  String studentsDeleted(String name);
+
+  /// No description provided for @studentsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No students yet'**
+  String get studentsEmptyTitle;
+
+  /// No description provided for @studentsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap “Add student” to create your first one.'**
+  String get studentsEmptySubtitle;
+
+  /// No description provided for @studentsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load students'**
+  String get studentsLoadError;
+
+  /// No description provided for @readingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading Log'**
+  String get readingTitle;
+
+  /// No description provided for @readingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your students\' reading adventures.'**
+  String get readingSubtitle;
+
+  /// No description provided for @readingAddBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Book'**
+  String get readingAddBook;
+
+  /// No description provided for @readingAddStudentsFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Add students first'**
+  String get readingAddStudentsFirst;
+
+  /// No description provided for @readingFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished!'**
+  String get readingFinished;
+
+  /// No description provided for @readingInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get readingInProgress;
+
+  /// No description provided for @readingComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get readingComplete;
+
+  /// No description provided for @readingCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get readingCompleted;
+
+  /// No description provided for @readingUpdateProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Progress'**
+  String get readingUpdateProgress;
+
+  /// No description provided for @readingStatusReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get readingStatusReading;
+
+  /// No description provided for @readingStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get readingStudent;
+
+  /// No description provided for @readingBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Title'**
+  String get readingBookTitle;
+
+  /// No description provided for @readingAuthorOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Author (optional)'**
+  String get readingAuthorOptional;
 }
 
 class _AppLocalizationsDelegate

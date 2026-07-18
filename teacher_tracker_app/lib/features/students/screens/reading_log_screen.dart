@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/book.dart';
 import '../../../models/student.dart';
 import '../state/books_providers.dart';
@@ -25,6 +26,7 @@ class _ReadingLogScreenState extends ConsumerState<ReadingLogScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final studentsAsync = ref.watch(studentsProvider);
 
     return Scaffold(
@@ -44,12 +46,12 @@ class _ReadingLogScreenState extends ConsumerState<ReadingLogScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Reading Log',
+                        Text(loc.readingTitle,
                             style: tt.displaySmall?.copyWith(
                                 color: cs.primary,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 36)),
-                        Text("Track Grade 3-B's reading adventures.",
+                        Text(loc.readingSubtitle,
                             style: tt.bodyLarge
                                 ?.copyWith(color: cs.onSurfaceVariant)),
                       ],
@@ -58,7 +60,7 @@ class _ReadingLogScreenState extends ConsumerState<ReadingLogScreen> {
                   FilledButton.icon(
                     onPressed: () => _addBook(context, ref),
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add New Book'),
+                    label: Text(loc.readingAddBook),
                     style: FilledButton.styleFrom(
                         minimumSize: const Size(0, 40)),
                   ),
@@ -76,7 +78,7 @@ class _ReadingLogScreenState extends ConsumerState<ReadingLogScreen> {
                   child: Row(
                     children: [
                       _FilterChip(
-                        label: 'All',
+                        label: loc.commonAll,
                         selected: _selectedStudentId == null,
                         onTap: () => setState(() => _selectedStudentId = null),
                         cs: cs,
@@ -128,8 +130,8 @@ class _ReadingLogScreenState extends ConsumerState<ReadingLogScreen> {
     final students = ref.read(studentsProvider).maybeWhen(
           data: (list) => list, orElse: () => <dynamic>[]);
     if (students.isEmpty) {
-      ScaffoldMessenger.of(ctx).showSnackBar(
-          const SnackBar(content: Text('Add students first')));
+      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+          content: Text(AppLocalizations.of(ctx)!.readingAddStudentsFirst)));
       return;
     }
     final targetId = _selectedStudentId ?? students.first.id;
@@ -177,7 +179,7 @@ class _ReadingAppBar extends StatelessWidget {
             children: [
               Icon(Icons.auto_stories, color: cs.primary),
               const SizedBox(width: 12),
-              Text('Reading Log',
+              Text(AppLocalizations.of(context)!.readingTitle,
                   style: tt.headlineMedium?.copyWith(
                       color: cs.primary, fontWeight: FontWeight.w700)),
               const Spacer(),
@@ -307,6 +309,7 @@ class _BookCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final isCompleted = book.status == BookStatus.completed;
     final progress = isCompleted ? 1.0 : 0.35;
 
@@ -378,12 +381,14 @@ class _BookCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    isCompleted ? 'Finished!' : 'In progress',
+                    isCompleted ? loc.readingFinished : loc.readingInProgress,
                     style: tt.labelMedium?.copyWith(color: cs.onSurface),
                   ),
                 ),
                 Text(
-                  isCompleted ? 'Complete' : '${(progress * 100).toInt()}%',
+                  isCompleted
+                      ? loc.readingComplete
+                      : '${(progress * 100).toInt()}%',
                   style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ],
@@ -401,7 +406,9 @@ class _BookCard extends ConsumerWidget {
                 icon: Icon(
                     isCompleted ? Icons.check_circle : Icons.update,
                     size: 16),
-                label: Text(isCompleted ? 'Completed' : 'Update Progress'),
+                label: Text(isCompleted
+                    ? loc.readingCompleted
+                    : loc.readingUpdateProgress),
                 style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, 36)),
               ),
@@ -435,7 +442,7 @@ class _BookCard extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.delete_outline),
-              title: const Text('Remove'),
+              title: Text(AppLocalizations.of(ctx)!.commonRemove),
               onTap: () {
                 Navigator.pop(ctx);
                 ref.read(booksProvider(studentId).notifier).remove(book.id);
@@ -456,9 +463,10 @@ class _GenreChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final isCompleted = status == BookStatus.completed;
     final color = isCompleted ? cs.primary : cs.tertiary;
-    final label = isCompleted ? 'Completed' : 'Reading';
+    final label = isCompleted ? loc.readingCompleted : loc.readingStatusReading;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -512,8 +520,9 @@ class _AddBookDialogState extends State<_AddBookDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Add New Book'),
+      title: Text(loc.readingAddBook),
       content: Form(
         key: _key,
         child: Column(
@@ -521,7 +530,7 @@ class _AddBookDialogState extends State<_AddBookDialog> {
           children: [
             DropdownButtonFormField<int>(
               value: _studentId,
-              decoration: const InputDecoration(labelText: 'Student'),
+              decoration: InputDecoration(labelText: loc.readingStudent),
               items: widget.students
                   .map<DropdownMenuItem<int>>((s) => DropdownMenuItem(
                         value: s.id as int,
@@ -533,23 +542,25 @@ class _AddBookDialogState extends State<_AddBookDialog> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _title,
-              decoration: const InputDecoration(labelText: 'Book Title'),
+              decoration: InputDecoration(labelText: loc.readingBookTitle),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _author,
               decoration:
-                  const InputDecoration(labelText: 'Author (optional)'),
+                  InputDecoration(labelText: loc.readingAuthorOptional),
             ),
             const SizedBox(height: 12),
             SegmentedButton<BookStatus>(
-              segments: const [
+              segments: [
                 ButtonSegment(
-                    value: BookStatus.reading, label: Text('Reading')),
+                    value: BookStatus.reading,
+                    label: Text(loc.readingStatusReading)),
                 ButtonSegment(
-                    value: BookStatus.completed, label: Text('Completed')),
+                    value: BookStatus.completed,
+                    label: Text(loc.readingCompleted)),
               ],
               selected: {_status},
               onSelectionChanged: (s) => setState(() => _status = s.first),
@@ -560,7 +571,7 @@ class _AddBookDialogState extends State<_AddBookDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(loc.commonCancel),
         ),
         FilledButton(
           onPressed: _loading
@@ -579,7 +590,7 @@ class _AddBookDialogState extends State<_AddBookDialog> {
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error: $e')));
+                          SnackBar(content: Text(loc.commonError('$e'))));
                     }
                   } finally {
                     if (mounted) setState(() => _loading = false);
@@ -590,7 +601,7 @@ class _AddBookDialogState extends State<_AddBookDialog> {
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Add'),
+              : Text(loc.commonAdd),
         ),
       ],
     );

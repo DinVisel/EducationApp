@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../models/student.dart';
 import '../state/students_providers.dart';
 import 'student_detail_screen.dart';
@@ -51,13 +52,14 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
   @override
   Widget build(BuildContext context) {
     final studentsAsync = ref.watch(studentsProvider);
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Students')),
+      appBar: AppBar(title: Text(loc.studentsTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(context),
         icon: const Icon(Icons.add),
-        label: const Text('Add student'),
+        label: Text(loc.studentsAdd),
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(studentsProvider.future),
@@ -87,10 +89,10 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
                       title: Text(s.fullName),
                       subtitle: s.studentNumber.isEmpty
                           ? null
-                          : Text('No. ${s.studentNumber}'),
+                          : Text(loc.classStudentNumber(s.studentNumber)),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline),
-                        tooltip: 'Delete',
+                        tooltip: loc.commonDelete,
                         onPressed: () => _confirmDelete(context, ref, s),
                       ),
                       onTap: () => Navigator.of(context).push(
@@ -121,19 +123,20 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
 
   Future<void> _confirmDelete(
       BuildContext context, WidgetRef ref, Student s) async {
+    final loc = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete student?'),
-        content: Text('Remove ${s.fullName}? This cannot be undone.'),
+        title: Text(loc.studentsDeleteTitle),
+        content: Text(loc.studentsDeleteBody(s.fullName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(loc.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(loc.commonDelete),
           ),
         ],
       ),
@@ -143,13 +146,13 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
       await ref.read(studentsProvider.notifier).remove(s.id);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Deleted ${s.fullName}')),
+          SnackBar(content: Text(loc.studentsDeleted(s.fullName))),
         );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(loc.commonCouldNotDelete('$e'))));
       }
     }
   }
@@ -160,17 +163,18 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return ListView(
       children: [
         const SizedBox(height: 120),
         Icon(Icons.group_add_outlined,
             size: 64, color: Theme.of(context).hintColor),
         const SizedBox(height: 16),
-        const Center(child: Text('No students yet')),
+        Center(child: Text(loc.studentsEmptyTitle)),
         const SizedBox(height: 4),
         Center(
           child: Text(
-            'Tap “Add student” to create your first one.',
+            loc.studentsEmptySubtitle,
             style: TextStyle(color: Theme.of(context).hintColor),
           ),
         ),
@@ -187,12 +191,13 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return ListView(
       children: [
         const SizedBox(height: 100),
         const Icon(Icons.error_outline, size: 56, color: Colors.redAccent),
         const SizedBox(height: 12),
-        const Center(child: Text('Could not load students')),
+        Center(child: Text(loc.studentsLoadError)),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Text(message, textAlign: TextAlign.center),
@@ -200,7 +205,7 @@ class _ErrorState extends StatelessWidget {
         Center(
           child: FilledButton.tonal(
             onPressed: onRetry,
-            child: const Text('Retry'),
+            child: Text(loc.commonRetry),
           ),
         ),
       ],

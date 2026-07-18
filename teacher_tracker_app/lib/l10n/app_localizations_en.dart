@@ -82,6 +82,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonNew => 'New';
 
   @override
+  String get commonAll => 'All';
+
+  @override
   String get commonCreate => 'Create';
 
   @override
@@ -862,4 +865,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String studentProfileCouldNotRevoke(String error) {
     return 'Could not revoke: $error';
   }
+
+  @override
+  String get studentsTitle => 'Students';
+
+  @override
+  String get studentsAdd => 'Add student';
+
+  @override
+  String get studentsDeleteTitle => 'Delete student?';
+
+  @override
+  String studentsDeleteBody(String name) {
+    return 'Remove $name? This cannot be undone.';
+  }
+
+  @override
+  String studentsDeleted(String name) {
+    return 'Deleted $name';
+  }
+
+  @override
+  String get studentsEmptyTitle => 'No students yet';
+
+  @override
+  String get studentsEmptySubtitle =>
+      'Tap “Add student” to create your first one.';
+
+  @override
+  String get studentsLoadError => 'Could not load students';
+
+  @override
+  String get readingTitle => 'Reading Log';
+
+  @override
+  String get readingSubtitle => 'Track your students\' reading adventures.';
+
+  @override
+  String get readingAddBook => 'Add New Book';
+
+  @override
+  String get readingAddStudentsFirst => 'Add students first';
+
+  @override
+  String get readingFinished => 'Finished!';
+
+  @override
+  String get readingInProgress => 'In progress';
+
+  @override
+  String get readingComplete => 'Complete';
+
+  @override
+  String get readingCompleted => 'Completed';
+
+  @override
+  String get readingUpdateProgress => 'Update Progress';
+
+  @override
+  String get readingStatusReading => 'Reading';
+
+  @override
+  String get readingStudent => 'Student';
+
+  @override
+  String get readingBookTitle => 'Book Title';
+
+  @override
+  String get readingAuthorOptional => 'Author (optional)';
 }
