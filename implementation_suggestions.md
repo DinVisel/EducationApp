@@ -89,7 +89,7 @@ degradation is visible.
 
 ---
 
-### 4. 🟡 Real-Time Notifications (WebSocket / SSE)
+### 4. 🟡 Real-Time Notifications (WebSocket / SSE) ✅ Implemented
 
 Notifications currently rely on **30-second polling** — functional but not ideal for a
 social platform where teachers expect instant feedback on likes/comments.
@@ -167,7 +167,7 @@ mixed throughout. No localization framework is set up.
 
 ## Medium-Priority Suggestions
 
-### 9. Logging & Observability
+### 9. Logging & Observability ✅ Implemented (backend)
 
 The backend has no structured logging, APM, or health-check endpoint.
 
@@ -238,7 +238,7 @@ Teachers need to produce reports for school administration.
 
 ---
 
-### 14. Attendance Tracking
+### 14. Attendance Tracking ✅ Implemented
 
 A core teacher need that's currently missing.
 
@@ -251,7 +251,7 @@ A core teacher need that's currently missing.
 
 ---
 
-### 15. Token Refresh & Session Security
+### 15. Token Refresh & Session Security ✅ Implemented
 
 JWTs currently have a 7-day expiry (`ExpiryMinutes: 10080`) with no refresh mechanism.
 
