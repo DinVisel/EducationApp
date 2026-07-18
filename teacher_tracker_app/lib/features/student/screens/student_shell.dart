@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import 'student_assignments_screen.dart';
 import 'student_classes_screen.dart';
 import 'student_profile_screen.dart';
@@ -26,32 +27,33 @@ class _StudentShellState extends State<StudentShell> {
       StudentClassesScreen(),
       StudentProfileScreen(),
     ];
+    final loc = AppLocalizations.of(context)!;
 
     return GlassScaffold(
       body: IndexedStack(index: _index, children: pages),
       bottomNavigationBar: GlassNavBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
+        destinations: [
           GlassNavDestination(
             icon: Icons.assignment_outlined,
             selectedIcon: Icons.assignment,
-            label: 'Assignments',
+            label: loc.stuAssignments,
           ),
           GlassNavDestination(
             icon: Icons.quiz_outlined,
             selectedIcon: Icons.quiz,
-            label: 'Quizzes',
+            label: loc.classTabQuizzes,
           ),
           GlassNavDestination(
             icon: Icons.class_outlined,
             selectedIcon: Icons.class_,
-            label: 'Classes',
+            label: loc.classesTitle,
           ),
           GlassNavDestination(
             icon: Icons.person_outline,
             selectedIcon: Icons.person,
-            label: 'Profile',
+            label: loc.navProfile,
           ),
         ],
       ),

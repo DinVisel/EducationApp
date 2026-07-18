@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/student_quiz.dart';
 import '../../notifications/widgets/notification_bell.dart';
 import '../state/student_providers.dart';
@@ -17,6 +18,7 @@ class StudentQuizzesScreen extends ConsumerWidget {
     final async = ref.watch(studentQuizzesProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -26,7 +28,7 @@ class StudentQuizzesScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => ListView(children: [
             const SizedBox(height: 120),
-            Center(child: Text('Error: $e')),
+            Center(child: Text(loc.commonError('$e'))),
           ]),
           data: (items) => CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -38,7 +40,7 @@ class StudentQuizzesScreen extends ConsumerWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text('My Quizzes',
+                        child: Text(loc.stuMyQuizzes,
                             style: tt.headlineMedium?.copyWith(
                                 color: cs.onSurface,
                                 fontWeight: FontWeight.w700)),
@@ -78,6 +80,7 @@ class _QuizCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final q = quiz;
     const green = Color(0xFF2E9E5B);
 
@@ -112,9 +115,8 @@ class _QuizCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   q.isSubmitted
-                      ? 'Score ${q.score}/${q.totalQuestions}'
-                      : '${q.questionCount} question'
-                          '${q.questionCount == 1 ? '' : 's'} · Tap to start',
+                      ? loc.stuScore(q.score, q.totalQuestions)
+                      : '${loc.feedQuizQuestionCount(q.questionCount)} · ${loc.stuTapToStart}',
                   style: tt.bodySmall?.copyWith(
                       color: q.isSubmitted ? green : cs.primary,
                       fontWeight: FontWeight.w600),
@@ -139,6 +141,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -146,13 +149,13 @@ class _Empty extends StatelessWidget {
           Icon(Icons.quiz_outlined,
               size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          Text('No quizzes yet',
+          Text(loc.classQuizEmptyTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
                   ?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text('Quizzes your teacher assigns will show up here.',
+          Text(loc.stuQuizzesEmptyHint,
               textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme

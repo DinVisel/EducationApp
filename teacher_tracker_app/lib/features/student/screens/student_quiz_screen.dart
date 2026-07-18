@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/student_quiz.dart';
 import '../data/student_module_repository.dart';
 import '../state/student_providers.dart';
@@ -88,26 +89,28 @@ class _StudentQuizScreenState extends ConsumerState<StudentQuizScreen> {
     } catch (e) {
       setState(() => _submitting = false);
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Could not submit: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.stuQuizCouldNotSubmit('$e'))));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return GlassScaffold(
       appBar: AppBar(
-        title: Text(_quiz?.title ?? 'Quiz'),
+        title: Text(_quiz?.title ?? loc.newPostQuizFallback),
         backgroundColor: Colors.transparent,
       ),
-      body: _buildBody(),
+      body: _buildBody(loc),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AppLocalizations loc) {
     if (_loading) return const Center(child: CircularProgressIndicator());
-    if (_error != null) return Center(child: Text('Error: $_error'));
+    if (_error != null) return Center(child: Text(loc.commonError('$_error')));
     final quiz = _quiz!;
 
     // Already submitted earlier → show the locked result.
@@ -126,7 +129,7 @@ class _StudentQuizScreenState extends ConsumerState<StudentQuizScreen> {
       );
     }
     if (quiz.questions.isEmpty) {
-      return const Center(child: Text('This quiz has no questions.'));
+      return Center(child: Text(loc.stuQuizNoQuestions));
     }
 
     final question = quiz.questions[_index];
@@ -141,7 +144,7 @@ class _StudentQuizScreenState extends ConsumerState<StudentQuizScreen> {
             children: [
               Row(
                 children: [
-                  Text('Question ${_index + 1} of ${quiz.questions.length}',
+                  Text(loc.stuQuizQuestionOf(_index + 1, quiz.questions.length),
                       style: Theme.of(context).textTheme.labelMedium),
                   const Spacer(),
                   Icon(Icons.stars, size: 16, color: AppPalette.secondaryContainer),
@@ -184,8 +187,8 @@ class _StudentQuizScreenState extends ConsumerState<StudentQuizScreen> {
                       ? Icons.arrow_forward
                       : Icons.check),
               label: Text(_index < quiz.questions.length - 1
-                  ? 'Next'
-                  : (_submitting ? 'Submitting…' : 'Finish')),
+                  ? loc.stuQuizNext
+                  : (_submitting ? loc.stuQuizSubmitting : loc.stuQuizFinish)),
               style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
             ),
           ),
@@ -316,6 +319,7 @@ class _ResultView extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final pct = total == 0 ? 0.0 : score / total;
     final passed = pct >= 0.5;
 
@@ -332,14 +336,14 @@ class _ResultView extends StatelessWidget {
                   size: 72,
                   color: passed ? AppPalette.secondaryContainer : cs.primary),
               const SizedBox(height: 16),
-              Text(alreadyDone ? 'Already completed' : 'Quiz complete!',
+              Text(alreadyDone ? loc.stuQuizAlreadyDone : loc.stuQuizComplete,
                   style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Text('$score / $total',
                   style: tt.displaySmall?.copyWith(
                       color: cs.primary, fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),
-              Text('${(pct * 100).round()}% correct',
+              Text(loc.stuQuizPctCorrect((pct * 100).round()),
                   style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
               const SizedBox(height: 20),
               SizedBox(
@@ -349,7 +353,7 @@ class _ResultView extends StatelessWidget {
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Done'),
+                child: Text(loc.commonDone),
               ),
             ],
           ),

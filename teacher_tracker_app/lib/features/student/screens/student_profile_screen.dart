@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/state/auth_controller.dart';
 import '../state/student_providers.dart';
 
@@ -16,6 +17,7 @@ class StudentProfileScreen extends ConsumerWidget {
     final classesAsync = ref.watch(studentClassesProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -23,7 +25,7 @@ class StudentProfileScreen extends ConsumerWidget {
         padding: EdgeInsets.fromLTRB(
             20, MediaQuery.of(context).padding.top + 24, 20, 40),
         children: [
-          Text('Profile',
+          Text(loc.navProfile,
               style: tt.headlineMedium?.copyWith(
                   color: cs.onSurface, fontWeight: FontWeight.w700)),
           const SizedBox(height: 20),
@@ -42,12 +44,12 @@ class StudentProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(student?.fullName ?? 'Student',
+                Text(student?.fullName ?? loc.stuStudentFallback,
                     style: tt.titleLarge?.copyWith(
                         color: cs.onSurface, fontWeight: FontWeight.w700)),
                 if ((student?.studentNumber ?? '').isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  Text('Student No. ${student!.studentNumber}',
+                  Text(loc.stuStudentNumber(student!.studentNumber),
                       style:
                           tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
                 ],
@@ -60,7 +62,7 @@ class StudentProfileScreen extends ConsumerWidget {
             child: ListTile(
               contentPadding: EdgeInsets.zero,
               leading: Icon(Icons.class_outlined, color: cs.primary),
-              title: const Text('Enrolled classes'),
+              title: Text(loc.stuEnrolledClasses),
               trailing: Text(
                 classesAsync.maybeWhen(
                     data: (c) => c.length.toString(), orElse: () => '—'),
@@ -72,7 +74,7 @@ class StudentProfileScreen extends ConsumerWidget {
           FilledButton.tonalIcon(
             onPressed: () => ref.read(authControllerProvider.notifier).logout(),
             icon: const Icon(Icons.logout),
-            label: const Text('Sign out'),
+            label: Text(loc.settingsSignOut),
           ),
         ],
       ),

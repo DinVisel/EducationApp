@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/student_assignment.dart';
 import '../../files/widgets/attachment_tile.dart';
 import '../../notifications/widgets/notification_bell.dart';
@@ -17,6 +18,7 @@ class StudentAssignmentsScreen extends ConsumerWidget {
     final async = ref.watch(studentAssignmentsProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -26,7 +28,7 @@ class StudentAssignmentsScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => ListView(children: [
             const SizedBox(height: 120),
-            Center(child: Text('Error: $e')),
+            Center(child: Text(loc.commonError('$e'))),
           ]),
           data: (items) => CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -38,7 +40,7 @@ class StudentAssignmentsScreen extends ConsumerWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text('My Assignments',
+                        child: Text(loc.stuMyAssignments,
                             style: tt.headlineMedium?.copyWith(
                                 color: cs.onSurface,
                                 fontWeight: FontWeight.w700)),
@@ -78,6 +80,7 @@ class _AssignmentCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final overdue = item.dueDate != null &&
         !item.isDone &&
         item.dueDate!.isBefore(DateTime.now());
@@ -123,7 +126,7 @@ class _AssignmentCard extends ConsumerWidget {
               if (item.dueDate != null)
                 _Chip(
                   icon: Icons.event_outlined,
-                  label: 'Due ${_fmtDate(item.dueDate!)}',
+                  label: loc.hwTrackerDue(_fmtDate(item.dueDate!)),
                   color: overdue ? cs.error : cs.primary,
                   cs: cs,
                   tt: tt,
@@ -131,7 +134,7 @@ class _AssignmentCard extends ConsumerWidget {
               if (item.isDone)
                 _Chip(
                   icon: Icons.check_circle,
-                  label: 'Done',
+                  label: loc.commonDone,
                   color: Colors.green,
                   cs: cs,
                   tt: tt,
@@ -170,12 +173,14 @@ class _DoneToggleState extends ConsumerState<_DoneToggle> {
   Future<void> _toggle() async {
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     try {
       await ref
           .read(studentAssignmentsProvider.notifier)
           .setDone(widget.item.id, !widget.item.isDone);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not update: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.stuCouldNotUpdate('$e'))));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -191,9 +196,10 @@ class _DoneToggleState extends ConsumerState<_DoneToggle> {
             width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2)),
       );
     }
+    final loc = AppLocalizations.of(context)!;
     return IconButton(
       onPressed: _toggle,
-      tooltip: widget.item.isDone ? 'Mark not done' : 'Mark done',
+      tooltip: widget.item.isDone ? loc.stuMarkNotDone : loc.hwTrackerMarkDone,
       icon: Icon(
         widget.item.isDone
             ? Icons.check_circle
@@ -247,6 +253,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -254,13 +261,13 @@ class _Empty extends StatelessWidget {
           Icon(Icons.assignment_turned_in_outlined,
               size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          Text('No assignments yet',
+          Text(loc.assignmentsEmptyTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
                   ?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text('Work your teacher assigns will show up here.',
+          Text(loc.stuAssignmentsEmptyHint,
               textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme

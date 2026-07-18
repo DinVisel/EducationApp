@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../state/student_providers.dart';
 
 /// The classes the signed-in student is enrolled in.
@@ -13,6 +14,7 @@ class StudentClassesScreen extends ConsumerWidget {
     final async = ref.watch(studentClassesProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -22,7 +24,7 @@ class StudentClassesScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => ListView(children: [
             const SizedBox(height: 120),
-            Center(child: Text('Error: $e')),
+            Center(child: Text(loc.commonError('$e'))),
           ]),
           data: (classes) => CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -31,7 +33,7 @@ class StudentClassesScreen extends ConsumerWidget {
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(
                       20, MediaQuery.of(context).padding.top + 24, 20, 8),
-                  child: Text('My Classes',
+                  child: Text(loc.stuMyClasses,
                       style: tt.headlineMedium?.copyWith(
                           color: cs.onSurface, fontWeight: FontWeight.w700)),
                 ),
@@ -95,6 +97,7 @@ class _Empty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -102,10 +105,10 @@ class _Empty extends StatelessWidget {
           Icon(Icons.class_outlined,
               size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          Text('Not in any class yet',
+          Text(loc.stuNoClassesTitle,
               style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text('Your teacher will enroll you in a class.',
+          Text(loc.stuNoClassesSubtitle,
               textAlign: TextAlign.center,
               style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
         ],
