@@ -236,11 +236,41 @@ abstract class AppLocalizations {
   /// **'New'**
   String get commonNew;
 
+  /// No description provided for @commonCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get commonCreate;
+
+  /// No description provided for @commonEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get commonEmail;
+
+  /// No description provided for @commonNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get commonNotAvailable;
+
   /// No description provided for @commonCouldNotDelete.
   ///
   /// In en, this message translates to:
   /// **'Could not delete: {error}'**
   String commonCouldNotDelete(String error);
+
+  /// No description provided for @commonFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {error}'**
+  String commonFailed(String error);
+
+  /// No description provided for @commonCouldNotLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load: {error}'**
+  String commonCouldNotLoad(String error);
 
   /// No description provided for @commonTimeJustNow.
   ///
@@ -1393,6 +1423,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not yet'**
   String get quizAnalyticsNotYet;
+
+  /// No description provided for @booksTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Books'**
+  String get booksTabTitle;
+
+  /// No description provided for @studentProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Profile'**
+  String get studentProfileTitle;
+
+  /// No description provided for @studentProfileReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get studentProfileReport;
+
+  /// No description provided for @studentProfilePersonalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Info'**
+  String get studentProfilePersonalInfo;
+
+  /// No description provided for @studentProfileStudentId.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID'**
+  String get studentProfileStudentId;
+
+  /// No description provided for @studentProfileGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade'**
+  String get studentProfileGrade;
+
+  /// No description provided for @studentProfileFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get studentProfileFullName;
+
+  /// No description provided for @studentProfileRecentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activity'**
+  String get studentProfileRecentActivity;
+
+  /// No description provided for @studentProfileViewHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'View Full History'**
+  String get studentProfileViewHistory;
+
+  /// No description provided for @studentProfileParentContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Contacts'**
+  String get studentProfileParentContacts;
+
+  /// No description provided for @studentProfileNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get studentProfileNotes;
+
+  /// No description provided for @studentProfileNotesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load notes: {error}'**
+  String studentProfileNotesLoadError(String error);
+
+  /// No description provided for @studentProfileNoNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes yet.'**
+  String get studentProfileNoNotes;
+
+  /// No description provided for @studentProfileAddNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Note'**
+  String get studentProfileAddNote;
+
+  /// No description provided for @studentProfileNoteContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Note content'**
+  String get studentProfileNoteContent;
+
+  /// No description provided for @studentProfileLoginAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Login Account'**
+  String get studentProfileLoginAccount;
+
+  /// No description provided for @studentProfileCanSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Can sign in'**
+  String get studentProfileCanSignIn;
+
+  /// No description provided for @studentProfileRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get studentProfileRevoke;
+
+  /// No description provided for @studentProfileNoLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'No login yet. Create one so this student can sign in and see their assignments.'**
+  String get studentProfileNoLogin;
+
+  /// No description provided for @studentProfileCreateLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Create login'**
+  String get studentProfileCreateLogin;
+
+  /// No description provided for @studentProfileTempPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary password'**
+  String get studentProfileTempPassword;
+
+  /// No description provided for @studentProfileLoginCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Login created. Share the credentials.'**
+  String get studentProfileLoginCreated;
+
+  /// No description provided for @studentProfileCouldNotCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create: {error}'**
+  String studentProfileCouldNotCreate(String error);
+
+  /// No description provided for @studentProfileRevokeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke login?'**
+  String get studentProfileRevokeTitle;
+
+  /// No description provided for @studentProfileRevokeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The student will no longer be able to sign in. Their profile and work are kept.'**
+  String get studentProfileRevokeBody;
+
+  /// No description provided for @studentProfileCouldNotRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not revoke: {error}'**
+  String studentProfileCouldNotRevoke(String error);
 }
 
 class _AppLocalizationsDelegate

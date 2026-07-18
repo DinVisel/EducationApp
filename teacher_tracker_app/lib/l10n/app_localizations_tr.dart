@@ -82,8 +82,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonNew => 'Yeni';
 
   @override
+  String get commonCreate => 'Oluştur';
+
+  @override
+  String get commonEmail => 'E-posta';
+
+  @override
+  String get commonNotAvailable => 'Yok';
+
+  @override
   String commonCouldNotDelete(String error) {
     return 'Silinemedi: $error';
+  }
+
+  @override
+  String commonFailed(String error) {
+    return 'Başarısız: $error';
+  }
+
+  @override
+  String commonCouldNotLoad(String error) {
+    return 'Yüklenemedi: $error';
   }
 
   @override
@@ -758,4 +777,91 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get quizAnalyticsNotYet => 'Henüz değil';
+
+  @override
+  String get booksTabTitle => 'Kitaplar';
+
+  @override
+  String get studentProfileTitle => 'Öğrenci Profili';
+
+  @override
+  String get studentProfileReport => 'Rapor';
+
+  @override
+  String get studentProfilePersonalInfo => 'Kişisel Bilgiler';
+
+  @override
+  String get studentProfileStudentId => 'Öğrenci No';
+
+  @override
+  String get studentProfileGrade => 'Sınıf';
+
+  @override
+  String get studentProfileFullName => 'Ad Soyad';
+
+  @override
+  String get studentProfileRecentActivity => 'Son Etkinlikler';
+
+  @override
+  String get studentProfileViewHistory => 'Tüm Geçmişi Gör';
+
+  @override
+  String get studentProfileParentContacts => 'Veli İletişim Bilgileri';
+
+  @override
+  String get studentProfileNotes => 'Notlar';
+
+  @override
+  String studentProfileNotesLoadError(String error) {
+    return 'Notlar yüklenemedi: $error';
+  }
+
+  @override
+  String get studentProfileNoNotes => 'Henüz not yok.';
+
+  @override
+  String get studentProfileAddNote => 'Not Ekle';
+
+  @override
+  String get studentProfileNoteContent => 'Not içeriği';
+
+  @override
+  String get studentProfileLoginAccount => 'Giriş Hesabı';
+
+  @override
+  String get studentProfileCanSignIn => 'Giriş yapabilir';
+
+  @override
+  String get studentProfileRevoke => 'İptal et';
+
+  @override
+  String get studentProfileNoLogin =>
+      'Henüz giriş yok. Bu öğrencinin giriş yapıp ödevlerini görebilmesi için bir tane oluşturun.';
+
+  @override
+  String get studentProfileCreateLogin => 'Giriş oluştur';
+
+  @override
+  String get studentProfileTempPassword => 'Geçici şifre';
+
+  @override
+  String get studentProfileLoginCreated =>
+      'Giriş oluşturuldu. Bilgileri paylaşın.';
+
+  @override
+  String studentProfileCouldNotCreate(String error) {
+    return 'Oluşturulamadı: $error';
+  }
+
+  @override
+  String get studentProfileRevokeTitle => 'Giriş iptal edilsin mi?';
+
+  @override
+  String get studentProfileRevokeBody =>
+      'Öğrenci artık giriş yapamayacak. Profili ve çalışmaları korunur.';
+
+  @override
+  String studentProfileCouldNotRevoke(String error) {
+    return 'İptal edilemedi: $error';
+  }
 }

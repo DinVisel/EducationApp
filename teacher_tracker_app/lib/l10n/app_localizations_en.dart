@@ -82,8 +82,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonNew => 'New';
 
   @override
+  String get commonCreate => 'Create';
+
+  @override
+  String get commonEmail => 'Email';
+
+  @override
+  String get commonNotAvailable => 'N/A';
+
+  @override
   String commonCouldNotDelete(String error) {
     return 'Could not delete: $error';
+  }
+
+  @override
+  String commonFailed(String error) {
+    return 'Failed: $error';
+  }
+
+  @override
+  String commonCouldNotLoad(String error) {
+    return 'Could not load: $error';
   }
 
   @override
@@ -756,4 +775,91 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quizAnalyticsNotYet => 'Not yet';
+
+  @override
+  String get booksTabTitle => 'Books';
+
+  @override
+  String get studentProfileTitle => 'Student Profile';
+
+  @override
+  String get studentProfileReport => 'Report';
+
+  @override
+  String get studentProfilePersonalInfo => 'Personal Info';
+
+  @override
+  String get studentProfileStudentId => 'Student ID';
+
+  @override
+  String get studentProfileGrade => 'Grade';
+
+  @override
+  String get studentProfileFullName => 'Full Name';
+
+  @override
+  String get studentProfileRecentActivity => 'Recent Activity';
+
+  @override
+  String get studentProfileViewHistory => 'View Full History';
+
+  @override
+  String get studentProfileParentContacts => 'Parent Contacts';
+
+  @override
+  String get studentProfileNotes => 'Notes';
+
+  @override
+  String studentProfileNotesLoadError(String error) {
+    return 'Could not load notes: $error';
+  }
+
+  @override
+  String get studentProfileNoNotes => 'No notes yet.';
+
+  @override
+  String get studentProfileAddNote => 'Add Note';
+
+  @override
+  String get studentProfileNoteContent => 'Note content';
+
+  @override
+  String get studentProfileLoginAccount => 'Login Account';
+
+  @override
+  String get studentProfileCanSignIn => 'Can sign in';
+
+  @override
+  String get studentProfileRevoke => 'Revoke';
+
+  @override
+  String get studentProfileNoLogin =>
+      'No login yet. Create one so this student can sign in and see their assignments.';
+
+  @override
+  String get studentProfileCreateLogin => 'Create login';
+
+  @override
+  String get studentProfileTempPassword => 'Temporary password';
+
+  @override
+  String get studentProfileLoginCreated =>
+      'Login created. Share the credentials.';
+
+  @override
+  String studentProfileCouldNotCreate(String error) {
+    return 'Could not create: $error';
+  }
+
+  @override
+  String get studentProfileRevokeTitle => 'Revoke login?';
+
+  @override
+  String get studentProfileRevokeBody =>
+      'The student will no longer be able to sign in. Their profile and work are kept.';
+
+  @override
+  String studentProfileCouldNotRevoke(String error) {
+    return 'Could not revoke: $error';
+  }
 }

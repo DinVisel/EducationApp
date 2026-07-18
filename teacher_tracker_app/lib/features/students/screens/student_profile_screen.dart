@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/student.dart';
 import '../data/student_account_repository.dart';
 import '../state/notes_providers.dart';
@@ -29,6 +30,7 @@ class StudentProfileScreen extends ConsumerWidget {
         );
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -47,7 +49,7 @@ class StudentProfileScreen extends ConsumerWidget {
           length: 2,
           child: Column(
             children: [
-              _glassTabBar(cs, tt),
+              _glassTabBar(cs, tt, loc),
               Expanded(
                 child: TabBarView(
                   children: [
@@ -63,16 +65,20 @@ class StudentProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _glassTabBar(ColorScheme cs, TextTheme tt) {
+  Widget _glassTabBar(ColorScheme cs, TextTheme tt, AppLocalizations loc) {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
           color: cs.surface.withValues(alpha: 0.5),
           child: TabBar(
-            tabs: const [
-              Tab(icon: Icon(Icons.assignment_outlined), text: 'Homework'),
-              Tab(icon: Icon(Icons.menu_book_outlined), text: 'Books'),
+            tabs: [
+              Tab(
+                  icon: const Icon(Icons.assignment_outlined),
+                  text: loc.classTabHomework),
+              Tab(
+                  icon: const Icon(Icons.menu_book_outlined),
+                  text: loc.booksTabTitle),
             ],
             labelColor: cs.primary,
             unselectedLabelColor: cs.onSurfaceVariant,
@@ -118,7 +124,7 @@ class _ProfileAppBar extends StatelessWidget {
                 icon: Icon(Icons.arrow_back, color: cs.primary),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              Text('Student Profile',
+              Text(AppLocalizations.of(context)!.studentProfileTitle,
                   style: tt.headlineMedium?.copyWith(
                       color: cs.primary, fontWeight: FontWeight.w700)),
               const Spacer(),
@@ -252,7 +258,7 @@ class _HeroCard extends StatelessWidget {
                                         StudentFormScreen(student: student)),
                               ),
                               icon: const Icon(Icons.edit, size: 16),
-                              label: const Text('Edit'),
+                              label: Text(AppLocalizations.of(context)!.commonEdit),
                               style: FilledButton.styleFrom(
                                   minimumSize: const Size(0, 36)),
                             ),
@@ -262,7 +268,8 @@ class _HeroCard extends StatelessWidget {
                             child: OutlinedButton.icon(
                               onPressed: () {},
                               icon: const Icon(Icons.print, size: 16),
-                              label: const Text('Report'),
+                              label: Text(
+                                  AppLocalizations.of(context)!.studentProfileReport),
                               style: OutlinedButton.styleFrom(
                                   minimumSize: const Size(0, 36)),
                             ),
@@ -319,6 +326,7 @@ class _PersonalInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       child: GlassCard(
@@ -326,26 +334,29 @@ class _PersonalInfoCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _SectionHeader(
-                icon: Icons.person_outline, title: 'Personal Info', cs: cs, tt: tt),
+                icon: Icons.person_outline,
+                title: loc.studentProfilePersonalInfo,
+                cs: cs,
+                tt: tt),
             const SizedBox(height: 12),
             Row(
               children: [
                 _InfoItem(
-                    label: 'Student ID',
+                    label: loc.studentProfileStudentId,
                     value: student.studentNumber.isEmpty
-                        ? 'N/A'
+                        ? loc.commonNotAvailable
                         : '#${student.studentNumber}',
                     cs: cs,
                     tt: tt),
                 const SizedBox(width: 16),
                 _InfoItem(
-                    label: 'Grade', value: '3-B', cs: cs, tt: tt),
+                    label: loc.studentProfileGrade, value: '3-B', cs: cs, tt: tt),
               ],
             ),
             const SizedBox(height: 12),
             if (student.firstName.isNotEmpty)
               _InfoItem(
-                  label: 'Full Name',
+                  label: loc.studentProfileFullName,
                   value: student.fullName,
                   cs: cs,
                   tt: tt),
@@ -405,7 +416,10 @@ class _RecentActivityCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _SectionHeader(
-                icon: Icons.history, title: 'Recent Activity', cs: cs, tt: tt),
+                icon: Icons.history,
+                title: AppLocalizations.of(context)!.studentProfileRecentActivity,
+                cs: cs,
+                tt: tt),
             const SizedBox(height: 8),
             ..._items.map((item) => _ActivityItem(
                   icon: item.$1,
@@ -416,7 +430,8 @@ class _RecentActivityCard extends StatelessWidget {
                 )),
             TextButton(
               onPressed: () {},
-              child: const Text('View Full History'),
+              child: Text(
+                  AppLocalizations.of(context)!.studentProfileViewHistory),
             ),
           ],
         ),
@@ -490,7 +505,7 @@ class _ParentContactsCard extends StatelessWidget {
           children: [
             _SectionHeader(
                 icon: Icons.family_restroom,
-                title: 'Parent Contacts',
+                title: AppLocalizations.of(context)!.studentProfileParentContacts,
                 cs: cs,
                 tt: tt),
             const SizedBox(height: 12),
@@ -603,6 +618,7 @@ class _NotesCardSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final notesAsync = ref.watch(notesProvider(student.id));
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
@@ -614,7 +630,7 @@ class _NotesCardSection extends ConsumerWidget {
               children: [
                 Icon(Icons.edit_note, color: cs.primary),
                 const SizedBox(width: 8),
-                Text('Notes',
+                Text(loc.studentProfileNotes,
                     style: tt.titleMedium?.copyWith(
                         color: cs.primary, fontWeight: FontWeight.w600)),
                 const Spacer(),
@@ -633,12 +649,12 @@ class _NotesCardSection extends ConsumerWidget {
                 padding: EdgeInsets.all(12),
                 child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
               ),
-              error: (e, _) => Text('Could not load notes: $e',
+              error: (e, _) => Text(loc.studentProfileNotesLoadError('$e'),
                   style: tt.bodySmall?.copyWith(color: cs.error)),
               data: (notes) => notes.isEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text('No notes yet.',
+                      child: Text(loc.studentProfileNoNotes,
                           style: tt.bodySmall
                               ?.copyWith(color: cs.onSurfaceVariant)),
                     )
@@ -680,25 +696,26 @@ class _NotesCardSection extends ConsumerWidget {
   }
 
   Future<void> _addNote(BuildContext ctx, WidgetRef ref) async {
+    final loc = AppLocalizations.of(ctx)!;
     final ctrl = TextEditingController();
     final result = await showDialog<String>(
       context: ctx,
       builder: (_) => AlertDialog(
-        title: const Text('Add Note'),
+        title: Text(loc.studentProfileAddNote),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           minLines: 2,
           maxLines: 5,
-          decoration: const InputDecoration(labelText: 'Note content'),
+          decoration: InputDecoration(labelText: loc.studentProfileNoteContent),
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child: Text(loc.commonCancel)),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-              child: const Text('Add')),
+              child: Text(loc.commonAdd)),
         ],
       ),
     );
@@ -712,7 +729,7 @@ class _NotesCardSection extends ConsumerWidget {
     } catch (e) {
       if (ctx.mounted) {
         ScaffoldMessenger.of(ctx)
-            .showSnackBar(SnackBar(content: Text('Failed: $e')));
+            .showSnackBar(SnackBar(content: Text(loc.commonFailed('$e'))));
       }
     }
   }
@@ -761,6 +778,7 @@ class _AccountCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountAsync = ref.watch(studentAccountProvider(student.id));
+    final loc = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
@@ -773,7 +791,7 @@ class _AccountCard extends ConsumerWidget {
               children: [
                 Icon(Icons.login, color: cs.primary, size: 20),
                 const SizedBox(width: 8),
-                Text('Login Account',
+                Text(loc.studentProfileLoginAccount,
                     style: tt.titleMedium?.copyWith(
                         color: cs.onSurface, fontWeight: FontWeight.w700)),
               ],
@@ -784,7 +802,7 @@ class _AccountCard extends ConsumerWidget {
                 padding: EdgeInsets.symmetric(vertical: 8),
                 child: LinearProgressIndicator(),
               ),
-              error: (e, _) => Text('Could not load: $e',
+              error: (e, _) => Text(loc.commonCouldNotLoad('$e'),
                   style: tt.bodySmall?.copyWith(color: cs.error)),
               data: (account) => account.hasAccount
                   ? Row(
@@ -793,7 +811,7 @@ class _AccountCard extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Can sign in',
+                              Text(loc.studentProfileCanSignIn,
                                   style: tt.bodyMedium
                                       ?.copyWith(color: cs.onSurface)),
                               Text(account.email ?? '',
@@ -804,7 +822,7 @@ class _AccountCard extends ConsumerWidget {
                         ),
                         TextButton(
                           onPressed: () => _revoke(context, ref),
-                          child: Text('Revoke',
+                          child: Text(loc.studentProfileRevoke,
                               style: TextStyle(color: cs.error)),
                         ),
                       ],
@@ -812,15 +830,14 @@ class _AccountCard extends ConsumerWidget {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('No login yet. Create one so this student can '
-                            'sign in and see their assignments.',
+                        Text(loc.studentProfileNoLogin,
                             style: tt.bodySmall
                                 ?.copyWith(color: cs.onSurfaceVariant)),
                         const SizedBox(height: 12),
                         FilledButton.tonalIcon(
                           onPressed: () => _create(context, ref),
                           icon: const Icon(Icons.person_add_alt),
-                          label: const Text('Create login'),
+                          label: Text(loc.studentProfileCreateLogin),
                         ),
                       ],
                     ),
@@ -833,6 +850,7 @@ class _AccountCard extends ConsumerWidget {
 
   Future<void> _create(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     final emailC = TextEditingController();
     final passC = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -840,7 +858,7 @@ class _AccountCard extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: const Text('Create login'),
+        title: Text(loc.studentProfileCreateLogin),
         content: Form(
           key: formKey,
           child: Column(
@@ -849,17 +867,17 @@ class _AccountCard extends ConsumerWidget {
               TextFormField(
                 controller: emailC,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(labelText: loc.commonEmail),
                 validator: (v) => (v == null || !v.contains('@'))
-                    ? 'Enter a valid email'
+                    ? loc.commonInvalidEmail
                     : null,
               ),
               TextFormField(
                 controller: passC,
                 decoration:
-                    const InputDecoration(labelText: 'Temporary password'),
+                    InputDecoration(labelText: loc.studentProfileTempPassword),
                 validator: (v) => (v == null || v.length < 6)
-                    ? 'At least 6 characters'
+                    ? loc.commonPasswordTooShort
                     : null,
               ),
             ],
@@ -868,12 +886,12 @@ class _AccountCard extends ConsumerWidget {
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(d, false),
-              child: const Text('Cancel')),
+              child: Text(loc.commonCancel)),
           FilledButton(
               onPressed: () {
                 if (formKey.currentState!.validate()) Navigator.pop(d, true);
               },
-              child: const Text('Create')),
+              child: Text(loc.commonCreate)),
         ],
       ),
     );
@@ -887,29 +905,29 @@ class _AccountCard extends ConsumerWidget {
           );
       ref.invalidate(studentAccountProvider(student.id));
       messenger.showSnackBar(
-        const SnackBar(content: Text('Login created. Share the credentials.')),
+        SnackBar(content: Text(loc.studentProfileLoginCreated)),
       );
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not create: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.studentProfileCouldNotCreate('$e'))));
     }
   }
 
   Future<void> _revoke(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: const Text('Revoke login?'),
-        content: const Text(
-            'The student will no longer be able to sign in. Their profile and '
-            'work are kept.'),
+        title: Text(loc.studentProfileRevokeTitle),
+        content: Text(loc.studentProfileRevokeBody),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(d, false),
-              child: const Text('Cancel')),
+              child: Text(loc.commonCancel)),
           FilledButton(
               onPressed: () => Navigator.pop(d, true),
-              child: const Text('Revoke')),
+              child: Text(loc.studentProfileRevoke)),
         ],
       ),
     );
@@ -918,7 +936,8 @@ class _AccountCard extends ConsumerWidget {
       await ref.read(studentAccountRepositoryProvider).delete(student.id);
       ref.invalidate(studentAccountProvider(student.id));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not revoke: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.studentProfileCouldNotRevoke('$e'))));
     }
   }
 }
