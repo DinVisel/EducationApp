@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/config.dart';
 import '../../../core/design.dart';
+import '../../../core/haptics/haptic_service.dart';
 import '../../../core/time_ago.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/classroom.dart';
@@ -130,7 +131,10 @@ class PostCard extends ConsumerWidget {
                 icon: post.likedByMe ? Icons.favorite : Icons.favorite_border,
                 color: post.likedByMe ? cs.error : cs.onSurfaceVariant,
                 label: '${post.likeCount}',
-                onTap: onToggleLike ?? () {},
+                onTap: () {
+                  ref.read(hapticServiceProvider).tap();
+                  onToggleLike?.call();
+                },
               ),
               const SizedBox(width: 16),
               _ActionButton(
@@ -257,7 +261,7 @@ class _PostMenu extends ConsumerWidget {
       onSelected: (v) {
         switch (v) {
           case 'delete':
-            _confirmDelete(context);
+            _confirmDelete(context, ref);
           case 'pin':
           case 'unpin':
             onTogglePin?.call();
@@ -281,7 +285,8 @@ class _PostMenu extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context) async {
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    ref.read(hapticServiceProvider).warning();
     final messenger = ScaffoldMessenger.of(context);
     final loc = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(

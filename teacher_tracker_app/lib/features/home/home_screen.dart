@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/design.dart';
+import '../../core/haptics/haptic_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../classes/screens/classes_list_screen.dart';
 import '../feed/screens/feed_screen.dart';
@@ -24,7 +25,10 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _index = 0;
 
-  void _goTo(int i) => setState(() => _index = i);
+  void _goTo(int i) {
+    ref.read(hapticServiceProvider).tap();
+    setState(() => _index = i);
+  }
 
   @override
   Widget build(BuildContext context) {

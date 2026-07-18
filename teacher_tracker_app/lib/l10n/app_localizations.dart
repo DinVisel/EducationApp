@@ -692,6 +692,18 @@ abstract class AppLocalizations {
   /// **'Dark'**
   String get settingsThemeDark;
 
+  /// No description provided for @settingsHaptics.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptics'**
+  String get settingsHaptics;
+
+  /// No description provided for @settingsHapticsToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration feedback'**
+  String get settingsHapticsToggle;
+
   /// No description provided for @imageCropperTitle.
   ///
   /// In en, this message translates to:

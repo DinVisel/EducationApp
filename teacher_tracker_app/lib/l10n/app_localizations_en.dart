@@ -335,6 +335,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsThemeDark => 'Dark';
 
   @override
+  String get settingsHaptics => 'Haptics';
+
+  @override
+  String get settingsHapticsToggle => 'Vibration feedback';
+
+  @override
   String get imageCropperTitle => 'Edit photo';
 
   @override

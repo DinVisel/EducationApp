@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/haptics/haptic_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/post_subject.dart';
 import '../../notifications/widgets/notification_bell.dart';
@@ -64,7 +65,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final loc = AppLocalizations.of(context)!;
 
     return RefreshIndicator(
-      onRefresh: () => ref.refresh(feedProvider.future),
+      onRefresh: () async {
+        await ref.refresh(feedProvider.future);
+        if (context.mounted) ref.read(hapticServiceProvider).tap();
+      },
       child: CustomScrollView(
         controller: _scroll,
         physics: const AlwaysScrollableScrollPhysics(),

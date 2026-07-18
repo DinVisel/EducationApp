@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../core/haptics/haptic_controller.dart';
+import '../../../core/haptics/haptic_service.dart';
 import '../../../core/locale/locale_controller.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/teacher.dart';
@@ -61,7 +63,11 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
 
   Future<void> _save() async {
     final loc = AppLocalizations.of(context)!;
-    if (!_formKey.currentState!.validate()) return;
+    final haptics = ref.read(hapticServiceProvider);
+    if (!_formKey.currentState!.validate()) {
+      haptics.error();
+      return;
+    }
     setState(() => _saving = true);
     try {
       await ref.read(authControllerProvider.notifier).updateProfile(
@@ -72,12 +78,14 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
             ),
           );
       if (mounted) {
+        haptics.success();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(loc.settingsProfileSaved)),
         );
       }
     } catch (e) {
       if (mounted) {
+        haptics.error();
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(loc.settingsSaveFailed('$e'))));
       }
@@ -187,6 +195,12 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
         const SizedBox(height: 12),
         const _ThemePicker(),
         const SizedBox(height: 24),
+        Text(loc.settingsHaptics,
+            style: tt.titleMedium
+                ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        const _HapticsToggle(),
+        const SizedBox(height: 24),
         OutlinedButton.icon(
           onPressed: _confirmLogout,
           icon: const Icon(Icons.logout),
@@ -265,6 +279,29 @@ class _ThemePicker extends ConsumerWidget {
             onChanged: (v) => set(ThemeMode.dark),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Toggle for enabling/disabling haptic feedback across the app.
+class _HapticsToggle extends ConsumerWidget {
+  const _HapticsToggle();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
+    final enabled = ref.watch(hapticControllerProvider).value ?? true;
+
+    return GlassCard(
+      child: SwitchListTile.adaptive(
+        title: Text(loc.settingsHapticsToggle),
+        secondary: const Icon(Icons.vibration),
+        value: enabled,
+        onChanged: (v) {
+          ref.read(hapticControllerProvider.notifier).setEnabled(v);
+          if (v) ref.read(hapticServiceProvider).tap();
+        },
       ),
     );
   }

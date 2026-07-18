@@ -335,6 +335,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsThemeDark => 'Koyu';
 
   @override
+  String get settingsHaptics => 'Dokunsal Geri Bildirim';
+
+  @override
+  String get settingsHapticsToggle => 'Titreşim geri bildirimi';
+
+  @override
   String get imageCropperTitle => 'Fotoğrafı düzenle';
 
   @override

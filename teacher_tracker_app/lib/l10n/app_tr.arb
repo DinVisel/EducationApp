@@ -118,6 +118,8 @@
   "settingsThemeSystem": "Sistem",
   "settingsThemeLight": "Açık",
   "settingsThemeDark": "Koyu",
+  "settingsHaptics": "Dokunsal Geri Bildirim",
+  "settingsHapticsToggle": "Titreşim geri bildirimi",
   "imageCropperTitle": "Fotoğrafı düzenle",
 
   "attendanceTitle": "Yoklama",

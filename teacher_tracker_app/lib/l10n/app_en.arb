@@ -123,6 +123,8 @@
   "settingsThemeSystem": "System",
   "settingsThemeLight": "Light",
   "settingsThemeDark": "Dark",
+  "settingsHaptics": "Haptics",
+  "settingsHapticsToggle": "Vibration feedback",
   "imageCropperTitle": "Edit photo",
 
   "attendanceTitle": "Attendance",
