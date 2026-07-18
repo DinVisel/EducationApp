@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../models/tracking_note.dart';
 import '../../state/notes_providers.dart';
 import '../../widgets/async_list.dart';
+
+/// Note categories are stored as canonical English strings; this maps them to a
+/// localized label for display only.
+String noteCategoryLabel(AppLocalizations loc, String category) {
+  switch (category) {
+    case 'Behavior':
+      return loc.notesCategoryBehavior;
+    case 'Academic':
+      return loc.notesCategoryAcademic;
+    case 'Social':
+      return loc.notesCategorySocial;
+    default:
+      return loc.notesCategoryOther;
+  }
+}
 
 class NotesTab extends ConsumerWidget {
   const NotesTab({super.key, required this.studentId});
@@ -13,6 +29,7 @@ class NotesTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notesAsync = ref.watch(notesProvider(studentId));
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -24,16 +41,16 @@ class NotesTab extends ConsumerWidget {
         onRefresh: () => ref.refresh(notesProvider(studentId).future),
         onRetry: () => ref.invalidate(notesProvider(studentId)),
         emptyIcon: Icons.sticky_note_2_outlined,
-        emptyText: 'No notes yet',
+        emptyText: loc.notesTabEmpty,
         itemBuilder: (note) => Card(
           child: ListTile(
             title: Text(note.content),
             subtitle: Text(
-              '${note.category} • ${_formatDate(note.createdAt)}',
+              '${noteCategoryLabel(loc, note.category)} • ${_formatDate(note.createdAt)}',
             ),
             trailing: IconButton(
               icon: const Icon(Icons.delete_outline),
-              tooltip: 'Delete',
+              tooltip: loc.commonDelete,
               onPressed: () async {
                 await ref.read(notesProvider(studentId).notifier).remove(note.id);
               },
@@ -56,8 +73,9 @@ class NotesTab extends ConsumerWidget {
           .add(category: result.category, content: result.content);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Add failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.commonAddFailed('$e'))));
       }
     }
   }
@@ -90,8 +108,9 @@ class _NoteDialogState extends State<_NoteDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Add note'),
+      title: Text(loc.notesTabAdd),
       content: Form(
         key: _formKey,
         child: Column(
@@ -99,12 +118,13 @@ class _NoteDialogState extends State<_NoteDialog> {
           children: [
             DropdownButtonFormField<String>(
               initialValue: _category,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.newQuizCategory,
+                border: const OutlineInputBorder(),
               ),
               items: _categories
-                  .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                  .map((c) => DropdownMenuItem(
+                      value: c, child: Text(noteCategoryLabel(loc, c))))
                   .toList(),
               onChanged: (v) => setState(() => _category = v ?? 'Other'),
             ),
@@ -114,12 +134,12 @@ class _NoteDialogState extends State<_NoteDialog> {
               minLines: 2,
               maxLines: 5,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Note',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.notesTabNoteLabel,
+                border: const OutlineInputBorder(),
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
             ),
           ],
         ),
@@ -127,7 +147,7 @@ class _NoteDialogState extends State<_NoteDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(loc.commonCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -137,7 +157,7 @@ class _NoteDialogState extends State<_NoteDialog> {
               (category: _category, content: _content.text.trim()),
             );
           },
-          child: const Text('Add'),
+          child: Text(loc.commonAdd),
         ),
       ],
     );

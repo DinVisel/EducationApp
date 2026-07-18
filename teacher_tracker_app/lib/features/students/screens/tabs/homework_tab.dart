@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../models/homework.dart';
 import '../../../../models/student.dart' show formatDateOnly;
 import '../../state/homework_providers.dart';
@@ -54,6 +55,7 @@ class _HomeworkTabState extends ConsumerState<HomeworkTab> {
   Widget build(BuildContext context) {
     final studentId = widget.studentId;
     final async = ref.watch(homeworkProvider(studentId));
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -65,7 +67,7 @@ class _HomeworkTabState extends ConsumerState<HomeworkTab> {
         onRefresh: () => ref.refresh(homeworkProvider(studentId).future),
         onRetry: () => ref.invalidate(homeworkProvider(studentId)),
         emptyIcon: Icons.assignment_outlined,
-        emptyText: 'No homework yet',
+        emptyText: loc.homeworkTabEmpty,
         scrollController: _scroll,
         loadingMore: _loadingMore,
         itemBuilder: (hw) => Card(
@@ -84,10 +86,10 @@ class _HomeworkTabState extends ConsumerState<HomeworkTab> {
                     )
                   : null,
             ),
-            subtitle: _subtitle(hw),
+            subtitle: _subtitle(loc, hw),
             trailing: IconButton(
               icon: const Icon(Icons.delete_outline),
-              tooltip: 'Delete',
+              tooltip: loc.commonDelete,
               onPressed: () => ref
                   .read(homeworkProvider(studentId).notifier)
                   .remove(hw.id),
@@ -98,10 +100,10 @@ class _HomeworkTabState extends ConsumerState<HomeworkTab> {
     );
   }
 
-  Widget? _subtitle(Homework hw) {
+  Widget? _subtitle(AppLocalizations loc, Homework hw) {
     final parts = <String>[
       if (hw.description != null && hw.description!.isNotEmpty) hw.description!,
-      if (hw.dueDate != null) 'Due ${formatDateOnly(hw.dueDate!)}',
+      if (hw.dueDate != null) loc.hwTrackerDue(formatDateOnly(hw.dueDate!)),
     ];
     return parts.isEmpty ? null : Text(parts.join('\n'));
   }
@@ -120,8 +122,9 @@ class _HomeworkTabState extends ConsumerState<HomeworkTab> {
           );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Add failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.commonAddFailed('$e'))));
       }
     }
   }
@@ -167,8 +170,9 @@ class _HomeworkDialogState extends State<_HomeworkDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Add homework'),
+      title: Text(loc.homeworkTabAdd),
       content: Form(
         key: _formKey,
         child: Column(
@@ -177,21 +181,21 @@ class _HomeworkDialogState extends State<_HomeworkDialog> {
             TextFormField(
               controller: _title,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.commonTitle,
+                border: const OutlineInputBorder(),
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _description,
               minLines: 1,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Description (optional)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.commonDescriptionOptional,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
@@ -203,8 +207,8 @@ class _HomeworkDialogState extends State<_HomeworkDialog> {
                     icon: const Icon(Icons.event),
                     label: Text(
                       _dueDate == null
-                          ? 'Due date (optional)'
-                          : 'Due ${formatDateOnly(_dueDate!)}',
+                          ? loc.homeworkTabDueOptional
+                          : loc.hwTrackerDue(formatDateOnly(_dueDate!)),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -222,7 +226,7 @@ class _HomeworkDialogState extends State<_HomeworkDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(loc.commonCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -236,7 +240,7 @@ class _HomeworkDialogState extends State<_HomeworkDialog> {
               ),
             );
           },
-          child: const Text('Add'),
+          child: Text(loc.commonAdd),
         ),
       ],
     );

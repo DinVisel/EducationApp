@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../models/book.dart';
 import '../../state/books_providers.dart';
 import '../../widgets/async_list.dart';
@@ -53,6 +54,7 @@ class _BooksTabState extends ConsumerState<BooksTab> {
   Widget build(BuildContext context) {
     final studentId = widget.studentId;
     final async = ref.watch(booksProvider(studentId));
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -64,7 +66,7 @@ class _BooksTabState extends ConsumerState<BooksTab> {
         onRefresh: () => ref.refresh(booksProvider(studentId).future),
         onRetry: () => ref.invalidate(booksProvider(studentId)),
         emptyIcon: Icons.menu_book_outlined,
-        emptyText: 'No books yet',
+        emptyText: loc.booksTabEmpty,
         scrollController: _scroll,
         loadingMore: _loadingMore,
         itemBuilder: (book) => Card(
@@ -81,7 +83,7 @@ class _BooksTabState extends ConsumerState<BooksTab> {
             subtitle: Text(_subtitle(book)),
             trailing: IconButton(
               icon: const Icon(Icons.delete_outline),
-              tooltip: 'Delete',
+              tooltip: loc.commonDelete,
               onPressed: () =>
                   ref.read(booksProvider(studentId).notifier).remove(book.id),
             ),
@@ -131,8 +133,9 @@ class _BooksTabState extends ConsumerState<BooksTab> {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Save failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.commonSaveFailed('$e'))));
       }
     }
   }
@@ -181,8 +184,9 @@ class _BookDialogState extends State<_BookDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: Text(widget.existing == null ? 'Add book' : 'Edit book'),
+      title: Text(widget.existing == null ? loc.booksTabAdd : loc.booksTabEdit),
       content: Form(
         key: _formKey,
         child: Column(
@@ -191,31 +195,31 @@ class _BookDialogState extends State<_BookDialog> {
             TextFormField(
               controller: _title,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.commonTitle,
+                border: const OutlineInputBorder(),
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _author,
-              decoration: const InputDecoration(
-                labelText: 'Author (optional)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.readingAuthorOptional,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
             SegmentedButton<BookStatus>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: BookStatus.reading,
-                  label: Text('Reading'),
+                  label: Text(loc.readingStatusReading),
                 ),
                 ButtonSegment(
                   value: BookStatus.completed,
-                  label: Text('Completed'),
+                  label: Text(loc.readingCompleted),
                 ),
               ],
               selected: {_status},
@@ -232,7 +236,7 @@ class _BookDialogState extends State<_BookDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(loc.commonCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -247,7 +251,7 @@ class _BookDialogState extends State<_BookDialog> {
               ),
             );
           },
-          child: const Text('Save'),
+          child: Text(loc.commonSave),
         ),
       ],
     );

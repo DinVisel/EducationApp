@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../models/student.dart';
 import '../state/students_providers.dart';
 
@@ -30,6 +31,18 @@ class _StudentFormScreenState extends ConsumerState<StudentFormScreen> {
   bool _saving = false;
 
   static const _genders = ['Female', 'Male', 'Other'];
+
+  // Gender is stored as a canonical English string; only the display is localized.
+  String _genderLabel(AppLocalizations loc, String g) {
+    switch (g) {
+      case 'Female':
+        return loc.studentFormGenderFemale;
+      case 'Male':
+        return loc.studentFormGenderMale;
+      default:
+        return loc.studentFormGenderOther;
+    }
+  }
 
   @override
   void initState() {
@@ -103,21 +116,24 @@ class _StudentFormScreenState extends ConsumerState<StudentFormScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _saving = false);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Save failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.commonSaveFailed('$e'))));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final dobLabel = _dateOfBirth == null
-        ? 'Date of birth (optional)'
-        : 'DOB: ${formatDateOnly(_dateOfBirth!)}';
+        ? loc.studentFormDobOptional
+        : loc.studentFormDob(formatDateOnly(_dateOfBirth!));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit student' : 'Add student'),
+        title: Text(
+            widget.isEditing ? loc.studentFormEditTitle : loc.studentsAdd),
       ),
       body: Form(
         key: _formKey,
@@ -127,30 +143,30 @@ class _StudentFormScreenState extends ConsumerState<StudentFormScreen> {
             TextFormField(
               controller: _firstName,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'First name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.settingsFirstName,
+                border: const OutlineInputBorder(),
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _lastName,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Last name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.settingsLastName,
+                border: const OutlineInputBorder(),
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _studentNumber,
-              decoration: const InputDecoration(
-                labelText: 'Student number (optional)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.studentFormNumberOptional,
+                border: const OutlineInputBorder(),
               ),
             ),
             const Divider(height: 32),
@@ -165,7 +181,7 @@ class _StudentFormScreenState extends ConsumerState<StudentFormScreen> {
                 ),
                 if (_dateOfBirth != null)
                   IconButton(
-                    tooltip: 'Clear',
+                    tooltip: loc.commonClear,
                     icon: const Icon(Icons.clear),
                     onPressed: () => setState(() => _dateOfBirth = null),
                   ),
@@ -174,14 +190,14 @@ class _StudentFormScreenState extends ConsumerState<StudentFormScreen> {
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: _gender,
-              decoration: const InputDecoration(
-                labelText: 'Gender (optional)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.studentFormGenderOptional,
+                border: const OutlineInputBorder(),
               ),
               items: [
                 const DropdownMenuItem(value: null, child: Text('—')),
                 ..._genders.map(
-                  (g) => DropdownMenuItem(value: g, child: Text(g)),
+                  (g) => DropdownMenuItem(value: g, child: Text(_genderLabel(loc, g))),
                 ),
               ],
               onChanged: (v) => setState(() => _gender = v),
@@ -190,18 +206,18 @@ class _StudentFormScreenState extends ConsumerState<StudentFormScreen> {
             TextFormField(
               controller: _guardianName,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Guardian name (optional)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.studentFormGuardianNameOptional,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _guardianPhone,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Guardian phone (optional)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.studentFormGuardianPhoneOptional,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -209,9 +225,9 @@ class _StudentFormScreenState extends ConsumerState<StudentFormScreen> {
               controller: _notes,
               minLines: 2,
               maxLines: 5,
-              decoration: const InputDecoration(
-                labelText: 'Notes (optional)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.studentFormNotesOptional,
+                border: const OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
             ),
@@ -226,7 +242,9 @@ class _StudentFormScreenState extends ConsumerState<StudentFormScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(widget.isEditing ? 'Save changes' : 'Create'),
+                    : Text(widget.isEditing
+                        ? loc.settingsSaveChanges
+                        : loc.commonCreate),
               ),
             ),
           ],

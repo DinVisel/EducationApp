@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../models/student.dart';
 
 class InfoTab extends StatelessWidget {
@@ -9,25 +10,28 @@ class InfoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final dob = student.dateOfBirth;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _tile(Icons.badge_outlined, 'Full name', student.fullName),
-        _tile(Icons.numbers, 'Student number',
+        _tile(Icons.badge_outlined, loc.studentProfileFullName, student.fullName),
+        _tile(Icons.numbers, loc.infoTabStudentNumber,
             _orDash(student.studentNumber)),
         _tile(
           Icons.cake_outlined,
-          'Date of birth',
+          loc.infoTabDob,
           dob == null
               ? '—'
-              : '${formatDateOnly(dob)}  (age ${_age(dob)})',
+              : '${formatDateOnly(dob)}  (${loc.infoTabAge(_age(dob))})',
         ),
-        _tile(Icons.wc_outlined, 'Gender', _orDash(student.gender)),
-        _tile(Icons.person_outline, 'Guardian', _orDash(student.guardianName)),
-        _tile(Icons.phone_outlined, 'Guardian phone',
+        _tile(Icons.wc_outlined, loc.infoTabGender, _orDash(student.gender)),
+        _tile(Icons.person_outline, loc.infoTabGuardian,
+            _orDash(student.guardianName)),
+        _tile(Icons.phone_outlined, loc.infoTabGuardianPhone,
             _orDash(student.guardianPhone)),
-        _tile(Icons.notes_outlined, 'Notes', _orDash(student.notes)),
+        _tile(Icons.notes_outlined, loc.studentProfileNotes,
+            _orDash(student.notes)),
       ],
     );
   }

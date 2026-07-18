@@ -290,6 +290,24 @@ abstract class AppLocalizations {
   /// **'Could not load: {error}'**
   String commonCouldNotLoad(String error);
 
+  /// No description provided for @commonSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: {error}'**
+  String commonSaveFailed(String error);
+
+  /// No description provided for @commonAddFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Add failed: {error}'**
+  String commonAddFailed(String error);
+
+  /// No description provided for @commonClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get commonClear;
+
   /// No description provided for @commonTimeJustNow.
   ///
   /// In en, this message translates to:
@@ -1801,6 +1819,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick due date'**
   String get hwTrackerPickDueDate;
+
+  /// No description provided for @studentFormEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit student'**
+  String get studentFormEditTitle;
+
+  /// No description provided for @studentFormDobOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth (optional)'**
+  String get studentFormDobOptional;
+
+  /// No description provided for @studentFormDob.
+  ///
+  /// In en, this message translates to:
+  /// **'DOB: {date}'**
+  String studentFormDob(String date);
+
+  /// No description provided for @studentFormNumberOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Student number (optional)'**
+  String get studentFormNumberOptional;
+
+  /// No description provided for @studentFormGenderOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender (optional)'**
+  String get studentFormGenderOptional;
+
+  /// No description provided for @studentFormGenderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get studentFormGenderFemale;
+
+  /// No description provided for @studentFormGenderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get studentFormGenderMale;
+
+  /// No description provided for @studentFormGenderOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get studentFormGenderOther;
+
+  /// No description provided for @studentFormGuardianNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian name (optional)'**
+  String get studentFormGuardianNameOptional;
+
+  /// No description provided for @studentFormGuardianPhoneOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian phone (optional)'**
+  String get studentFormGuardianPhoneOptional;
+
+  /// No description provided for @studentFormNotesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get studentFormNotesOptional;
+
+  /// No description provided for @booksTabEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No books yet'**
+  String get booksTabEmpty;
+
+  /// No description provided for @booksTabAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add book'**
+  String get booksTabAdd;
+
+  /// No description provided for @booksTabEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit book'**
+  String get booksTabEdit;
+
+  /// No description provided for @homeworkTabEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No homework yet'**
+  String get homeworkTabEmpty;
+
+  /// No description provided for @homeworkTabAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add homework'**
+  String get homeworkTabAdd;
+
+  /// No description provided for @homeworkTabDueOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date (optional)'**
+  String get homeworkTabDueOptional;
+
+  /// No description provided for @notesTabEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes yet'**
+  String get notesTabEmpty;
+
+  /// No description provided for @notesTabAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add note'**
+  String get notesTabAdd;
+
+  /// No description provided for @notesTabNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get notesTabNoteLabel;
+
+  /// No description provided for @notesCategoryBehavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Behavior'**
+  String get notesCategoryBehavior;
+
+  /// No description provided for @notesCategoryAcademic.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic'**
+  String get notesCategoryAcademic;
+
+  /// No description provided for @notesCategorySocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get notesCategorySocial;
+
+  /// No description provided for @notesCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get notesCategoryOther;
+
+  /// No description provided for @infoTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get infoTabTitle;
+
+  /// No description provided for @infoTabStudentNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Student number'**
+  String get infoTabStudentNumber;
+
+  /// No description provided for @infoTabDob.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get infoTabDob;
+
+  /// No description provided for @infoTabAge.
+  ///
+  /// In en, this message translates to:
+  /// **'age {age}'**
+  String infoTabAge(int age);
+
+  /// No description provided for @infoTabGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get infoTabGender;
+
+  /// No description provided for @infoTabGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian'**
+  String get infoTabGuardian;
+
+  /// No description provided for @infoTabGuardianPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian phone'**
+  String get infoTabGuardianPhone;
+
+  /// No description provided for @studentDetailEditInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit info'**
+  String get studentDetailEditInfo;
+
+  /// No description provided for @dashboardAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get dashboardAssistant;
+
+  /// No description provided for @dashboardSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a student…'**
+  String get dashboardSearchHint;
+
+  /// No description provided for @dashboardQuickAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Access'**
+  String get dashboardQuickAccess;
+
+  /// No description provided for @dashboardNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No students found'**
+  String get dashboardNoMatch;
+
+  /// No description provided for @dashboardAddStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Student'**
+  String get dashboardAddStudent;
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../models/student.dart';
 import '../state/students_providers.dart';
 import 'student_form_screen.dart';
@@ -24,6 +25,7 @@ class StudentDetailScreen extends ConsumerWidget {
           ),
           orElse: () => student,
         );
+    final loc = AppLocalizations.of(context)!;
 
     return DefaultTabController(
       length: 4,
@@ -33,7 +35,7 @@ class StudentDetailScreen extends ConsumerWidget {
           actions: [
             IconButton(
               icon: const Icon(Icons.edit_outlined),
-              tooltip: 'Edit info',
+              tooltip: loc.studentDetailEditInfo,
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => StudentFormScreen(student: current),
@@ -41,13 +43,19 @@ class StudentDetailScreen extends ConsumerWidget {
               ),
             ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
             tabs: [
-              Tab(icon: Icon(Icons.person_outline), text: 'Info'),
-              Tab(icon: Icon(Icons.sticky_note_2_outlined), text: 'Notes'),
-              Tab(icon: Icon(Icons.assignment_outlined), text: 'Homework'),
-              Tab(icon: Icon(Icons.menu_book_outlined), text: 'Books'),
+              Tab(icon: const Icon(Icons.person_outline), text: loc.infoTabTitle),
+              Tab(
+                  icon: const Icon(Icons.sticky_note_2_outlined),
+                  text: loc.studentProfileNotes),
+              Tab(
+                  icon: const Icon(Icons.assignment_outlined),
+                  text: loc.classTabHomework),
+              Tab(
+                  icon: const Icon(Icons.menu_book_outlined),
+                  text: loc.booksTabTitle),
             ],
           ),
         ),

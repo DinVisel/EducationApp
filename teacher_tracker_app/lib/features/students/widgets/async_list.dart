@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// Renders an [AsyncValue] list with shared loading / error / empty / data
 /// handling and pull-to-refresh. Used by the student detail tabs.
 class AsyncList<T> extends StatelessWidget {
@@ -92,7 +94,9 @@ class _ErrorState extends StatelessWidget {
           child: Text(message, textAlign: TextAlign.center),
         ),
         Center(
-          child: FilledButton.tonal(onPressed: onRetry, child: const Text('Retry')),
+          child: FilledButton.tonal(
+              onPressed: onRetry,
+              child: Text(AppLocalizations.of(context)!.commonRetry)),
         ),
       ],
     );

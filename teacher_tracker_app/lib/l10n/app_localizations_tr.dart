@@ -115,6 +115,19 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String commonSaveFailed(String error) {
+    return 'Kaydetme başarısız: $error';
+  }
+
+  @override
+  String commonAddFailed(String error) {
+    return 'Ekleme başarısız: $error';
+  }
+
+  @override
+  String get commonClear => 'Temizle';
+
+  @override
   String get commonTimeJustNow => 'az önce';
 
   @override
@@ -983,4 +996,119 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get hwTrackerPickDueDate => 'Son tarih seç';
+
+  @override
+  String get studentFormEditTitle => 'Öğrenciyi düzenle';
+
+  @override
+  String get studentFormDobOptional => 'Doğum tarihi (isteğe bağlı)';
+
+  @override
+  String studentFormDob(String date) {
+    return 'Doğum tarihi: $date';
+  }
+
+  @override
+  String get studentFormNumberOptional => 'Öğrenci numarası (isteğe bağlı)';
+
+  @override
+  String get studentFormGenderOptional => 'Cinsiyet (isteğe bağlı)';
+
+  @override
+  String get studentFormGenderFemale => 'Kız';
+
+  @override
+  String get studentFormGenderMale => 'Erkek';
+
+  @override
+  String get studentFormGenderOther => 'Diğer';
+
+  @override
+  String get studentFormGuardianNameOptional => 'Veli adı (isteğe bağlı)';
+
+  @override
+  String get studentFormGuardianPhoneOptional => 'Veli telefonu (isteğe bağlı)';
+
+  @override
+  String get studentFormNotesOptional => 'Notlar (isteğe bağlı)';
+
+  @override
+  String get booksTabEmpty => 'Henüz kitap yok';
+
+  @override
+  String get booksTabAdd => 'Kitap ekle';
+
+  @override
+  String get booksTabEdit => 'Kitabı düzenle';
+
+  @override
+  String get homeworkTabEmpty => 'Henüz ödev yok';
+
+  @override
+  String get homeworkTabAdd => 'Ödev ekle';
+
+  @override
+  String get homeworkTabDueOptional => 'Son tarih (isteğe bağlı)';
+
+  @override
+  String get notesTabEmpty => 'Henüz not yok';
+
+  @override
+  String get notesTabAdd => 'Not ekle';
+
+  @override
+  String get notesTabNoteLabel => 'Not';
+
+  @override
+  String get notesCategoryBehavior => 'Davranış';
+
+  @override
+  String get notesCategoryAcademic => 'Akademik';
+
+  @override
+  String get notesCategorySocial => 'Sosyal';
+
+  @override
+  String get notesCategoryOther => 'Diğer';
+
+  @override
+  String get infoTabTitle => 'Bilgi';
+
+  @override
+  String get infoTabStudentNumber => 'Öğrenci numarası';
+
+  @override
+  String get infoTabDob => 'Doğum tarihi';
+
+  @override
+  String infoTabAge(int age) {
+    return 'yaş $age';
+  }
+
+  @override
+  String get infoTabGender => 'Cinsiyet';
+
+  @override
+  String get infoTabGuardian => 'Veli';
+
+  @override
+  String get infoTabGuardianPhone => 'Veli telefonu';
+
+  @override
+  String get studentDetailEditInfo => 'Bilgileri düzenle';
+
+  @override
+  String get dashboardAssistant => 'Asistan';
+
+  @override
+  String get dashboardSearchHint => 'Öğrenci bul…';
+
+  @override
+  String get dashboardQuickAccess => 'Hızlı Erişim';
+
+  @override
+  String get dashboardNoMatch => 'Öğrenci bulunamadı';
+
+  @override
+  String get dashboardAddStudent => 'Öğrenci Ekle';
 }

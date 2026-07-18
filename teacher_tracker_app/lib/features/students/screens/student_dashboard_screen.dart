@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/student.dart';
 import '../state/students_providers.dart';
 import 'student_profile_screen.dart';
@@ -28,12 +29,13 @@ class _StudentDashboardScreenState
     final studentsAsync = ref.watch(studentsProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: studentsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(loc.commonError('$e'))),
         data: (students) {
           final filtered = _query.isEmpty
               ? students
@@ -83,7 +85,7 @@ class _StudentDashboardScreenState
                         const EdgeInsets.fromLTRB(20, 24, 20, 8),
                     child: Row(
                       children: [
-                        Text('All Students',
+                        Text(loc.hwTrackerAllStudents,
                             style: tt.titleLarge?.copyWith(
                                 color: cs.onSurface,
                                 fontWeight: FontWeight.w600)),
@@ -138,7 +140,7 @@ class _StudentDashboardScreenState
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(context),
         icon: const Icon(Icons.add),
-        label: const Text('Add Student'),
+        label: Text(loc.dashboardAddStudent),
       ),
     );
   }
@@ -189,7 +191,7 @@ class _GlassAppBar extends StatelessWidget {
             children: [
               Icon(Icons.menu, color: cs.primary),
               const SizedBox(width: 12),
-              Text('Assistant',
+              Text(AppLocalizations.of(context)!.dashboardAssistant,
                   style: tt.headlineMedium
                       ?.copyWith(color: cs.primary, fontWeight: FontWeight.w700)),
               const Spacer(),
@@ -226,7 +228,7 @@ class _SearchField extends StatelessWidget {
           child: TextField(
             onChanged: onChanged,
             decoration: InputDecoration(
-              hintText: 'Find a student…',
+              hintText: AppLocalizations.of(context)!.dashboardSearchHint,
               prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -263,7 +265,7 @@ class _QuickAccessRow extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-          child: Text('Quick Access',
+          child: Text(AppLocalizations.of(context)!.dashboardQuickAccess,
               style: tt.titleLarge
                   ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w600)),
         ),
@@ -363,7 +365,7 @@ class _QuickAddButton extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text('Add',
+          Text(AppLocalizations.of(context)!.commonAdd,
               style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
         ],
       ),
@@ -421,7 +423,7 @@ class _StudentCard extends StatelessWidget {
                             size: 14,
                             color: cs.primaryContainer),
                         const SizedBox(width: 4),
-                        Text('Present',
+                        Text(AppLocalizations.of(context)!.attendanceStatusPresent,
                             style: tt.labelSmall
                                 ?.copyWith(color: cs.primaryContainer)),
                       ],
@@ -498,6 +500,7 @@ class _EmptyOrNoMatch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -509,7 +512,7 @@ class _EmptyOrNoMatch extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            query.isEmpty ? 'No students yet' : 'No students found',
+            query.isEmpty ? loc.studentsEmptyTitle : loc.dashboardNoMatch,
             style: Theme.of(context)
                 .textTheme
                 .titleMedium

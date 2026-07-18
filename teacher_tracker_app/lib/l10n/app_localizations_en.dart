@@ -115,6 +115,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String commonSaveFailed(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
+  String commonAddFailed(String error) {
+    return 'Add failed: $error';
+  }
+
+  @override
+  String get commonClear => 'Clear';
+
+  @override
   String get commonTimeJustNow => 'just now';
 
   @override
@@ -980,4 +993,119 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hwTrackerPickDueDate => 'Pick due date';
+
+  @override
+  String get studentFormEditTitle => 'Edit student';
+
+  @override
+  String get studentFormDobOptional => 'Date of birth (optional)';
+
+  @override
+  String studentFormDob(String date) {
+    return 'DOB: $date';
+  }
+
+  @override
+  String get studentFormNumberOptional => 'Student number (optional)';
+
+  @override
+  String get studentFormGenderOptional => 'Gender (optional)';
+
+  @override
+  String get studentFormGenderFemale => 'Female';
+
+  @override
+  String get studentFormGenderMale => 'Male';
+
+  @override
+  String get studentFormGenderOther => 'Other';
+
+  @override
+  String get studentFormGuardianNameOptional => 'Guardian name (optional)';
+
+  @override
+  String get studentFormGuardianPhoneOptional => 'Guardian phone (optional)';
+
+  @override
+  String get studentFormNotesOptional => 'Notes (optional)';
+
+  @override
+  String get booksTabEmpty => 'No books yet';
+
+  @override
+  String get booksTabAdd => 'Add book';
+
+  @override
+  String get booksTabEdit => 'Edit book';
+
+  @override
+  String get homeworkTabEmpty => 'No homework yet';
+
+  @override
+  String get homeworkTabAdd => 'Add homework';
+
+  @override
+  String get homeworkTabDueOptional => 'Due date (optional)';
+
+  @override
+  String get notesTabEmpty => 'No notes yet';
+
+  @override
+  String get notesTabAdd => 'Add note';
+
+  @override
+  String get notesTabNoteLabel => 'Note';
+
+  @override
+  String get notesCategoryBehavior => 'Behavior';
+
+  @override
+  String get notesCategoryAcademic => 'Academic';
+
+  @override
+  String get notesCategorySocial => 'Social';
+
+  @override
+  String get notesCategoryOther => 'Other';
+
+  @override
+  String get infoTabTitle => 'Info';
+
+  @override
+  String get infoTabStudentNumber => 'Student number';
+
+  @override
+  String get infoTabDob => 'Date of birth';
+
+  @override
+  String infoTabAge(int age) {
+    return 'age $age';
+  }
+
+  @override
+  String get infoTabGender => 'Gender';
+
+  @override
+  String get infoTabGuardian => 'Guardian';
+
+  @override
+  String get infoTabGuardianPhone => 'Guardian phone';
+
+  @override
+  String get studentDetailEditInfo => 'Edit info';
+
+  @override
+  String get dashboardAssistant => 'Assistant';
+
+  @override
+  String get dashboardSearchHint => 'Find a student…';
+
+  @override
+  String get dashboardQuickAccess => 'Quick Access';
+
+  @override
+  String get dashboardNoMatch => 'No students found';
+
+  @override
+  String get dashboardAddStudent => 'Add Student';
 }
