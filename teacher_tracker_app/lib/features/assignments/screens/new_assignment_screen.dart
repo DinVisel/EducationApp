@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/classroom.dart';
 import '../../../models/file_object.dart';
 import '../../files/data/files_repository.dart';
@@ -58,6 +59,7 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
     if (result == null || !mounted) return;
 
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     setState(() => _uploading = true);
     final repo = ref.read(filesRepositoryProvider);
     try {
@@ -84,7 +86,8 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
         if (mounted) setState(() => _attachments.add(uploaded));
       }
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.commonUploadFailed('$e'))));
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
@@ -105,6 +108,7 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
     setState(() => _saving = true);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final loc = AppLocalizations.of(context)!;
     try {
       await ref.read(assignmentActionsProvider).create(
             widget.classroom.id,
@@ -114,12 +118,13 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
             fileIds: _attachments.map((f) => f.id).toList(),
           );
       messenger.showSnackBar(
-        const SnackBar(content: Text('Assignment published')),
+        SnackBar(content: Text(loc.newAssignmentPublished)),
       );
       navigator.pop();
     } catch (e) {
       if (mounted) setState(() => _saving = false);
-      messenger.showSnackBar(SnackBar(content: Text('Could not publish: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.commonCouldNotPublish('$e'))));
     }
   }
 
@@ -127,11 +132,12 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final busy = _saving || _uploading;
 
     return GlassScaffold(
       appBar: AppBar(
-        title: Text('New Assignment · ${widget.classroom.name}'),
+        title: Text(loc.newAssignmentTitle(widget.classroom.name)),
         backgroundColor: Colors.transparent,
       ),
       body: Form(
@@ -142,12 +148,13 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
             TextFormField(
               controller: _title,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                hintText: 'e.g. Read chapter 3',
+              decoration: InputDecoration(
+                labelText: loc.commonTitle,
+                hintText: loc.newAssignmentTitleHint,
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Title is required' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? loc.newQuizTitleRequired
+                  : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -155,8 +162,8 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
               textCapitalization: TextCapitalization.sentences,
               minLines: 3,
               maxLines: 6,
-              decoration: const InputDecoration(
-                labelText: 'Description (optional)',
+              decoration: InputDecoration(
+                labelText: loc.commonDescriptionOptional,
                 alignLabelWithHint: true,
               ),
             ),
@@ -172,8 +179,8 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
                   Expanded(
                     child: Text(
                       _dueDate == null
-                          ? 'Set a due date (optional)'
-                          : 'Due ${_fmtDate(_dueDate!)}',
+                          ? loc.newAssignmentSetDueDate
+                          : loc.hwTrackerDue(_fmtDate(_dueDate!)),
                       style: tt.bodyLarge?.copyWith(color: cs.onSurface),
                     ),
                   ),
@@ -188,14 +195,14 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
             const SizedBox(height: 24),
             Row(
               children: [
-                Text('Attachments',
+                Text(loc.newPostAttachments,
                     style: tt.titleMedium?.copyWith(
                         color: cs.onSurface, fontWeight: FontWeight.w600)),
                 const Spacer(),
                 TextButton.icon(
                   onPressed: _uploading ? null : _pickFiles,
                   icon: const Icon(Icons.attach_file),
-                  label: const Text('Add files'),
+                  label: Text(loc.newPostAddFiles),
                 ),
               ],
             ),
@@ -208,7 +215,7 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 4, bottom: 8),
                 child: Text(
-                  'Exercises, videos, or files students can download.',
+                  loc.newAssignmentAttachmentsHint,
                   style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
@@ -246,7 +253,7 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.send),
-              label: Text(_saving ? 'Publishing…' : 'Publish to class'),
+              label: Text(_saving ? loc.newQuizPublishing : loc.newQuizPublish),
             ),
           ],
         ),

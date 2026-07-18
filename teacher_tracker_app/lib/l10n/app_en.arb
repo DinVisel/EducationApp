@@ -42,6 +42,8 @@
   "@commonSaveFailed": { "placeholders": { "error": { "type": "String" } } },
   "commonAddFailed": "Add failed: {error}",
   "@commonAddFailed": { "placeholders": { "error": { "type": "String" } } },
+  "commonCouldNotPublish": "Could not publish: {error}",
+  "@commonCouldNotPublish": { "placeholders": { "error": { "type": "String" } } },
   "commonClear": "Clear",
   "commonTimeJustNow": "just now",
   "commonTimeMinutesAgo": "{minutes}m ago",
@@ -408,5 +410,23 @@
   "dashboardSearchHint": "Find a student…",
   "dashboardQuickAccess": "Quick Access",
   "dashboardNoMatch": "No students found",
-  "dashboardAddStudent": "Add Student"
+  "dashboardAddStudent": "Add Student",
+
+  "assignmentsTitle": "{className} · Assignments",
+  "@assignmentsTitle": { "placeholders": { "className": { "type": "String" } } },
+  "assignmentsDeleteTitle": "Delete assignment?",
+  "assignmentsDeleteBody": "Remove \"{title}\"? This clears it for all {count, plural, =1{1 student} other{{count} students}}.",
+  "@assignmentsDeleteBody": { "placeholders": { "title": { "type": "String" }, "count": { "type": "int" } } },
+  "assignmentsDone": "{completed}/{total} done",
+  "@assignmentsDone": { "placeholders": { "completed": { "type": "int" }, "total": { "type": "int" } } },
+  "assignmentsFiles": "{count, plural, =1{1 file} other{{count} files}}",
+  "@assignmentsFiles": { "placeholders": { "count": { "type": "int" } } },
+  "assignmentsEmptyTitle": "No assignments yet",
+  "assignmentsEmptySubtitle": "Tap “New Assignment” to publish work to this class.",
+  "newAssignmentTitle": "New Assignment · {className}",
+  "@newAssignmentTitle": { "placeholders": { "className": { "type": "String" } } },
+  "newAssignmentTitleHint": "e.g. Read chapter 3",
+  "newAssignmentSetDueDate": "Set a due date (optional)",
+  "newAssignmentPublished": "Assignment published",
+  "newAssignmentAttachmentsHint": "Exercises, videos, or files students can download."
 }

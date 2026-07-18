@@ -42,6 +42,8 @@
   "@commonSaveFailed": { "placeholders": { "error": { "type": "String" } } },
   "commonAddFailed": "Ekleme başarısız: {error}",
   "@commonAddFailed": { "placeholders": { "error": { "type": "String" } } },
+  "commonCouldNotPublish": "Yayınlanamadı: {error}",
+  "@commonCouldNotPublish": { "placeholders": { "error": { "type": "String" } } },
   "commonClear": "Temizle",
   "commonTimeJustNow": "az önce",
   "commonTimeMinutesAgo": "{minutes} dk önce",
@@ -398,5 +400,23 @@
   "dashboardSearchHint": "Öğrenci bul…",
   "dashboardQuickAccess": "Hızlı Erişim",
   "dashboardNoMatch": "Öğrenci bulunamadı",
-  "dashboardAddStudent": "Öğrenci Ekle"
+  "dashboardAddStudent": "Öğrenci Ekle",
+
+  "assignmentsTitle": "{className} · Ödevler",
+  "@assignmentsTitle": { "placeholders": { "className": { "type": "String" } } },
+  "assignmentsDeleteTitle": "Ödev silinsin mi?",
+  "assignmentsDeleteBody": "\"{title}\" kaldırılsın mı? Bu, {count, plural, =1{1 öğrenci} other{{count} öğrenci}} için ödevi temizler.",
+  "@assignmentsDeleteBody": { "placeholders": { "title": { "type": "String" }, "count": { "type": "int" } } },
+  "assignmentsDone": "{completed}/{total} tamamlandı",
+  "@assignmentsDone": { "placeholders": { "completed": { "type": "int" }, "total": { "type": "int" } } },
+  "assignmentsFiles": "{count, plural, =1{1 dosya} other{{count} dosya}}",
+  "@assignmentsFiles": { "placeholders": { "count": { "type": "int" } } },
+  "assignmentsEmptyTitle": "Henüz ödev yok",
+  "assignmentsEmptySubtitle": "Bu sınıfa çalışma yayınlamak için “Yeni Ödev”e dokunun.",
+  "newAssignmentTitle": "Yeni Ödev · {className}",
+  "@newAssignmentTitle": { "placeholders": { "className": { "type": "String" } } },
+  "newAssignmentTitleHint": "örn. 3. bölümü oku",
+  "newAssignmentSetDueDate": "Son tarih belirle (isteğe bağlı)",
+  "newAssignmentPublished": "Ödev yayınlandı",
+  "newAssignmentAttachmentsHint": "Öğrencilerin indirebileceği alıştırmalar, videolar veya dosyalar."
 }

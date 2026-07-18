@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/assignment.dart';
 import '../../../models/classroom.dart';
 import '../../files/widgets/attachment_tile.dart';
@@ -18,20 +19,21 @@ class ClassAssignmentsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final assignmentsAsync =
         ref.watch(classroomAssignmentsProvider(classroom.id));
+    final loc = AppLocalizations.of(context)!;
 
     return GlassScaffold(
       appBar: AppBar(
-        title: Text('${classroom.name} · Assignments'),
+        title: Text(loc.assignmentsTitle(classroom.name)),
         backgroundColor: Colors.transparent,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _newAssignment(context),
         icon: const Icon(Icons.post_add),
-        label: const Text('New Assignment'),
+        label: Text(loc.hwTrackerNewAssignment),
       ),
       body: assignmentsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(loc.commonError('$e'))),
         data: (assignments) {
           if (assignments.isEmpty) return const _Empty();
           return RefreshIndicator(
@@ -63,19 +65,19 @@ class ClassAssignmentsScreen extends ConsumerWidget {
 
   Future<void> _delete(BuildContext ctx, WidgetRef ref, Assignment a) async {
     final messenger = ScaffoldMessenger.of(ctx);
+    final loc = AppLocalizations.of(ctx)!;
     final ok = await showDialog<bool>(
       context: ctx,
       builder: (d) => AlertDialog(
-        title: const Text('Delete assignment?'),
-        content: Text('Remove "${a.title}"? This clears it for all '
-            '${a.studentCount} student${a.studentCount == 1 ? '' : 's'}.'),
+        title: Text(loc.assignmentsDeleteTitle),
+        content: Text(loc.assignmentsDeleteBody(a.title, a.studentCount)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(d, false),
-              child: const Text('Cancel')),
+              child: Text(loc.commonCancel)),
           FilledButton(
               onPressed: () => Navigator.pop(d, true),
-              child: const Text('Delete')),
+              child: Text(loc.commonDelete)),
         ],
       ),
     );
@@ -83,7 +85,8 @@ class ClassAssignmentsScreen extends ConsumerWidget {
     try {
       await ref.read(assignmentActionsProvider).delete(classroom.id, a.id);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not delete: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.commonCouldNotDelete('$e'))));
     }
   }
 }
@@ -97,6 +100,7 @@ class _AssignmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final a = assignment;
     return GlassCard(
       padding: const EdgeInsets.all(16),
@@ -113,7 +117,7 @@ class _AssignmentCard extends StatelessWidget {
               ),
               IconButton(
                 icon: Icon(Icons.delete_outline, color: cs.error),
-                tooltip: 'Delete',
+                tooltip: loc.commonDelete,
                 visualDensity: VisualDensity.compact,
                 onPressed: onDelete,
               ),
@@ -131,22 +135,21 @@ class _AssignmentCard extends StatelessWidget {
             children: [
               _Chip(
                 icon: Icons.people_alt_outlined,
-                label: '${a.completedCount}/${a.studentCount} done',
+                label: loc.assignmentsDone(a.completedCount, a.studentCount),
                 cs: cs,
                 tt: tt,
               ),
               if (a.dueDate != null)
                 _Chip(
                   icon: Icons.event_outlined,
-                  label: 'Due ${_fmtDate(a.dueDate!)}',
+                  label: loc.hwTrackerDue(_fmtDate(a.dueDate!)),
                   cs: cs,
                   tt: tt,
                 ),
               if (a.attachments.isNotEmpty)
                 _Chip(
                   icon: Icons.attach_file,
-                  label: '${a.attachments.length} file'
-                      '${a.attachments.length == 1 ? '' : 's'}',
+                  label: loc.assignmentsFiles(a.attachments.length),
                   cs: cs,
                   tt: tt,
                 ),
@@ -210,6 +213,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return ListView(
       children: [
         const SizedBox(height: 120),
@@ -217,7 +221,7 @@ class _Empty extends StatelessWidget {
             size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
         const SizedBox(height: 16),
         Center(
-          child: Text('No assignments yet',
+          child: Text(loc.assignmentsEmptyTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -225,7 +229,7 @@ class _Empty extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Center(
-          child: Text('Tap “New Assignment” to publish work to this class.',
+          child: Text(loc.assignmentsEmptySubtitle,
               textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme

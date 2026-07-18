@@ -125,6 +125,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String commonCouldNotPublish(String error) {
+    return 'Could not publish: $error';
+  }
+
+  @override
   String get commonClear => 'Clear';
 
   @override
@@ -1108,4 +1113,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardAddStudent => 'Add Student';
+
+  @override
+  String assignmentsTitle(String className) {
+    return '$className · Assignments';
+  }
+
+  @override
+  String get assignmentsDeleteTitle => 'Delete assignment?';
+
+  @override
+  String assignmentsDeleteBody(String title, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+    );
+    return 'Remove \"$title\"? This clears it for all $_temp0.';
+  }
+
+  @override
+  String assignmentsDone(int completed, int total) {
+    return '$completed/$total done';
+  }
+
+  @override
+  String assignmentsFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files',
+      one: '1 file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assignmentsEmptyTitle => 'No assignments yet';
+
+  @override
+  String get assignmentsEmptySubtitle =>
+      'Tap “New Assignment” to publish work to this class.';
+
+  @override
+  String newAssignmentTitle(String className) {
+    return 'New Assignment · $className';
+  }
+
+  @override
+  String get newAssignmentTitleHint => 'e.g. Read chapter 3';
+
+  @override
+  String get newAssignmentSetDueDate => 'Set a due date (optional)';
+
+  @override
+  String get newAssignmentPublished => 'Assignment published';
+
+  @override
+  String get newAssignmentAttachmentsHint =>
+      'Exercises, videos, or files students can download.';
 }

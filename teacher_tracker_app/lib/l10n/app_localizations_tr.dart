@@ -125,6 +125,11 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String commonCouldNotPublish(String error) {
+    return 'Yayınlanamadı: $error';
+  }
+
+  @override
   String get commonClear => 'Temizle';
 
   @override
@@ -1111,4 +1116,64 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get dashboardAddStudent => 'Öğrenci Ekle';
+
+  @override
+  String assignmentsTitle(String className) {
+    return '$className · Ödevler';
+  }
+
+  @override
+  String get assignmentsDeleteTitle => 'Ödev silinsin mi?';
+
+  @override
+  String assignmentsDeleteBody(String title, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count öğrenci',
+      one: '1 öğrenci',
+    );
+    return '\"$title\" kaldırılsın mı? Bu, $_temp0 için ödevi temizler.';
+  }
+
+  @override
+  String assignmentsDone(int completed, int total) {
+    return '$completed/$total tamamlandı';
+  }
+
+  @override
+  String assignmentsFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dosya',
+      one: '1 dosya',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assignmentsEmptyTitle => 'Henüz ödev yok';
+
+  @override
+  String get assignmentsEmptySubtitle =>
+      'Bu sınıfa çalışma yayınlamak için “Yeni Ödev”e dokunun.';
+
+  @override
+  String newAssignmentTitle(String className) {
+    return 'Yeni Ödev · $className';
+  }
+
+  @override
+  String get newAssignmentTitleHint => 'örn. 3. bölümü oku';
+
+  @override
+  String get newAssignmentSetDueDate => 'Son tarih belirle (isteğe bağlı)';
+
+  @override
+  String get newAssignmentPublished => 'Ödev yayınlandı';
+
+  @override
+  String get newAssignmentAttachmentsHint =>
+      'Öğrencilerin indirebileceği alıştırmalar, videolar veya dosyalar.';
 }

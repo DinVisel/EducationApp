@@ -302,6 +302,12 @@ abstract class AppLocalizations {
   /// **'Add failed: {error}'**
   String commonAddFailed(String error);
 
+  /// No description provided for @commonCouldNotPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not publish: {error}'**
+  String commonCouldNotPublish(String error);
+
   /// No description provided for @commonClear.
   ///
   /// In en, this message translates to:
@@ -2041,6 +2047,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Student'**
   String get dashboardAddStudent;
+
+  /// No description provided for @assignmentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{className} · Assignments'**
+  String assignmentsTitle(String className);
+
+  /// No description provided for @assignmentsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete assignment?'**
+  String get assignmentsDeleteTitle;
+
+  /// No description provided for @assignmentsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{title}\"? This clears it for all {count, plural, =1{1 student} other{{count} students}}.'**
+  String assignmentsDeleteBody(String title, int count);
+
+  /// No description provided for @assignmentsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed}/{total} done'**
+  String assignmentsDone(int completed, int total);
+
+  /// No description provided for @assignmentsFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file} other{{count} files}}'**
+  String assignmentsFiles(int count);
+
+  /// No description provided for @assignmentsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No assignments yet'**
+  String get assignmentsEmptyTitle;
+
+  /// No description provided for @assignmentsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap “New Assignment” to publish work to this class.'**
+  String get assignmentsEmptySubtitle;
+
+  /// No description provided for @newAssignmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Assignment · {className}'**
+  String newAssignmentTitle(String className);
+
+  /// No description provided for @newAssignmentTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Read chapter 3'**
+  String get newAssignmentTitleHint;
+
+  /// No description provided for @newAssignmentSetDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a due date (optional)'**
+  String get newAssignmentSetDueDate;
+
+  /// No description provided for @newAssignmentPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment published'**
+  String get newAssignmentPublished;
+
+  /// No description provided for @newAssignmentAttachmentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercises, videos, or files students can download.'**
+  String get newAssignmentAttachmentsHint;
 }
 
 class _AppLocalizationsDelegate
