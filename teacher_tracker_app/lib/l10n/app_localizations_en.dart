@@ -203,4 +203,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLanguageTurkish => 'Türkçe';
+
+  @override
+  String get attendanceTitle => 'Attendance';
+
+  @override
+  String get attendanceTabLabel => 'Attendance';
+
+  @override
+  String get attendanceStatusPresent => 'Present';
+
+  @override
+  String get attendanceStatusAbsent => 'Absent';
+
+  @override
+  String get attendanceStatusLate => 'Late';
+
+  @override
+  String get attendanceStatusExcused => 'Excused';
+
+  @override
+  String get attendanceSave => 'Save';
+
+  @override
+  String get attendanceSaved => 'Attendance saved';
+
+  @override
+  String attendanceSaveFailed(String error) {
+    return 'Could not save: $error';
+  }
+
+  @override
+  String get attendanceEmptyRoster => 'No students in this class yet.';
+
+  @override
+  String get attendancePickDate => 'Pick date';
+
+  @override
+  String get attendanceMarkAllPresent => 'Mark all present';
+
+  @override
+  String get attendanceUnmarked => 'Not marked';
+
+  @override
+  String get attendanceHistoryTitle => 'Attendance history';
+
+  @override
+  String get attendanceHistoryEmpty => 'No attendance recorded yet.';
+
+  @override
+  String get attendanceViewHistory => 'View attendance history';
 }

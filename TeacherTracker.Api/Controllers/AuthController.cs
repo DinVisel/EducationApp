@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -53,7 +52,7 @@ public class AuthController : ControllerBase
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
-        return Ok(BuildResponse(user, teacher));
+        return Ok(await IssueAsync(user, teacher, null));
     }
 
     [EnableRateLimiting("auth")]
@@ -79,7 +78,67 @@ public class AuthController : ControllerBase
             await _db.SaveChangesAsync();
         }
 
-        return Ok(BuildResponse(user));
+        return Ok(await IssueAsync(user, user.Teacher, user.Student));
+    }
+
+    [EnableRateLimiting("auth")]
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponseDto>> Refresh(RefreshRequestDto dto)
+    {
+        var hash = TokenService.HashToken(dto.RefreshToken);
+        var token = await _db.RefreshTokens
+            .FirstOrDefaultAsync(t => t.TokenHash == hash);
+        if (token is null)
+            return Unauthorized("Invalid refresh token.");
+
+        if (!token.IsActive)
+        {
+            // A revoked token presented again suggests theft/replay: defensively
+            // revoke every still-active token for the account.
+            if (token.RevokedAtUtc is not null)
+                await _db.RefreshTokens
+                    .Where(t => t.UserId == token.UserId && t.RevokedAtUtc == null)
+                    .ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAtUtc, DateTime.UtcNow));
+            return Unauthorized("Refresh token is no longer valid.");
+        }
+
+        var user = await _db.Users
+            .Include(u => u.Teacher)
+            .Include(u => u.Student)
+            .FirstOrDefaultAsync(u => u.Id == token.UserId);
+        if (user is null)
+            return Unauthorized("Invalid refresh token.");
+
+        // Rotate: revoke the presented token and issue a fresh pair.
+        var (rawRefresh, refreshEntity) = _tokens.CreateRefreshToken(user.Id);
+        token.RevokedAtUtc = DateTime.UtcNow;
+        token.ReplacedByTokenHash = refreshEntity.TokenHash;
+        _db.RefreshTokens.Add(refreshEntity);
+        await _db.SaveChangesAsync();
+
+        return Ok(new AuthResponseDto(
+            _tokens.CreateToken(user, user.Teacher, user.Student),
+            rawRefresh,
+            _tokens.AccessTokenExpiresAtUtc,
+            user.Role.ToString(),
+            user.Teacher is null ? null : ToDto(user.Teacher, user),
+            user.Student is null ? null : ToProfileDto(user.Student)));
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(LogoutRequestDto dto)
+    {
+        var hash = TokenService.HashToken(dto.RefreshToken);
+        var token = await _db.RefreshTokens
+            .FirstOrDefaultAsync(t => t.TokenHash == hash && t.UserId == User.GetUserId());
+        if (token is not null && token.RevokedAtUtc is null)
+        {
+            token.RevokedAtUtc = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+        }
+
+        return NoContent();
     }
 
     [EnableRateLimiting("auth")]
@@ -91,7 +150,7 @@ public class AuthController : ControllerBase
         if (user is not null)
         {
             var rawToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
-            user.PasswordResetTokenHash = HashToken(rawToken);
+            user.PasswordResetTokenHash = TokenService.HashToken(rawToken);
             user.PasswordResetTokenExpiresAtUtc = DateTime.UtcNow.AddMinutes(ResetTokenExpiryMinutes);
             await _db.SaveChangesAsync();
 
@@ -109,7 +168,7 @@ public class AuthController : ControllerBase
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
     {
-        var tokenHash = HashToken(dto.Token);
+        var tokenHash = TokenService.HashToken(dto.Token);
         var user = await _db.Users.FirstOrDefaultAsync(u =>
             u.PasswordResetTokenHash == tokenHash &&
             u.PasswordResetTokenExpiresAtUtc != null &&
@@ -124,9 +183,6 @@ public class AuthController : ControllerBase
 
         return Ok();
     }
-
-    private static string HashToken(string rawToken) =>
-        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(rawToken)));
 
     /// The current identity (any role), used to restore a session from a saved
     /// token at startup. Returns the profile matching the account's role.
@@ -197,18 +253,22 @@ public class AuthController : ControllerBase
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.Id == User.GetTeacherId());
 
-    // Register only ever produces a teacher, so keep the explicit overload for it.
-    private AuthResponseDto BuildResponse(User user, Teacher teacher) =>
-        new(_tokens.CreateToken(user, teacher),
-            user.Role.ToString(),
-            ToDto(teacher, user));
+    // Issues an access token + a fresh (persisted) refresh token for the account,
+    // building the profile DTO from whichever role the user has.
+    private async Task<AuthResponseDto> IssueAsync(User user, Teacher? teacher, Student? student)
+    {
+        var (rawRefresh, refreshEntity) = _tokens.CreateRefreshToken(user.Id);
+        _db.RefreshTokens.Add(refreshEntity);
+        await _db.SaveChangesAsync();
 
-    // Login builds from whichever profile the user has (teacher or student).
-    private AuthResponseDto BuildResponse(User user) =>
-        new(_tokens.CreateToken(user, user.Teacher, user.Student),
+        return new AuthResponseDto(
+            _tokens.CreateToken(user, teacher, student),
+            rawRefresh,
+            _tokens.AccessTokenExpiresAtUtc,
             user.Role.ToString(),
-            user.Teacher is null ? null : ToDto(user.Teacher, user),
-            user.Student is null ? null : ToProfileDto(user.Student));
+            teacher is null ? null : ToDto(teacher, user),
+            student is null ? null : ToProfileDto(student));
+    }
 
     private static TeacherDto ToDto(Teacher t) =>
         new(t.Id, t.UserId, t.FirstName, t.LastName, t.User?.Email ?? string.Empty,

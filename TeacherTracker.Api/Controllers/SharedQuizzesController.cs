@@ -6,6 +6,7 @@ using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
+using TeacherTracker.Api.Notifications;
 
 namespace TeacherTracker.Api.Controllers;
 
@@ -20,10 +21,12 @@ namespace TeacherTracker.Api.Controllers;
 public class SharedQuizzesController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly INotificationPublisher _publisher;
 
-    public SharedQuizzesController(AppDbContext db)
+    public SharedQuizzesController(AppDbContext db, INotificationPublisher publisher)
     {
         _db = db;
+        _publisher = publisher;
     }
 
     private int TeacherId => User.GetTeacherId();
@@ -169,7 +172,8 @@ public class SharedQuizzesController : ControllerBase
             });
 
         // Notify the original author that their quiz was cloned (not when cloning your own).
-        if (source.AuthorUserId != User.GetUserId())
+        var notifyAuthor = source.AuthorUserId != User.GetUserId();
+        if (notifyAuthor)
             _db.Notifications.Add(new Notification
             {
                 RecipientUserId = source.AuthorUserId,
@@ -178,6 +182,11 @@ public class SharedQuizzesController : ControllerBase
             });
 
         await _db.SaveChangesAsync();
+
+        var pushTargets = notifyAuthor
+            ? recipientUserIds.Append(source.AuthorUserId)
+            : recipientUserIds;
+        await _publisher.NotifyAsync(pushTargets);
 
         return Ok(new QuizDto(
             quiz.Id,

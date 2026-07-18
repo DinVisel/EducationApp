@@ -203,4 +203,54 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsLanguageTurkish => 'Türkçe';
+
+  @override
+  String get attendanceTitle => 'Yoklama';
+
+  @override
+  String get attendanceTabLabel => 'Yoklama';
+
+  @override
+  String get attendanceStatusPresent => 'Var';
+
+  @override
+  String get attendanceStatusAbsent => 'Yok';
+
+  @override
+  String get attendanceStatusLate => 'Geç';
+
+  @override
+  String get attendanceStatusExcused => 'İzinli';
+
+  @override
+  String get attendanceSave => 'Kaydet';
+
+  @override
+  String get attendanceSaved => 'Yoklama kaydedildi';
+
+  @override
+  String attendanceSaveFailed(String error) {
+    return 'Kaydedilemedi: $error';
+  }
+
+  @override
+  String get attendanceEmptyRoster => 'Bu sınıfta henüz öğrenci yok.';
+
+  @override
+  String get attendancePickDate => 'Tarih seç';
+
+  @override
+  String get attendanceMarkAllPresent => 'Tümünü var işaretle';
+
+  @override
+  String get attendanceUnmarked => 'İşaretlenmedi';
+
+  @override
+  String get attendanceHistoryTitle => 'Yoklama geçmişi';
+
+  @override
+  String get attendanceHistoryEmpty => 'Henüz yoklama kaydı yok.';
+
+  @override
+  String get attendanceViewHistory => 'Yoklama geçmişini gör';
 }

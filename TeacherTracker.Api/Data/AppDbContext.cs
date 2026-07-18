@@ -33,6 +33,8 @@ public class AppDbContext : DbContext
     public DbSet<QuizChoice> QuizChoices { get; set; }
     public DbSet<StudentQuizAttempt> StudentQuizAttempts { get; set; }
     public DbSet<StudentQuizAnswer> StudentQuizAnswers { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Attendance> Attendances { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -427,5 +429,52 @@ public class AppDbContext : DbContext
             .WithMany(t => t.Answers)
             .HasForeignKey(a => a.AttemptId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // --- Refresh tokens (session security) ---
+
+        // Deleting the account removes its refresh tokens.
+        modelBuilder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany()
+            .HasForeignKey(rt => rt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Refresh is a lookup by token hash, so index it.
+        modelBuilder.Entity<RefreshToken>()
+            .HasIndex(rt => rt.TokenHash);
+
+        // --- Attendance ---
+
+        // Store the status as readable text rather than an int.
+        modelBuilder.Entity<Attendance>()
+            .Property(a => a.Status)
+            .HasConversion<string>();
+
+        // Deleting a student removes their attendance records.
+        modelBuilder.Entity<Attendance>()
+            .HasOne(a => a.Student)
+            .WithMany()
+            .HasForeignKey(a => a.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting a classroom removes its attendance records (second cascade
+        // path; Postgres allows this alongside the student one).
+        modelBuilder.Entity<Attendance>()
+            .HasOne(a => a.Classroom)
+            .WithMany()
+            .HasForeignKey(a => a.ClassroomId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // The teacher who marked it; keep records if the FK is unset on delete.
+        modelBuilder.Entity<Attendance>()
+            .HasOne(a => a.Teacher)
+            .WithMany()
+            .HasForeignKey(a => a.TeacherId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // One record per student per class per day (marking is an upsert).
+        modelBuilder.Entity<Attendance>()
+            .HasIndex(a => new { a.StudentId, a.ClassroomId, a.Date })
+            .IsUnique();
     }
 }

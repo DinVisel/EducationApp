@@ -9,6 +9,7 @@ using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
 using TeacherTracker.Api.Moderation;
+using TeacherTracker.Api.Notifications;
 
 namespace TeacherTracker.Api.Controllers;
 
@@ -22,10 +23,12 @@ namespace TeacherTracker.Api.Controllers;
 public class PostsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly INotificationPublisher _publisher;
 
-    public PostsController(AppDbContext db)
+    public PostsController(AppDbContext db, INotificationPublisher publisher)
     {
         _db = db;
+        _publisher = publisher;
     }
 
     private int UserId => User.GetUserId();
@@ -153,7 +156,8 @@ public class PostsController : ControllerBase
         {
             _db.PostLikes.Add(new PostLike { PostId = id, UserId = UserId });
             // Notify the author of a new like (not when liking your own post).
-            if (authorUserId != UserId)
+            var notifyAuthor = authorUserId != UserId;
+            if (notifyAuthor)
                 _db.Notifications.Add(new Notification
                 {
                     RecipientUserId = authorUserId.Value,
@@ -162,6 +166,8 @@ public class PostsController : ControllerBase
                     PostId = id,
                 });
             await _db.SaveChangesAsync();
+            if (notifyAuthor)
+                await _publisher.NotifyAsync(new[] { authorUserId.Value });
         }
 
         return NoContent();
@@ -197,6 +203,7 @@ public class PostsController : ControllerBase
 
         var rating = await _db.PostRatings
             .FirstOrDefaultAsync(r => r.PostId == id && r.UserId == UserId);
+        var notifyAuthor = false;
         if (rating is null)
         {
             _db.PostRatings.Add(new PostRating
@@ -206,7 +213,8 @@ public class PostsController : ControllerBase
                 Value = dto.Value,
             });
             // Notify the author of a new rating (not when rating your own post).
-            if (post.AuthorUserId != UserId)
+            notifyAuthor = post.AuthorUserId != UserId;
+            if (notifyAuthor)
                 _db.Notifications.Add(new Notification
                 {
                     RecipientUserId = post.AuthorUserId,
@@ -221,6 +229,8 @@ public class PostsController : ControllerBase
         }
 
         await _db.SaveChangesAsync();
+        if (notifyAuthor)
+            await _publisher.NotifyAsync(new[] { post.AuthorUserId });
         return NoContent();
     }
 
@@ -280,7 +290,8 @@ public class PostsController : ControllerBase
         };
         _db.PostComments.Add(comment);
         // Notify the post author of a new comment (not on your own post).
-        if (authorUserId != UserId)
+        var notifyAuthor = authorUserId != UserId;
+        if (notifyAuthor)
             _db.Notifications.Add(new Notification
             {
                 RecipientUserId = authorUserId.Value,
@@ -289,6 +300,8 @@ public class PostsController : ControllerBase
                 PostId = id,
             });
         await _db.SaveChangesAsync();
+        if (notifyAuthor)
+            await _publisher.NotifyAsync(new[] { authorUserId.Value });
 
         var created = await _db.PostComments
             .AsNoTracking()

@@ -9,14 +9,29 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Serilog;
+using Serilog.Formatting.Compact;
 using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
+using TeacherTracker.Api.Hubs;
+using TeacherTracker.Api.Middleware;
 using TeacherTracker.Api.Models;
 using TeacherTracker.Api.Moderation;
+using TeacherTracker.Api.Notifications;
 using TeacherTracker.Api.Storage;
 using TeacherTracker.Api.Email;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --- Structured logging (Serilog) ---
+// Compact JSON to the console (production-friendly, machine-parseable); levels and
+// overrides come from the "Serilog" configuration section. Enriched with the
+// correlation id pushed by RequestIdMiddleware.
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new CompactJsonFormatter()));
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -38,6 +53,11 @@ builder.Services.AddApiVersioning(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<AuditInterceptor>();
+
+// --- Health checks ---
+// `/health` probes DB connectivity for load balancers / monitoring.
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>("db");
 
 builder.Services.AddDbContext<AppDbContext>((sp, options) =>
     options
@@ -65,8 +85,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwt.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
         };
+
+        // WebSocket clients can't send an Authorization header, so SignalR passes
+        // the JWT in the `access_token` query string. Only honour it for hub
+        // paths, leaving normal API auth untouched.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            },
+        };
     });
 builder.Services.AddAuthorization();
+
+// --- Real-time notifications (SignalR) ---
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
 
 // --- File storage (Cloudflare R2, S3-compatible) ---
 builder.Services.Configure<R2Options>(
@@ -194,6 +236,11 @@ if (rateLimitingEnabled)
 
 var app = builder.Build();
 
+// Correlation id first so every downstream log line (including request logging)
+// carries it.
+app.UseMiddleware<RequestIdMiddleware>();
+app.UseSerilogRequestLogging();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -209,7 +256,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/", () => "Teacher Tracker API Çalışıyor!");
+app.MapHealthChecks("/health"); // load-balancer probe; unversioned + anonymous
 app.MapControllers();
+app.MapHub<NotificationsHub>("/hubs/notifications");
 
 // In development, apply any pending EF migrations on startup so the schema stays
 // in sync with the code without a manual `dotnet ef database update`. Left off

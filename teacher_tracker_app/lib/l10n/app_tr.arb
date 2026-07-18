@@ -70,5 +70,22 @@
   "settingsSignOutConfirmBody": "Tekrar giriş yapmanız gerekecek.",
   "settingsLanguage": "Dil",
   "settingsLanguageEnglish": "İngilizce",
-  "settingsLanguageTurkish": "Türkçe"
+  "settingsLanguageTurkish": "Türkçe",
+
+  "attendanceTitle": "Yoklama",
+  "attendanceTabLabel": "Yoklama",
+  "attendanceStatusPresent": "Var",
+  "attendanceStatusAbsent": "Yok",
+  "attendanceStatusLate": "Geç",
+  "attendanceStatusExcused": "İzinli",
+  "attendanceSave": "Kaydet",
+  "attendanceSaved": "Yoklama kaydedildi",
+  "attendanceSaveFailed": "Kaydedilemedi: {error}",
+  "attendanceEmptyRoster": "Bu sınıfta henüz öğrenci yok.",
+  "attendancePickDate": "Tarih seç",
+  "attendanceMarkAllPresent": "Tümünü var işaretle",
+  "attendanceUnmarked": "İşaretlenmedi",
+  "attendanceHistoryTitle": "Yoklama geçmişi",
+  "attendanceHistoryEmpty": "Henüz yoklama kaydı yok.",
+  "attendanceViewHistory": "Yoklama geçmişini gör"
 }

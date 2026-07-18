@@ -7,6 +7,7 @@ using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
+using TeacherTracker.Api.Notifications;
 
 namespace TeacherTracker.Api.Controllers;
 
@@ -20,10 +21,12 @@ namespace TeacherTracker.Api.Controllers;
 public class AssignmentsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly INotificationPublisher _publisher;
 
-    public AssignmentsController(AppDbContext db)
+    public AssignmentsController(AppDbContext db, INotificationPublisher publisher)
     {
         _db = db;
+        _publisher = publisher;
     }
 
     private int TeacherId => User.GetTeacherId();
@@ -114,6 +117,7 @@ public class AssignmentsController : ControllerBase
             });
 
         await _db.SaveChangesAsync();
+        await _publisher.NotifyAsync(recipientUserIds);
 
         // Reload with attachment file metadata for the response.
         var created = await _db.Assignments

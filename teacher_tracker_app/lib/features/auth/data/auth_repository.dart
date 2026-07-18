@@ -5,16 +5,19 @@ import '../../../core/api/api_client.dart';
 import '../../../models/student_profile.dart';
 import '../../../models/teacher.dart';
 
-/// Token + role + the profile matching the role. Exactly one of [teacher] /
-/// [student] is set depending on the account type.
+/// Access token + rotating refresh token + role + the profile matching the
+/// role. Exactly one of [teacher] / [student] is set depending on the account
+/// type.
 class AuthResult {
   const AuthResult({
     required this.token,
+    required this.refreshToken,
     required this.role,
     required this.teacher,
     required this.student,
   });
   final String token;
+  final String refreshToken;
   final String role;
   final Teacher? teacher;
   final StudentProfile? student;
@@ -76,6 +79,21 @@ class AuthRepository {
     );
   }
 
+  /// Exchanges a refresh token for a fresh access + refresh token pair. The
+  /// server rotates the refresh token, so callers must persist the new one.
+  Future<AuthResult> refresh(String refreshToken) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/v1/auth/refresh',
+      data: {'refreshToken': refreshToken},
+    );
+    return _parse(res.data!);
+  }
+
+  /// Revokes a refresh token server-side (best-effort on sign-out).
+  Future<void> logout(String refreshToken) async {
+    await _dio.post('/api/v1/auth/logout', data: {'refreshToken': refreshToken});
+  }
+
   Future<void> forgotPassword(String email) async {
     await _dio.post('/api/v1/auth/forgot-password', data: {'email': email});
   }
@@ -103,6 +121,7 @@ class AuthRepository {
     final student = json['student'];
     return AuthResult(
       token: json['token'] as String,
+      refreshToken: json['refreshToken'] as String? ?? '',
       role: json['role'] as String? ?? 'Teacher',
       teacher:
           teacher == null ? null : Teacher.fromJson(teacher as Map<String, dynamic>),

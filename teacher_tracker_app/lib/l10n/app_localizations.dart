@@ -475,6 +475,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Türkçe'**
   String get settingsLanguageTurkish;
+
+  /// No description provided for @attendanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attendanceTitle;
+
+  /// No description provided for @attendanceTabLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attendanceTabLabel;
+
+  /// No description provided for @attendanceStatusPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attendanceStatusPresent;
+
+  /// No description provided for @attendanceStatusAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get attendanceStatusAbsent;
+
+  /// No description provided for @attendanceStatusLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get attendanceStatusLate;
+
+  /// No description provided for @attendanceStatusExcused.
+  ///
+  /// In en, this message translates to:
+  /// **'Excused'**
+  String get attendanceStatusExcused;
+
+  /// No description provided for @attendanceSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get attendanceSave;
+
+  /// No description provided for @attendanceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance saved'**
+  String get attendanceSaved;
+
+  /// No description provided for @attendanceSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save: {error}'**
+  String attendanceSaveFailed(String error);
+
+  /// No description provided for @attendanceEmptyRoster.
+  ///
+  /// In en, this message translates to:
+  /// **'No students in this class yet.'**
+  String get attendanceEmptyRoster;
+
+  /// No description provided for @attendancePickDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick date'**
+  String get attendancePickDate;
+
+  /// No description provided for @attendanceMarkAllPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all present'**
+  String get attendanceMarkAllPresent;
+
+  /// No description provided for @attendanceUnmarked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked'**
+  String get attendanceUnmarked;
+
+  /// No description provided for @attendanceHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance history'**
+  String get attendanceHistoryTitle;
+
+  /// No description provided for @attendanceHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance recorded yet.'**
+  String get attendanceHistoryEmpty;
+
+  /// No description provided for @attendanceViewHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'View attendance history'**
+  String get attendanceViewHistory;
 }
 
 class _AppLocalizationsDelegate

@@ -28,10 +28,19 @@ public record UpdateProfileDto(
     int? AvatarFileId = null,
     int? CoverFileId = null);
 
-/// Returned by register/login: the signed token, the account role, and the
-/// matching profile (teacher or student, depending on the role).
+public record RefreshRequestDto(
+    [Required] string RefreshToken);
+
+public record LogoutRequestDto(
+    [Required] string RefreshToken);
+
+/// Returned by register/login/refresh: the short-lived access token (+ its
+/// expiry), the rotating refresh token, the account role, and the matching
+/// profile (teacher or student, depending on the role).
 public record AuthResponseDto(
     string Token,
+    string RefreshToken,
+    DateTime AccessTokenExpiresAtUtc,
     string Role,
     TeacherDto? Teacher,
     StudentProfileDto? Student = null);

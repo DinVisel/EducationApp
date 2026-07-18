@@ -75,5 +75,27 @@
   "settingsSignOutConfirmBody": "You will need to sign in again.",
   "settingsLanguage": "Language",
   "settingsLanguageEnglish": "English",
-  "settingsLanguageTurkish": "Türkçe"
+  "settingsLanguageTurkish": "Türkçe",
+
+  "attendanceTitle": "Attendance",
+  "attendanceTabLabel": "Attendance",
+  "attendanceStatusPresent": "Present",
+  "attendanceStatusAbsent": "Absent",
+  "attendanceStatusLate": "Late",
+  "attendanceStatusExcused": "Excused",
+  "attendanceSave": "Save",
+  "attendanceSaved": "Attendance saved",
+  "attendanceSaveFailed": "Could not save: {error}",
+  "@attendanceSaveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "attendanceEmptyRoster": "No students in this class yet.",
+  "attendancePickDate": "Pick date",
+  "attendanceMarkAllPresent": "Mark all present",
+  "attendanceUnmarked": "Not marked",
+  "attendanceHistoryTitle": "Attendance history",
+  "attendanceHistoryEmpty": "No attendance recorded yet.",
+  "attendanceViewHistory": "View attendance history"
 }

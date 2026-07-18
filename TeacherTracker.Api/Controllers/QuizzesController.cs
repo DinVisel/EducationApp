@@ -7,6 +7,7 @@ using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
+using TeacherTracker.Api.Notifications;
 
 namespace TeacherTracker.Api.Controllers;
 
@@ -20,10 +21,12 @@ namespace TeacherTracker.Api.Controllers;
 public class QuizzesController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly INotificationPublisher _publisher;
 
-    public QuizzesController(AppDbContext db)
+    public QuizzesController(AppDbContext db, INotificationPublisher publisher)
     {
         _db = db;
+        _publisher = publisher;
     }
 
     private int TeacherId => User.GetTeacherId();
@@ -135,6 +138,7 @@ public class QuizzesController : ControllerBase
             });
 
         await _db.SaveChangesAsync();
+        await _publisher.NotifyAsync(recipientUserIds);
 
         var created = await _db.Quizzes
             .AsNoTracking()

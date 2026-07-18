@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/classroom.dart';
 import '../../../models/student.dart';
+import '../../attendance/screens/attendance_tab.dart';
 import '../../quizzes/screens/class_quizzes_tab.dart';
 import '../../students/screens/student_detail_screen.dart';
 import '../../students/state/students_providers.dart';
@@ -25,7 +27,7 @@ class ClassDetailScreen extends ConsumerStatefulWidget {
 
 class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
     with SingleTickerProviderStateMixin {
-  late final TabController _tabs = TabController(length: 4, vsync: this)
+  late final TabController _tabs = TabController(length: 5, vsync: this)
     ..addListener(() => setState(() {}));
 
   Classroom get classroom => widget.classroom;
@@ -44,11 +46,16 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
         backgroundColor: Colors.transparent,
         bottom: TabBar(
           controller: _tabs,
-          tabs: const [
-            Tab(icon: Icon(Icons.groups_outlined), text: 'Students'),
-            Tab(icon: Icon(Icons.assignment_outlined), text: 'Homework'),
-            Tab(icon: Icon(Icons.quiz_outlined), text: 'Quizzes'),
-            Tab(icon: Icon(Icons.auto_stories_outlined), text: 'Reading'),
+          isScrollable: true,
+          tabs: [
+            const Tab(icon: Icon(Icons.groups_outlined), text: 'Students'),
+            const Tab(icon: Icon(Icons.assignment_outlined), text: 'Homework'),
+            const Tab(icon: Icon(Icons.quiz_outlined), text: 'Quizzes'),
+            const Tab(icon: Icon(Icons.auto_stories_outlined), text: 'Reading'),
+            Tab(
+              icon: const Icon(Icons.fact_check_outlined),
+              text: AppLocalizations.of(context)!.attendanceTabLabel,
+            ),
           ],
         ),
       ),
@@ -69,6 +76,7 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
           ClassHomeworkTab(classroom: classroom),
           ClassQuizzesTab(classroom: classroom),
           ClassReadingTab(classroom: classroom),
+          AttendanceTab(classroom: classroom),
         ],
       ),
     );

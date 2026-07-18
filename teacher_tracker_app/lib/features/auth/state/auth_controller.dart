@@ -48,7 +48,7 @@ class AuthController extends AsyncNotifier<AuthState?> {
     final result = await ref
         .read(authRepositoryProvider)
         .login(email: email.trim(), password: password);
-    await ref.read(tokenStoreProvider).save(result.token);
+    await ref.read(tokenStoreProvider).saveTokens(result.token, result.refreshToken);
     state = AsyncData(AuthState(
       role: result.role,
       teacher: result.teacher,
@@ -68,7 +68,7 @@ class AuthController extends AsyncNotifier<AuthState?> {
           email: email.trim(),
           password: password,
         );
-    await ref.read(tokenStoreProvider).save(result.token);
+    await ref.read(tokenStoreProvider).saveTokens(result.token, result.refreshToken);
     state = AsyncData(AuthState(
       role: result.role,
       teacher: result.teacher,
@@ -77,7 +77,17 @@ class AuthController extends AsyncNotifier<AuthState?> {
   }
 
   Future<void> logout() async {
-    await ref.read(tokenStoreProvider).clear();
+    final store = ref.read(tokenStoreProvider);
+    // Best-effort server-side revocation; never block sign-out on it.
+    final refresh = store.currentRefresh;
+    if (refresh != null && refresh.isNotEmpty) {
+      try {
+        await ref.read(authRepositoryProvider).logout(refresh);
+      } on DioException {
+        // Offline or already-invalid token — clearing locally is enough.
+      }
+    }
+    await store.clear();
     state = const AsyncData(null);
   }
 
