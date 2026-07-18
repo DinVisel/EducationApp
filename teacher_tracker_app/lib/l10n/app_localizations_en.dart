@@ -79,6 +79,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get commonNew => 'New';
+
+  @override
+  String commonCouldNotDelete(String error) {
+    return 'Could not delete: $error';
+  }
+
+  @override
   String get commonTimeJustNow => 'just now';
 
   @override
@@ -599,4 +607,153 @@ class AppLocalizationsEn extends AppLocalizations {
   String commentsCouldNotAdd(String error) {
     return 'Could not comment: $error';
   }
+
+  @override
+  String newQuizTitle(String className) {
+    return 'New Quiz · $className';
+  }
+
+  @override
+  String get newQuizTitleLabel => 'Title';
+
+  @override
+  String get newQuizTitleHint => 'e.g. Charlotte’s Web — Chapter 1';
+
+  @override
+  String get newQuizTitleRequired => 'Title is required';
+
+  @override
+  String get newQuizDescriptionLabel => 'Description (optional)';
+
+  @override
+  String get newQuizCategory => 'Category';
+
+  @override
+  String get newQuizCategoryBook => 'Book';
+
+  @override
+  String get newQuizCategoryPractice => 'Practice';
+
+  @override
+  String get newQuizCategoryGeneral => 'General';
+
+  @override
+  String get newQuizBookLabel => 'Book';
+
+  @override
+  String get newQuizBookHint => 'e.g. Charlotte’s Web';
+
+  @override
+  String get newQuizQuestions => 'Questions';
+
+  @override
+  String get newQuizAddQuestion => 'Add question';
+
+  @override
+  String get newQuizPublishing => 'Publishing…';
+
+  @override
+  String get newQuizPublish => 'Publish to class';
+
+  @override
+  String get newQuizPublished => 'Quiz published';
+
+  @override
+  String newQuizCouldNotPublish(String error) {
+    return 'Could not publish: $error';
+  }
+
+  @override
+  String newQuizQuestionNeedsText(int number) {
+    return 'Question $number needs text.';
+  }
+
+  @override
+  String newQuizQuestionNeedsChoices(int number) {
+    return 'Question $number needs at least two answer choices.';
+  }
+
+  @override
+  String newQuizQuestionNeedsCorrect(int number) {
+    return 'Question $number needs a correct answer selected.';
+  }
+
+  @override
+  String newQuizQuestionLabel(int number) {
+    return 'Question $number';
+  }
+
+  @override
+  String get newQuizRemoveQuestion => 'Remove question';
+
+  @override
+  String get newQuizQuestionHint => 'Enter the question';
+
+  @override
+  String get newQuizChooseCorrectHint =>
+      'Tap the circle to mark the correct answer';
+
+  @override
+  String get newQuizAddChoice => 'Add choice';
+
+  @override
+  String get newQuizMarkCorrect => 'Mark correct';
+
+  @override
+  String get newQuizChoiceHint => 'Answer choice';
+
+  @override
+  String get newQuizRemoveChoice => 'Remove choice';
+
+  @override
+  String get classQuizTitle => 'Class Quizzes';
+
+  @override
+  String get classQuizDeleteTitle => 'Delete quiz?';
+
+  @override
+  String classQuizDeleteBody(String title, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+    );
+    return 'Remove \"$title\"? This clears it for all $_temp0 and deletes their results.';
+  }
+
+  @override
+  String get classQuizShareToHub => 'Share to Hub';
+
+  @override
+  String classQuizAvg(int percent) {
+    return 'Avg $percent%';
+  }
+
+  @override
+  String classQuizSubmitted(int submitted, int assigned) {
+    return '$submitted/$assigned submitted';
+  }
+
+  @override
+  String get classQuizEmptyTitle => 'No quizzes yet';
+
+  @override
+  String get classQuizEmptySubtitle =>
+      'Tap “New” to publish a quiz to this class.';
+
+  @override
+  String get quizAnalyticsPerQuestion => 'Per-question breakdown';
+
+  @override
+  String get quizAnalyticsStudents => 'Students';
+
+  @override
+  String get quizAnalyticsParticipation => 'Participation';
+
+  @override
+  String get quizAnalyticsAverageScore => 'Average score';
+
+  @override
+  String get quizAnalyticsNotYet => 'Not yet';
 }

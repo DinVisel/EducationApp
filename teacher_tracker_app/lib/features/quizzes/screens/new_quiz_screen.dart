@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/classroom.dart';
 import '../../../models/quiz.dart';
 import '../../../models/quiz_draft.dart';
@@ -28,10 +29,11 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return GlassScaffold(
       appBar: AppBar(
-        title: Text('New Quiz · ${widget.classroom.name}'),
+        title: Text(loc.newQuizTitle(widget.classroom.name)),
         backgroundColor: Colors.transparent,
       ),
       body: Form(
@@ -42,12 +44,13 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
             TextFormField(
               initialValue: _draft.title,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                hintText: 'e.g. Charlotte’s Web — Chapter 1',
+              decoration: InputDecoration(
+                labelText: loc.newQuizTitleLabel,
+                hintText: loc.newQuizTitleHint,
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Title is required' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? loc.newQuizTitleRequired
+                  : null,
               onChanged: (v) => _draft.title = v,
             ),
             const SizedBox(height: 16),
@@ -56,31 +59,31 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
               textCapitalization: TextCapitalization.sentences,
               minLines: 2,
               maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: 'Description (optional)',
+              decoration: InputDecoration(
+                labelText: loc.newQuizDescriptionLabel,
                 alignLabelWithHint: true,
               ),
               onChanged: (v) => _draft.description = v,
             ),
             const SizedBox(height: 20),
-            Text('Category',
+            Text(loc.newQuizCategory,
                 style:
                     tt.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             SegmentedButton<QuizCategory>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                     value: QuizCategory.bookExam,
-                    label: Text('Book'),
-                    icon: Icon(Icons.auto_stories_outlined)),
+                    label: Text(loc.newQuizCategoryBook),
+                    icon: const Icon(Icons.auto_stories_outlined)),
                 ButtonSegment(
                     value: QuizCategory.practice,
-                    label: Text('Practice'),
-                    icon: Icon(Icons.fitness_center_outlined)),
+                    label: Text(loc.newQuizCategoryPractice),
+                    icon: const Icon(Icons.fitness_center_outlined)),
                 ButtonSegment(
                     value: QuizCategory.general,
-                    label: Text('General'),
-                    icon: Icon(Icons.quiz_outlined)),
+                    label: Text(loc.newQuizCategoryGeneral),
+                    icon: const Icon(Icons.quiz_outlined)),
               ],
               selected: {_draft.category},
               onSelectionChanged: (s) =>
@@ -91,9 +94,9 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
               TextFormField(
                 initialValue: _draft.bookReference,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'Book',
-                  hintText: 'e.g. Charlotte’s Web',
+                decoration: InputDecoration(
+                  labelText: loc.newQuizBookLabel,
+                  hintText: loc.newQuizBookHint,
                 ),
                 onChanged: (v) => _draft.bookReference = v,
               ),
@@ -102,7 +105,7 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Text('Questions',
+                  child: Text(loc.newQuizQuestions,
                       style:
                           tt.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
                 ),
@@ -126,7 +129,7 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
               onPressed: () =>
                   setState(() => _draft.questions.add(QuizQuestionDraft())),
               icon: const Icon(Icons.add),
-              label: const Text('Add question'),
+              label: Text(loc.newQuizAddQuestion),
             ),
             const SizedBox(height: 28),
             FilledButton.icon(
@@ -138,7 +141,7 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.send),
-              label: Text(_saving ? 'Publishing…' : 'Publish to class'),
+              label: Text(_saving ? loc.newQuizPublishing : loc.newQuizPublish),
             ),
           ],
         ),
@@ -146,16 +149,16 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
     );
   }
 
-  String? _validateQuestions() {
+  String? _validateQuestions(AppLocalizations loc) {
     for (var i = 0; i < _draft.questions.length; i++) {
       final q = _draft.questions[i];
-      if (q.text.trim().isEmpty) return 'Question ${i + 1} needs text.';
+      if (q.text.trim().isEmpty) return loc.newQuizQuestionNeedsText(i + 1);
       final filled = q.choices.where((c) => c.text.trim().isNotEmpty).toList();
       if (filled.length < 2) {
-        return 'Question ${i + 1} needs at least two answer choices.';
+        return loc.newQuizQuestionNeedsChoices(i + 1);
       }
       if (!filled.any((c) => c.isCorrect)) {
-        return 'Question ${i + 1} needs a correct answer selected.';
+        return loc.newQuizQuestionNeedsCorrect(i + 1);
       }
     }
     return null;
@@ -163,7 +166,8 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
 
   Future<void> _publish() async {
     if (!_formKey.currentState!.validate()) return;
-    final problem = _validateQuestions();
+    final loc = AppLocalizations.of(context)!;
+    final problem = _validateQuestions(loc);
     if (problem != null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(problem)));
@@ -182,11 +186,12 @@ class _NewQuizScreenState extends ConsumerState<NewQuizScreen> {
       await ref
           .read(quizActionsProvider)
           .create(widget.classroom.id, _draft);
-      messenger.showSnackBar(const SnackBar(content: Text('Quiz published')));
+      messenger.showSnackBar(SnackBar(content: Text(loc.newQuizPublished)));
       navigator.pop();
     } catch (e) {
       if (mounted) setState(() => _saving = false);
-      messenger.showSnackBar(SnackBar(content: Text('Could not publish: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.newQuizCouldNotPublish('$e'))));
     }
   }
 }
@@ -212,6 +217,7 @@ class _QuestionEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -223,14 +229,14 @@ class _QuestionEditor extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text('Question ${index + 1}',
+                Text(loc.newQuizQuestionLabel(index + 1),
                     style: tt.titleSmall
                         ?.copyWith(color: cs.primary, fontWeight: FontWeight.w700)),
                 const Spacer(),
                 if (canRemove)
                   IconButton(
                     icon: Icon(Icons.delete_outline, size: 20, color: cs.error),
-                    tooltip: 'Remove question',
+                    tooltip: loc.newQuizRemoveQuestion,
                     visualDensity: VisualDensity.compact,
                     onPressed: onRemove,
                   ),
@@ -240,11 +246,11 @@ class _QuestionEditor extends StatelessWidget {
             TextFormField(
               initialValue: question.text,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(hintText: 'Enter the question'),
+              decoration: InputDecoration(hintText: loc.newQuizQuestionHint),
               onChanged: (v) => question.text = v,
             ),
             const SizedBox(height: 12),
-            Text('Tap the circle to mark the correct answer',
+            Text(loc.newQuizChooseCorrectHint,
                 style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
             const SizedBox(height: 6),
             for (int i = 0; i < question.choices.length; i++)
@@ -269,7 +275,7 @@ class _QuestionEditor extends StatelessWidget {
                 onChanged();
               },
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add choice'),
+              label: Text(loc.newQuizAddChoice),
             ),
           ],
         ),
@@ -294,6 +300,7 @@ class _ChoiceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -305,16 +312,16 @@ class _ChoiceRow extends StatelessWidget {
                   : Icons.radio_button_unchecked,
               color: choice.isCorrect ? cs.primary : cs.onSurfaceVariant,
             ),
-            tooltip: 'Mark correct',
+            tooltip: loc.newQuizMarkCorrect,
             onPressed: onSelectCorrect,
           ),
           Expanded(
             child: TextFormField(
               initialValue: choice.text,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 isDense: true,
-                hintText: 'Answer choice',
+                hintText: loc.newQuizChoiceHint,
               ),
               onChanged: (v) => choice.text = v,
             ),
@@ -322,7 +329,7 @@ class _ChoiceRow extends StatelessWidget {
           if (canRemove)
             IconButton(
               icon: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
-              tooltip: 'Remove choice',
+              tooltip: loc.newQuizRemoveChoice,
               onPressed: onRemove,
             ),
         ],

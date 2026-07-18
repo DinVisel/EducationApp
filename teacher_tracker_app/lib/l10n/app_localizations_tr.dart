@@ -79,6 +79,14 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get commonNew => 'Yeni';
+
+  @override
+  String commonCouldNotDelete(String error) {
+    return 'Silinemedi: $error';
+  }
+
+  @override
   String get commonTimeJustNow => 'az önce';
 
   @override
@@ -601,4 +609,153 @@ class AppLocalizationsTr extends AppLocalizations {
   String commentsCouldNotAdd(String error) {
     return 'Yorum yapılamadı: $error';
   }
+
+  @override
+  String newQuizTitle(String className) {
+    return 'Yeni Sınav · $className';
+  }
+
+  @override
+  String get newQuizTitleLabel => 'Başlık';
+
+  @override
+  String get newQuizTitleHint => 'örn. Şarlot\'un Ağı — 1. Bölüm';
+
+  @override
+  String get newQuizTitleRequired => 'Başlık zorunlu';
+
+  @override
+  String get newQuizDescriptionLabel => 'Açıklama (isteğe bağlı)';
+
+  @override
+  String get newQuizCategory => 'Kategori';
+
+  @override
+  String get newQuizCategoryBook => 'Kitap';
+
+  @override
+  String get newQuizCategoryPractice => 'Alıştırma';
+
+  @override
+  String get newQuizCategoryGeneral => 'Genel';
+
+  @override
+  String get newQuizBookLabel => 'Kitap';
+
+  @override
+  String get newQuizBookHint => 'örn. Şarlot\'un Ağı';
+
+  @override
+  String get newQuizQuestions => 'Sorular';
+
+  @override
+  String get newQuizAddQuestion => 'Soru ekle';
+
+  @override
+  String get newQuizPublishing => 'Yayınlanıyor…';
+
+  @override
+  String get newQuizPublish => 'Sınıfa yayınla';
+
+  @override
+  String get newQuizPublished => 'Sınav yayınlandı';
+
+  @override
+  String newQuizCouldNotPublish(String error) {
+    return 'Yayınlanamadı: $error';
+  }
+
+  @override
+  String newQuizQuestionNeedsText(int number) {
+    return '$number. soru metin gerektiriyor.';
+  }
+
+  @override
+  String newQuizQuestionNeedsChoices(int number) {
+    return '$number. soru en az iki yanıt seçeneği gerektiriyor.';
+  }
+
+  @override
+  String newQuizQuestionNeedsCorrect(int number) {
+    return '$number. soru için bir doğru yanıt seçilmeli.';
+  }
+
+  @override
+  String newQuizQuestionLabel(int number) {
+    return '$number. soru';
+  }
+
+  @override
+  String get newQuizRemoveQuestion => 'Soruyu kaldır';
+
+  @override
+  String get newQuizQuestionHint => 'Soruyu girin';
+
+  @override
+  String get newQuizChooseCorrectHint =>
+      'Doğru yanıtı işaretlemek için daireye dokunun';
+
+  @override
+  String get newQuizAddChoice => 'Seçenek ekle';
+
+  @override
+  String get newQuizMarkCorrect => 'Doğru olarak işaretle';
+
+  @override
+  String get newQuizChoiceHint => 'Yanıt seçeneği';
+
+  @override
+  String get newQuizRemoveChoice => 'Seçeneği kaldır';
+
+  @override
+  String get classQuizTitle => 'Sınıf Sınavları';
+
+  @override
+  String get classQuizDeleteTitle => 'Sınav silinsin mi?';
+
+  @override
+  String classQuizDeleteBody(String title, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count öğrenci',
+      one: '1 öğrenci',
+    );
+    return '\"$title\" kaldırılsın mı? Bu, $_temp0 için sınavı temizler ve sonuçlarını siler.';
+  }
+
+  @override
+  String get classQuizShareToHub => 'Hub\'a paylaş';
+
+  @override
+  String classQuizAvg(int percent) {
+    return 'Ort. %$percent';
+  }
+
+  @override
+  String classQuizSubmitted(int submitted, int assigned) {
+    return '$submitted/$assigned gönderildi';
+  }
+
+  @override
+  String get classQuizEmptyTitle => 'Henüz sınav yok';
+
+  @override
+  String get classQuizEmptySubtitle =>
+      'Bu sınıfa sınav yayınlamak için “Yeni”ye dokunun.';
+
+  @override
+  String get quizAnalyticsPerQuestion => 'Soru bazında dağılım';
+
+  @override
+  String get quizAnalyticsStudents => 'Öğrenciler';
+
+  @override
+  String get quizAnalyticsParticipation => 'Katılım';
+
+  @override
+  String get quizAnalyticsAverageScore => 'Ortalama puan';
+
+  @override
+  String get quizAnalyticsNotYet => 'Henüz değil';
 }

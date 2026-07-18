@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/classroom.dart';
 import '../../../models/quiz_analytics.dart';
 import '../state/quizzes_providers.dart';
@@ -24,6 +25,7 @@ class QuizAnalyticsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final key = (classroomId: classroom.id, quizId: quizId);
     final analyticsAsync = ref.watch(quizAnalyticsProvider(key));
+    final loc = AppLocalizations.of(context)!;
 
     return GlassScaffold(
       appBar: AppBar(
@@ -32,7 +34,7 @@ class QuizAnalyticsScreen extends ConsumerWidget {
       ),
       body: analyticsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(loc.commonError('$e'))),
         data: (a) => RefreshIndicator(
           onRefresh: () => ref.refresh(quizAnalyticsProvider(key).future),
           child: ListView(
@@ -41,12 +43,12 @@ class QuizAnalyticsScreen extends ConsumerWidget {
             children: [
               _Overview(analytics: a),
               const SizedBox(height: 24),
-              _SectionTitle('Per-question breakdown'),
+              _SectionTitle(loc.quizAnalyticsPerQuestion),
               const SizedBox(height: 12),
               for (int i = 0; i < a.questions.length; i++)
                 _QuestionStatCard(index: i, stat: a.questions[i]),
               const SizedBox(height: 12),
-              _SectionTitle('Students'),
+              _SectionTitle(loc.quizAnalyticsStudents),
               const SizedBox(height: 12),
               for (final r in a.results) _StudentResultRow(result: r),
             ],
@@ -64,6 +66,7 @@ class _Overview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final a = analytics;
+    final loc = AppLocalizations.of(context)!;
     return GlassCard(
       float: true,
       padding: const EdgeInsets.all(18),
@@ -74,7 +77,7 @@ class _Overview extends StatelessWidget {
             children: [
               Expanded(
                 child: _Stat(
-                  label: 'Participation',
+                  label: loc.quizAnalyticsParticipation,
                   value: '${a.submittedCount}/${a.assignedCount}',
                   progress: a.participation,
                 ),
@@ -82,7 +85,7 @@ class _Overview extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: _Stat(
-                  label: 'Average score',
+                  label: loc.quizAnalyticsAverageScore,
                   value: a.averageScorePct == null
                       ? '—'
                       : '${a.averageScorePct!.round()}%',
@@ -205,6 +208,7 @@ class _StudentResultRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final r = result;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -228,7 +232,7 @@ class _StudentResultRow extends StatelessWidget {
                   style: tt.titleSmall?.copyWith(
                       color: cs.primary, fontWeight: FontWeight.w700))
             else
-              Text('Not yet',
+              Text(loc.quizAnalyticsNotYet,
                   style: tt.labelMedium
                       ?.copyWith(color: cs.onSurfaceVariant)),
           ],

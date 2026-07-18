@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/classroom.dart';
 import '../../../models/quiz.dart';
 import '../../feed/screens/new_post_screen.dart';
@@ -19,6 +20,7 @@ class ClassQuizzesTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final quizzesAsync = ref.watch(classroomQuizzesProvider(classroom.id));
 
     return RefreshIndicator(
@@ -30,7 +32,7 @@ class ClassQuizzesTab extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text('Class Quizzes',
+                child: Text(loc.classQuizTitle,
                     style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
               ),
               FilledButton.icon(
@@ -40,7 +42,7 @@ class ClassQuizzesTab extends ConsumerWidget {
                   ),
                 ),
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('New'),
+                label: Text(loc.commonNew),
                 style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
               ),
             ],
@@ -48,7 +50,7 @@ class ClassQuizzesTab extends ConsumerWidget {
           const SizedBox(height: 12),
           quizzesAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Text('Error: $e'),
+            error: (e, _) => Text(loc.commonError('$e')),
             data: (quizzes) {
               if (quizzes.isEmpty) return const _Empty();
               return Column(
@@ -86,20 +88,19 @@ class ClassQuizzesTab extends ConsumerWidget {
 
   Future<void> _delete(BuildContext ctx, WidgetRef ref, Quiz q) async {
     final messenger = ScaffoldMessenger.of(ctx);
+    final loc = AppLocalizations.of(ctx)!;
     final ok = await showDialog<bool>(
       context: ctx,
       builder: (d) => AlertDialog(
-        title: const Text('Delete quiz?'),
-        content: Text('Remove "${q.title}"? This clears it for all '
-            '${q.assignedCount} student${q.assignedCount == 1 ? '' : 's'} and '
-            'deletes their results.'),
+        title: Text(loc.classQuizDeleteTitle),
+        content: Text(loc.classQuizDeleteBody(q.title, q.assignedCount)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(d, false),
-              child: const Text('Cancel')),
+              child: Text(loc.commonCancel)),
           FilledButton(
               onPressed: () => Navigator.pop(d, true),
-              child: const Text('Delete')),
+              child: Text(loc.commonDelete)),
         ],
       ),
     );
@@ -107,7 +108,8 @@ class ClassQuizzesTab extends ConsumerWidget {
     try {
       await ref.read(quizActionsProvider).delete(classroom.id, q.id);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not delete: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.commonCouldNotDelete('$e'))));
     }
   }
 }
@@ -128,6 +130,7 @@ class _QuizCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final q = quiz;
     final progress = q.assignedCount == 0 ? 0.0 : q.submittedCount / q.assignedCount;
 
@@ -149,13 +152,13 @@ class _QuizCard extends StatelessWidget {
                 ),
                 IconButton(
                   icon: Icon(Icons.ios_share, color: cs.primary),
-                  tooltip: 'Share to Hub',
+                  tooltip: loc.classQuizShareToHub,
                   visualDensity: VisualDensity.compact,
                   onPressed: onShare,
                 ),
                 IconButton(
                   icon: Icon(Icons.delete_outline, color: cs.error),
-                  tooltip: 'Delete',
+                  tooltip: loc.commonDelete,
                   visualDensity: VisualDensity.compact,
                   onPressed: onDelete,
                 ),
@@ -172,18 +175,17 @@ class _QuizCard extends StatelessWidget {
                   _Chip(icon: Icons.menu_book_outlined, label: q.bookReference!),
                 _Chip(
                     icon: Icons.help_outline,
-                    label: '${q.questionCount} question'
-                        '${q.questionCount == 1 ? '' : 's'}'),
+                    label: loc.feedQuizQuestionCount(q.questionCount)),
                 if (q.averageScorePct != null)
                   _Chip(
                       icon: Icons.emoji_events_outlined,
-                      label: 'Avg ${q.averageScorePct!.round()}%'),
+                      label: loc.classQuizAvg(q.averageScorePct!.round())),
               ],
             ),
             const SizedBox(height: 12),
             LiquidProgressBar(value: progress.clamp(0, 1).toDouble()),
             const SizedBox(height: 6),
-            Text('${q.submittedCount}/${q.assignedCount} submitted',
+            Text(loc.classQuizSubmitted(q.submittedCount, q.assignedCount),
                 style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
           ],
         ),
@@ -226,6 +228,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
@@ -233,13 +236,13 @@ class _Empty extends StatelessWidget {
           Icon(Icons.quiz_outlined,
               size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          Text('No quizzes yet',
+          Text(loc.classQuizEmptyTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
                   ?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text('Tap “New” to publish a quiz to this class.',
+          Text(loc.classQuizEmptySubtitle,
               textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme

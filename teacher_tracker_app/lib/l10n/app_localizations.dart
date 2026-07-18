@@ -230,6 +230,18 @@ abstract class AppLocalizations {
   /// **'Upload failed: {error}'**
   String commonUploadFailed(String error);
 
+  /// No description provided for @commonNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get commonNew;
+
+  /// No description provided for @commonCouldNotDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete: {error}'**
+  String commonCouldNotDelete(String error);
+
   /// No description provided for @commonTimeJustNow.
   ///
   /// In en, this message translates to:
@@ -1135,6 +1147,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not comment: {error}'**
   String commentsCouldNotAdd(String error);
+
+  /// No description provided for @newQuizTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Quiz · {className}'**
+  String newQuizTitle(String className);
+
+  /// No description provided for @newQuizTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get newQuizTitleLabel;
+
+  /// No description provided for @newQuizTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Charlotte’s Web — Chapter 1'**
+  String get newQuizTitleHint;
+
+  /// No description provided for @newQuizTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get newQuizTitleRequired;
+
+  /// No description provided for @newQuizDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get newQuizDescriptionLabel;
+
+  /// No description provided for @newQuizCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get newQuizCategory;
+
+  /// No description provided for @newQuizCategoryBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get newQuizCategoryBook;
+
+  /// No description provided for @newQuizCategoryPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice'**
+  String get newQuizCategoryPractice;
+
+  /// No description provided for @newQuizCategoryGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get newQuizCategoryGeneral;
+
+  /// No description provided for @newQuizBookLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get newQuizBookLabel;
+
+  /// No description provided for @newQuizBookHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Charlotte’s Web'**
+  String get newQuizBookHint;
+
+  /// No description provided for @newQuizQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions'**
+  String get newQuizQuestions;
+
+  /// No description provided for @newQuizAddQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add question'**
+  String get newQuizAddQuestion;
+
+  /// No description provided for @newQuizPublishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing…'**
+  String get newQuizPublishing;
+
+  /// No description provided for @newQuizPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to class'**
+  String get newQuizPublish;
+
+  /// No description provided for @newQuizPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz published'**
+  String get newQuizPublished;
+
+  /// No description provided for @newQuizCouldNotPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not publish: {error}'**
+  String newQuizCouldNotPublish(String error);
+
+  /// No description provided for @newQuizQuestionNeedsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number} needs text.'**
+  String newQuizQuestionNeedsText(int number);
+
+  /// No description provided for @newQuizQuestionNeedsChoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number} needs at least two answer choices.'**
+  String newQuizQuestionNeedsChoices(int number);
+
+  /// No description provided for @newQuizQuestionNeedsCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number} needs a correct answer selected.'**
+  String newQuizQuestionNeedsCorrect(int number);
+
+  /// No description provided for @newQuizQuestionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number}'**
+  String newQuizQuestionLabel(int number);
+
+  /// No description provided for @newQuizRemoveQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove question'**
+  String get newQuizRemoveQuestion;
+
+  /// No description provided for @newQuizQuestionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the question'**
+  String get newQuizQuestionHint;
+
+  /// No description provided for @newQuizChooseCorrectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the circle to mark the correct answer'**
+  String get newQuizChooseCorrectHint;
+
+  /// No description provided for @newQuizAddChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Add choice'**
+  String get newQuizAddChoice;
+
+  /// No description provided for @newQuizMarkCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark correct'**
+  String get newQuizMarkCorrect;
+
+  /// No description provided for @newQuizChoiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer choice'**
+  String get newQuizChoiceHint;
+
+  /// No description provided for @newQuizRemoveChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove choice'**
+  String get newQuizRemoveChoice;
+
+  /// No description provided for @classQuizTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Quizzes'**
+  String get classQuizTitle;
+
+  /// No description provided for @classQuizDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete quiz?'**
+  String get classQuizDeleteTitle;
+
+  /// No description provided for @classQuizDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{title}\"? This clears it for all {count, plural, =1{1 student} other{{count} students}} and deletes their results.'**
+  String classQuizDeleteBody(String title, int count);
+
+  /// No description provided for @classQuizShareToHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Share to Hub'**
+  String get classQuizShareToHub;
+
+  /// No description provided for @classQuizAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg {percent}%'**
+  String classQuizAvg(int percent);
+
+  /// No description provided for @classQuizSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'{submitted}/{assigned} submitted'**
+  String classQuizSubmitted(int submitted, int assigned);
+
+  /// No description provided for @classQuizEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No quizzes yet'**
+  String get classQuizEmptyTitle;
+
+  /// No description provided for @classQuizEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap “New” to publish a quiz to this class.'**
+  String get classQuizEmptySubtitle;
+
+  /// No description provided for @quizAnalyticsPerQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Per-question breakdown'**
+  String get quizAnalyticsPerQuestion;
+
+  /// No description provided for @quizAnalyticsStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Students'**
+  String get quizAnalyticsStudents;
+
+  /// No description provided for @quizAnalyticsParticipation.
+  ///
+  /// In en, this message translates to:
+  /// **'Participation'**
+  String get quizAnalyticsParticipation;
+
+  /// No description provided for @quizAnalyticsAverageScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Average score'**
+  String get quizAnalyticsAverageScore;
+
+  /// No description provided for @quizAnalyticsNotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet'**
+  String get quizAnalyticsNotYet;
 }
 
 class _AppLocalizationsDelegate
