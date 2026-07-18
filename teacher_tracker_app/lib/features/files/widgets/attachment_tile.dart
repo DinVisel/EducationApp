@@ -72,11 +72,15 @@ class _AttachmentTileState extends ConsumerState<AttachmentTile> {
     final messenger = ScaffoldMessenger.of(context);
     final loc = AppLocalizations.of(context)!;
     try {
+      final box = context.findRenderObject() as RenderBox?;
       final message = await ref.read(filesRepositoryProvider).downloadToDevice(
             fileId: fileId,
             fileName: fileName,
             isImage: _isImage,
             isVideo: _isVideo,
+            sharePositionOrigin: box != null
+                ? box.localToGlobal(Offset.zero) & box.size
+                : null,
           );
       messenger.showSnackBar(SnackBar(content: Text(message)));
     } on GalException catch (e) {

@@ -112,6 +112,13 @@ abstract final class AppTheme {
         ),
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
       ),
+      listTileTheme: ListTileThemeData(
+        tileColor: Colors.transparent,
+        textColor: scheme.onSurface,
+        iconColor: scheme.onSurfaceVariant,
+        selectedTileColor: scheme.primary.withValues(alpha: 0.08),
+        selectedColor: scheme.primary,
+      ),
     );
   }
 

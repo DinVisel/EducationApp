@@ -148,7 +148,7 @@ class PostCard extends ConsumerWidget {
                 icon: Icons.ios_share,
                 color: cs.onSurfaceVariant,
                 label: loc.commonShare,
-                onTap: () => _share(loc, post),
+                onTap: () => _share(context, loc, post),
               ),
             ],
           ),
@@ -159,9 +159,15 @@ class PostCard extends ConsumerWidget {
 
   // Shares a link to this post. If the recipient has the app, the OS deep-links
   // straight to the post; otherwise the web fallback sends them to the store.
-  void _share(AppLocalizations loc, Post post) {
+  void _share(BuildContext context, AppLocalizations loc, Post post) {
     final url = '$publicWebBaseUrl/post/${post.id}';
-    Share.share(url, subject: loc.feedShareSubject(post.authorName));
+    final box = context.findRenderObject() as RenderBox?;
+    Share.share(
+      url,
+      subject: loc.feedShareSubject(post.authorName),
+      sharePositionOrigin:
+          box != null ? box.localToGlobal(Offset.zero) & box.size : Rect.zero,
+    );
   }
 
   // "Assign to My Class": pick one of the teacher's classes, then clone the

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gal/gal.dart';
@@ -85,6 +87,7 @@ class FilesRepository {
     required String fileName,
     required bool isImage,
     required bool isVideo,
+    Rect? sharePositionOrigin,
   }) async {
     final url = await getDownloadUrl(fileId);
 
@@ -103,7 +106,11 @@ class FilesRepository {
       return 'Saved "$fileName" to your gallery';
     }
     // Documents: let the OS save sheet place it in Files/Downloads.
-    await Share.shareXFiles([XFile(path)], subject: fileName);
+    await Share.shareXFiles(
+      [XFile(path)],
+      subject: fileName,
+      sharePositionOrigin: sharePositionOrigin,
+    );
     return 'Ready to save "$fileName"';
   }
 
