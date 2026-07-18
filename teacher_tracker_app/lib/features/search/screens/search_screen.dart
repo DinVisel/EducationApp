@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
 import '../../../core/utils/debouncer.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/grade_level.dart';
 import '../../../models/post_subject.dart';
 import '../../../models/search_result.dart';
@@ -46,6 +47,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final resultsAsync = ref.watch(searchResultsProvider);
 
     return Scaffold(
@@ -58,7 +60,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Discover',
+                  Text(loc.searchTitle,
                       style: tt.headlineMedium?.copyWith(
                           color: cs.onSurface, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 12),
@@ -70,7 +72,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       textInputAction: TextInputAction.search,
                       decoration: InputDecoration(
                         border: InputBorder.none,
-                        hintText: 'Teachers, quizzes, documents…',
+                        hintText: loc.searchHint,
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: _controller.text.isEmpty
                             ? null
@@ -93,7 +95,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               child: resultsAsync.when(
                 loading: () =>
                     const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
+                error: (e, _) => Center(child: Text(loc.commonError('$e'))),
                 data: (results) => _Results(results: results),
               ),
             ),
@@ -113,6 +115,7 @@ class _FilterBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(searchQueryProvider);
     final notifier = ref.read(searchQueryProvider.notifier);
+    final loc = AppLocalizations.of(context)!;
 
     void setType(String type) => notifier.update((
           q: query.q,
@@ -138,11 +141,11 @@ class _FilterBar extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'all', label: Text('All')),
-              ButtonSegment(value: 'teachers', label: Text('Teachers')),
-              ButtonSegment(value: 'quizzes', label: Text('Quizzes')),
-              ButtonSegment(value: 'documents', label: Text('Docs')),
+            segments: [
+              ButtonSegment(value: 'all', label: Text(loc.commonAll)),
+              ButtonSegment(value: 'teachers', label: Text(loc.searchTeachers)),
+              ButtonSegment(value: 'quizzes', label: Text(loc.classTabQuizzes)),
+              ButtonSegment(value: 'documents', label: Text(loc.searchDocs)),
             ],
             selected: {query.type},
             onSelectionChanged: (s) => setType(s.first),
@@ -198,6 +201,7 @@ class _Results extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     if (results.isEmpty) {
       return Center(
@@ -209,7 +213,7 @@ class _Results extends StatelessWidget {
               Icon(Icons.travel_explore,
                   size: 56, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
               const SizedBox(height: 12),
-              Text('Search teachers and shared materials',
+              Text(loc.searchEmptyHint,
                   textAlign: TextAlign.center,
                   style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
             ],
@@ -222,13 +226,13 @@ class _Results extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       children: [
         if (results.teachers.isNotEmpty) ...[
-          _SectionTitle('Teachers'),
+          _SectionTitle(loc.searchTeachers),
           const SizedBox(height: 8),
           for (final t in results.teachers) _TeacherRow(teacher: t),
           const SizedBox(height: 16),
         ],
         if (results.materials.isNotEmpty) ...[
-          _SectionTitle('Materials'),
+          _SectionTitle(loc.searchMaterials),
           const SizedBox(height: 8),
           for (final m in results.materials) _MaterialRow(material: m),
         ],
@@ -328,7 +332,7 @@ class _MaterialRow extends StatelessWidget {
                       m.type,
                       PostSubject.labelFor(m.subject),
                       if (grade != null) grade,
-                      'by ${m.authorName}',
+                      AppLocalizations.of(context)!.searchByAuthor(m.authorName),
                     ].join(' · '),
                     style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                     maxLines: 1,

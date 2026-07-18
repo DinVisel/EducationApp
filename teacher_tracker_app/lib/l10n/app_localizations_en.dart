@@ -1259,4 +1259,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminRoleTeacher => 'Teacher';
+
+  @override
+  String get searchTitle => 'Discover';
+
+  @override
+  String get searchHint => 'Teachers, quizzes, documents…';
+
+  @override
+  String get searchTeachers => 'Teachers';
+
+  @override
+  String get searchDocs => 'Docs';
+
+  @override
+  String get searchMaterials => 'Materials';
+
+  @override
+  String get searchEmptyHint => 'Search teachers and shared materials';
+
+  @override
+  String searchByAuthor(String author) {
+    return 'by $author';
+  }
+
+  @override
+  String get notifTitle => 'Notifications';
+
+  @override
+  String get notifEmptyTitle => 'No notifications';
+
+  @override
+  String get notifEmptySubtitle => 'You\'re all caught up.';
 }

@@ -450,5 +450,18 @@
   "@adminActionFailed": { "placeholders": { "error": { "type": "String" } } },
   "adminRoleAdmin": "Yönetici",
   "adminRoleStudent": "Öğrenci",
-  "adminRoleTeacher": "Öğretmen"
+  "adminRoleTeacher": "Öğretmen",
+
+  "searchTitle": "Keşfet",
+  "searchHint": "Öğretmenler, sınavlar, belgeler…",
+  "searchTeachers": "Öğretmenler",
+  "searchDocs": "Belgeler",
+  "searchMaterials": "Materyaller",
+  "searchEmptyHint": "Öğretmenleri ve paylaşılan materyalleri ara",
+  "searchByAuthor": "{author} tarafından",
+  "@searchByAuthor": { "placeholders": { "author": { "type": "String" } } },
+
+  "notifTitle": "Bildirimler",
+  "notifEmptyTitle": "Bildirim yok",
+  "notifEmptySubtitle": "Her şeyi gördünüz."
 }

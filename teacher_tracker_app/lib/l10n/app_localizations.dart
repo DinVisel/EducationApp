@@ -2275,6 +2275,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Teacher'**
   String get adminRoleTeacher;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get searchTitle;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers, quizzes, documents…'**
+  String get searchHint;
+
+  /// No description provided for @searchTeachers.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers'**
+  String get searchTeachers;
+
+  /// No description provided for @searchDocs.
+  ///
+  /// In en, this message translates to:
+  /// **'Docs'**
+  String get searchDocs;
+
+  /// No description provided for @searchMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get searchMaterials;
+
+  /// No description provided for @searchEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search teachers and shared materials'**
+  String get searchEmptyHint;
+
+  /// No description provided for @searchByAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'by {author}'**
+  String searchByAuthor(String author);
+
+  /// No description provided for @notifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifTitle;
+
+  /// No description provided for @notifEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications'**
+  String get notifEmptyTitle;
+
+  /// No description provided for @notifEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up.'**
+  String get notifEmptySubtitle;
 }
 
 class _AppLocalizationsDelegate

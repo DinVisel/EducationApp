@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/realtime/notification_hub.dart';
+import '../../../l10n/app_localizations.dart';
 import '../screens/notifications_screen.dart';
 import '../state/notifications_providers.dart';
 
@@ -21,7 +22,7 @@ class NotificationBell extends ConsumerWidget {
 
     final bell = IconButton(
       icon: const Icon(Icons.notifications_outlined),
-      tooltip: 'Notifications',
+      tooltip: AppLocalizations.of(context)!.notifTitle,
       onPressed: () async {
         await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const NotificationsScreen()),

@@ -460,5 +460,18 @@
   "@adminActionFailed": { "placeholders": { "error": { "type": "String" } } },
   "adminRoleAdmin": "Admin",
   "adminRoleStudent": "Student",
-  "adminRoleTeacher": "Teacher"
+  "adminRoleTeacher": "Teacher",
+
+  "searchTitle": "Discover",
+  "searchHint": "Teachers, quizzes, documents…",
+  "searchTeachers": "Teachers",
+  "searchDocs": "Docs",
+  "searchMaterials": "Materials",
+  "searchEmptyHint": "Search teachers and shared materials",
+  "searchByAuthor": "by {author}",
+  "@searchByAuthor": { "placeholders": { "author": { "type": "String" } } },
+
+  "notifTitle": "Notifications",
+  "notifEmptyTitle": "No notifications",
+  "notifEmptySubtitle": "You're all caught up."
 }

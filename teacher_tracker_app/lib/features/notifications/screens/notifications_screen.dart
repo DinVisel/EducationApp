@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../core/time_ago.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/app_notification.dart';
 import '../data/notifications_repository.dart';
 import '../state/notifications_providers.dart';
@@ -66,15 +68,16 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(notificationsProvider);
+    final loc = AppLocalizations.of(context)!;
 
     return GlassScaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(loc.notifTitle),
         backgroundColor: Colors.transparent,
       ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(loc.commonError('$e'))),
         data: (items) {
           if (items.isEmpty) return const _Empty();
           return RefreshIndicator(
@@ -110,6 +113,7 @@ class _NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     return GlassCard(
       padding: const EdgeInsets.all(14),
       child: Row(
@@ -127,7 +131,7 @@ class _NotificationCard extends StatelessWidget {
                 Text(item.text,
                     style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
                 const SizedBox(height: 2),
-                Text(_fmtWhen(item.createdAt),
+                Text(timeAgo(loc, item.createdAt),
                     style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
               ],
             ),
@@ -159,16 +163,6 @@ class _NotificationCard extends StatelessWidget {
     }
   }
 
-  static String _fmtWhen(DateTime d) {
-    final local = d.toLocal();
-    final diff = DateTime.now().difference(local);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-    if (diff.inDays < 1) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${local.day.toString().padLeft(2, '0')}.'
-        '${local.month.toString().padLeft(2, '0')}.${local.year}';
-  }
 }
 
 class _Empty extends StatelessWidget {
@@ -177,6 +171,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -184,13 +179,13 @@ class _Empty extends StatelessWidget {
           Icon(Icons.notifications_none,
               size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          Text('No notifications',
+          Text(loc.notifEmptyTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
                   ?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text("You're all caught up.",
+          Text(loc.notifEmptySubtitle,
               style: Theme.of(context)
                   .textTheme
                   .bodySmall

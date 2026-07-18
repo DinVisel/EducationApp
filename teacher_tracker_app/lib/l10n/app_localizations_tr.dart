@@ -1261,4 +1261,36 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get adminRoleTeacher => 'Öğretmen';
+
+  @override
+  String get searchTitle => 'Keşfet';
+
+  @override
+  String get searchHint => 'Öğretmenler, sınavlar, belgeler…';
+
+  @override
+  String get searchTeachers => 'Öğretmenler';
+
+  @override
+  String get searchDocs => 'Belgeler';
+
+  @override
+  String get searchMaterials => 'Materyaller';
+
+  @override
+  String get searchEmptyHint => 'Öğretmenleri ve paylaşılan materyalleri ara';
+
+  @override
+  String searchByAuthor(String author) {
+    return '$author tarafından';
+  }
+
+  @override
+  String get notifTitle => 'Bildirimler';
+
+  @override
+  String get notifEmptyTitle => 'Bildirim yok';
+
+  @override
+  String get notifEmptySubtitle => 'Her şeyi gördünüz.';
 }
