@@ -2,9 +2,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../models/teacher.dart';
 import '../../auth/state/auth_controller.dart';
 import '../../files/data/files_repository.dart';
+import '../../files/image_processing.dart';
 import '../../files/mime.dart';
 import '../../profile/widgets/profile_cover_header.dart';
 import '../../profile/widgets/teacher_posts_list.dart';
@@ -49,24 +51,44 @@ class _ProfileBody extends ConsumerStatefulWidget {
 class _ProfileBodyState extends ConsumerState<_ProfileBody> {
   bool _uploadingImage = false;
 
-  /// Pick an image, upload it to R2, then persist it as the avatar or cover.
+  /// Pick an image, crop it (square for the avatar, wide for the cover),
+  /// compress, upload to R2, then persist it as the avatar or cover.
   Future<void> _changeImage({required bool cover}) async {
+    final loc = AppLocalizations.of(context)!;
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       withData: true,
     );
     if (result == null || result.files.isEmpty || !mounted) return;
     final f = result.files.first;
-    final bytes = f.bytes;
-    if (bytes == null) return;
+    var bytes = f.bytes;
+    var fileName = f.name;
+    var contentType = mimeForFileName(f.name);
+
+    // Crop + compress when we have a real path (mobile). Fall back to the raw
+    // bytes on platforms where file_picker doesn't expose a path (web/desktop).
+    if (f.path != null) {
+      final processed = await cropAndCompress(
+        path: f.path!,
+        originalName: f.name,
+        ratioX: cover ? 16 : 1,
+        ratioY: cover ? 9 : 1,
+        toolbarTitle: loc.imageCropperTitle,
+      );
+      if (processed == null) return; // user cancelled the crop
+      bytes = processed.bytes;
+      fileName = processed.fileName;
+      contentType = processed.contentType;
+    }
+    if (bytes == null || !mounted) return;
 
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _uploadingImage = true);
     try {
       final uploaded = await ref.read(filesRepositoryProvider).uploadDirect(
             bytes: bytes,
-            fileName: f.name,
-            contentType: mimeForFileName(f.name),
+            fileName: fileName,
+            contentType: contentType,
           );
       await ref.read(authControllerProvider.notifier).updateProfile(
             cover

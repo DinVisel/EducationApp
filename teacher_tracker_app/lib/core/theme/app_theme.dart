@@ -3,19 +3,25 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app_dimens.dart';
 import 'app_palette.dart';
+import 'glass_colors.dart';
 
 /// Assembles the "Liquid Glass Education" [ThemeData] from the DESIGN.md tokens:
 /// Inter typography, the teal-anchored [ColorScheme], rounded shapes, and
 /// translucent inputs/buttons tuned for glass surfaces.
 abstract final class AppTheme {
-  static ThemeData get light {
-    const scheme = AppPalette.lightScheme;
+  static ThemeData get light =>
+      _build(AppPalette.lightScheme, GlassColors.light);
+
+  static ThemeData get dark => _build(AppPalette.darkScheme, GlassColors.dark);
+
+  static ThemeData _build(ColorScheme scheme, GlassColors glass) {
     final text = _textTheme(scheme.onSurface);
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: AppPalette.background,
+      extensions: [glass],
+      scaffoldBackgroundColor: glass.background,
       textTheme: text,
       // Glass surfaces provide their own backdrop; keep Scaffold/AppBar clear.
       appBarTheme: AppBarTheme(
@@ -28,7 +34,7 @@ abstract final class AppTheme {
       ),
       // Cards inherit the glass look; use GlassCard for the full effect.
       cardTheme: CardThemeData(
-        color: AppGlass.fill,
+        color: glass.fill,
         elevation: 0,
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.xlAll),
         clipBehavior: Clip.antiAlias,
@@ -51,7 +57,7 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,
-          backgroundColor: AppGlass.fill,
+          backgroundColor: glass.fill,
           minimumSize: const Size.fromHeight(52),
           side: BorderSide(color: scheme.primary.withValues(alpha: 0.5)),
           textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -64,7 +70,7 @@ abstract final class AppTheme {
       // Inputs: semi-transparent, with a bottom border that glows teal on focus.
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppGlass.fill,
+        fillColor: glass.fill,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,

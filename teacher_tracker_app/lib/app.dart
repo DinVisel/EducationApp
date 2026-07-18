@@ -128,11 +128,14 @@ class TeacherTrackerApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeControllerProvider).value;
+    final themeMode = ref.watch(themeControllerProvider).value ?? ThemeMode.system;
     return _DeepLinkListener(
       child: MaterialApp.router(
         title: 'Teacher Tracker',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: themeMode,
         locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

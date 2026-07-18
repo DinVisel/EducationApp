@@ -71,6 +71,11 @@
   "settingsLanguage": "Dil",
   "settingsLanguageEnglish": "İngilizce",
   "settingsLanguageTurkish": "Türkçe",
+  "settingsAppearance": "Görünüm",
+  "settingsThemeSystem": "Sistem",
+  "settingsThemeLight": "Açık",
+  "settingsThemeDark": "Koyu",
+  "imageCropperTitle": "Fotoğrafı düzenle",
 
   "attendanceTitle": "Yoklama",
   "attendanceTabLabel": "Yoklama",

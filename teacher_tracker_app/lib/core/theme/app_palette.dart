@@ -98,4 +98,43 @@ abstract final class AppPalette {
     inverseSurface: inverseSurface,
     onInverseSurface: inverseOnSurface,
   );
+
+  /// Assembled Material [ColorScheme] for the dark theme. Keeps the teal /
+  /// orange / indigo brand anchors but lifts them to lighter tones for contrast
+  /// on dark surfaces (mirroring Material 3's dark-scheme conventions).
+  static const ColorScheme darkScheme = ColorScheme(
+    brightness: Brightness.dark,
+    primary: Color(0xFF6BD8CB),
+    onPrimary: Color(0xFF00382F),
+    primaryContainer: Color(0xFF004F48),
+    onPrimaryContainer: Color(0xFF89F5E7),
+    inversePrimary: Color(0xFF00695F),
+    secondary: Color(0xFFFFB690),
+    onSecondary: Color(0xFF562200),
+    secondaryContainer: Color(0xFF7A3400),
+    onSecondaryContainer: Color(0xFFFFDBCA),
+    tertiary: Color(0xFFC0C1FF),
+    onTertiary: Color(0xFF13148B),
+    tertiaryContainer: Color(0xFF2E30A8),
+    onTertiaryContainer: Color(0xFFE1E0FF),
+    error: Color(0xFFFFB4AB),
+    onError: Color(0xFF690005),
+    errorContainer: Color(0xFF93000A),
+    onErrorContainer: Color(0xFFFFDAD6),
+    surface: Color(0xFF0F1416),
+    onSurface: Color(0xFFDEE3E5),
+    onSurfaceVariant: Color(0xFFBFC9C6),
+    surfaceContainerLowest: Color(0xFF0A0F11),
+    surfaceContainerLow: Color(0xFF171D1F),
+    surfaceContainer: Color(0xFF1B2123),
+    surfaceContainerHigh: Color(0xFF262B2E),
+    surfaceContainerHighest: Color(0xFF303639),
+    surfaceDim: Color(0xFF0F1416),
+    surfaceBright: Color(0xFF353A3D),
+    surfaceTint: Color(0xFF6BD8CB),
+    outline: Color(0xFF89938F),
+    outlineVariant: Color(0xFF3F4946),
+    inverseSurface: Color(0xFFDEE3E5),
+    onInverseSurface: Color(0xFF2D3133),
+  );
 }

@@ -181,6 +181,12 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
         const SizedBox(height: 12),
         const _LanguagePicker(),
         const SizedBox(height: 24),
+        Text(loc.settingsAppearance,
+            style: tt.titleMedium
+                ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        const _ThemePicker(),
+        const SizedBox(height: 24),
         OutlinedButton.icon(
           onPressed: _confirmLogout,
           icon: const Icon(Icons.logout),
@@ -218,6 +224,45 @@ class _LanguagePicker extends ConsumerWidget {
             onChanged: (v) => ref
                 .read(localeControllerProvider.notifier)
                 .setLocale(const Locale('tr')),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Lets the teacher pick a system / light / dark theme.
+class _ThemePicker extends ConsumerWidget {
+  const _ThemePicker();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
+    final mode = ref.watch(themeControllerProvider).value ?? ThemeMode.system;
+
+    void set(ThemeMode m) =>
+        ref.read(themeControllerProvider.notifier).setMode(m);
+
+    return GlassCard(
+      child: Column(
+        children: [
+          RadioListTile<ThemeMode>(
+            title: Text(loc.settingsThemeSystem),
+            value: ThemeMode.system,
+            groupValue: mode,
+            onChanged: (v) => set(ThemeMode.system),
+          ),
+          RadioListTile<ThemeMode>(
+            title: Text(loc.settingsThemeLight),
+            value: ThemeMode.light,
+            groupValue: mode,
+            onChanged: (v) => set(ThemeMode.light),
+          ),
+          RadioListTile<ThemeMode>(
+            title: Text(loc.settingsThemeDark),
+            value: ThemeMode.dark,
+            groupValue: mode,
+            onChanged: (v) => set(ThemeMode.dark),
           ),
         ],
       ),

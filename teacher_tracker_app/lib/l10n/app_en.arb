@@ -76,6 +76,11 @@
   "settingsLanguage": "Language",
   "settingsLanguageEnglish": "English",
   "settingsLanguageTurkish": "Türkçe",
+  "settingsAppearance": "Appearance",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "imageCropperTitle": "Edit photo",
 
   "attendanceTitle": "Attendance",
   "attendanceTabLabel": "Attendance",

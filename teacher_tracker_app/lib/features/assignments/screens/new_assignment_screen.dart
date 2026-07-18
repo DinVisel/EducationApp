@@ -6,6 +6,7 @@ import '../../../core/design.dart';
 import '../../../models/classroom.dart';
 import '../../../models/file_object.dart';
 import '../../files/data/files_repository.dart';
+import '../../files/image_processing.dart';
 import '../../files/mime.dart';
 import '../state/assignments_providers.dart';
 
@@ -61,12 +62,24 @@ class _NewAssignmentScreenState extends ConsumerState<NewAssignmentScreen> {
     final repo = ref.read(filesRepositoryProvider);
     try {
       for (final f in result.files) {
-        final bytes = f.bytes;
+        var bytes = f.bytes;
         if (bytes == null) continue; // withData failed for this entry
+        var fileName = f.name;
+        var contentType = mimeForFileName(f.name);
+        // Shrink raster images before upload; other file types pass through.
+        if (f.path != null && isCompressibleImage(f.name)) {
+          final processed =
+              await compressImage(path: f.path!, originalName: f.name);
+          if (processed != null) {
+            bytes = processed.bytes;
+            fileName = processed.fileName;
+            contentType = processed.contentType;
+          }
+        }
         final uploaded = await repo.uploadDirect(
           bytes: bytes,
-          fileName: f.name,
-          contentType: mimeForFileName(f.name),
+          fileName: fileName,
+          contentType: contentType,
         );
         if (mounted) setState(() => _attachments.add(uploaded));
       }

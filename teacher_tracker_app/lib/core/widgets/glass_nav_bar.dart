@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../theme/app_dimens.dart';
+import '../theme/glass_colors.dart';
 
 /// One destination in a [GlassNavBar], mirroring [NavigationDestination]'s
 /// shape so shells can swap between the two with minimal churn.
@@ -40,6 +41,7 @@ class GlassNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassColors>() ?? GlassColors.light;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     const radius = AppRadius.full;
 
@@ -60,14 +62,14 @@ class GlassNavBar extends StatelessWidget {
             child: Container(
               height: 64,
               decoration: BoxDecoration(
-                color: AppGlass.fillStrong,
+                color: glass.fillStrong,
                 borderRadius: const BorderRadius.all(radius),
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [AppGlass.highlight, AppGlass.lowlight],
+                  colors: [glass.highlight, glass.lowlight],
                 ),
-                border: Border.all(color: AppGlass.highlight, width: 1),
+                border: Border.all(color: glass.highlight, width: 1),
               ),
               child: Row(
                 children: [

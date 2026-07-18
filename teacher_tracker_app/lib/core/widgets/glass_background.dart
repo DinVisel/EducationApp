@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_palette.dart';
+import '../theme/glass_colors.dart';
 
 /// Level 0 backdrop from DESIGN.md: a soft, colorful field of organic gradient
 /// "blobs". This is what makes the glass containers layered on top actually
@@ -14,28 +14,29 @@ class GlassBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassColors>() ?? GlassColors.light;
     return DecoratedBox(
-      decoration: const BoxDecoration(color: AppPalette.background),
+      decoration: BoxDecoration(color: glass.background),
       child: Stack(
         children: [
           // Teal wash, top-left.
-          const _Blob(
-            alignment: Alignment(-1.1, -1.0),
-            color: AppPalette.primaryFixed,
+          _Blob(
+            alignment: const Alignment(-1.1, -1.0),
+            color: glass.blobPrimary,
             size: 360,
             opacity: 0.55,
           ),
           // Indigo wash, top-right.
-          const _Blob(
-            alignment: Alignment(1.2, -0.7),
-            color: AppPalette.tertiaryFixedDim,
+          _Blob(
+            alignment: const Alignment(1.2, -0.7),
+            color: glass.blobTertiary,
             size: 300,
             opacity: 0.45,
           ),
           // Soft orange wash, bottom.
-          const _Blob(
-            alignment: Alignment(0.6, 1.2),
-            color: AppPalette.secondaryFixedDim,
+          _Blob(
+            alignment: const Alignment(0.6, 1.2),
+            color: glass.blobSecondary,
             size: 340,
             opacity: 0.40,
           ),

@@ -205,6 +205,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageTurkish => 'Türkçe';
 
   @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsThemeSystem => 'System';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
+  String get imageCropperTitle => 'Edit photo';
+
+  @override
   String get attendanceTitle => 'Attendance';
 
   @override

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../theme/app_dimens.dart';
+import '../theme/glass_colors.dart';
 
 /// Level 1 glass surface from DESIGN.md: a translucent panel with a real
 /// backdrop blur, a 1px top-left highlight and bottom-right lowlight to fake an
@@ -35,6 +36,7 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassColors>() ?? GlassColors.light;
     final content = ClipRRect(
       borderRadius: borderRadius,
       child: BackdropFilter(
@@ -44,15 +46,15 @@ class GlassCard extends StatelessWidget {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: fill ?? AppGlass.fill,
+            color: fill ?? glass.fill,
             borderRadius: borderRadius,
             // Edge-light: bright toward top-left, dim toward bottom-right.
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppGlass.highlight, AppGlass.lowlight],
+              colors: [glass.highlight, glass.lowlight],
             ),
-            border: Border.all(color: AppGlass.highlight, width: 1),
+            border: Border.all(color: glass.highlight, width: 1),
           ),
           child: Padding(padding: padding, child: child),
         ),

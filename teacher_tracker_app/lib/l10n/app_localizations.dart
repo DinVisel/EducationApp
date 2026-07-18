@@ -476,6 +476,36 @@ abstract class AppLocalizations {
   /// **'Türkçe'**
   String get settingsLanguageTurkish;
 
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearance;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
+
+  /// No description provided for @imageCropperTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit photo'**
+  String get imageCropperTitle;
+
   /// No description provided for @attendanceTitle.
   ///
   /// In en, this message translates to:
