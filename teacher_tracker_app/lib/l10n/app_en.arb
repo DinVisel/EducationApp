@@ -473,5 +473,14 @@
 
   "notifTitle": "Notifications",
   "notifEmptyTitle": "No notifications",
-  "notifEmptySubtitle": "You're all caught up."
+  "notifEmptySubtitle": "You're all caught up.",
+
+  "homeTeacherFallback": "Teacher",
+  "homeGreetingMorning": "Good morning,",
+  "homeGreetingAfternoon": "Good afternoon,",
+  "homeGreetingEvening": "Good evening,",
+  "homeQuickActions": "Quick Actions",
+  "homeRecentStudents": "Recent Students",
+  "homeSeeAll": "See all",
+  "homeAddFirstStudent": "Add your first student to get started."
 }

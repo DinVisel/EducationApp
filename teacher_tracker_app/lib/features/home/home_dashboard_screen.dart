@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/design.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/student.dart';
 import '../auth/state/auth_controller.dart';
 import '../classes/state/classrooms_providers.dart';
@@ -22,6 +23,7 @@ class HomeDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final teacher = ref.watch(currentTeacherProvider);
     final studentsAsync = ref.watch(studentsProvider);
     final classroomsAsync = ref.watch(classroomsProvider);
@@ -35,7 +37,7 @@ class HomeDashboardScreen extends ConsumerWidget {
           slivers: [
             SliverToBoxAdapter(
               child: _Greeting(
-                name: teacher?.firstName ?? 'Teacher',
+                name: teacher?.firstName ?? loc.homeTeacherFallback,
                 cs: cs,
                 tt: tt,
               ),
@@ -49,7 +51,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: _StatCard(
                         icon: Icons.groups,
-                        label: 'Students',
+                        label: loc.studentsTitle,
                         value: studentsAsync.maybeWhen(
                           data: (s) => s.length.toString(),
                           orElse: () => '—',
@@ -62,7 +64,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: _StatCard(
                         icon: Icons.class_,
-                        label: 'Classes',
+                        label: loc.classesTitle,
                         value: classroomsAsync.maybeWhen(
                           data: (c) => c.length.toString(),
                           orElse: () => '—',
@@ -77,7 +79,7 @@ class HomeDashboardScreen extends ConsumerWidget {
             ),
             // ── Quick actions ──────────────────────────────────────────────
             SliverToBoxAdapter(
-              child: _SectionHeader(title: 'Quick Actions', cs: cs, tt: tt),
+              child: _SectionHeader(title: loc.homeQuickActions, cs: cs, tt: tt),
             ),
             SliverToBoxAdapter(
               child: Padding(
@@ -87,7 +89,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: _ActionTile(
                         icon: Icons.groups_outlined,
-                        label: 'Students',
+                        label: loc.studentsTitle,
                         onTap: () => onNavigate(1),
                         cs: cs,
                         tt: tt,
@@ -97,7 +99,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: _ActionTile(
                         icon: Icons.class_outlined,
-                        label: 'Classes',
+                        label: loc.classesTitle,
                         onTap: () => onNavigate(2),
                         cs: cs,
                         tt: tt,
@@ -107,7 +109,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: _ActionTile(
                         icon: Icons.menu_book_outlined,
-                        label: 'Homework',
+                        label: loc.classTabHomework,
                         onTap: () => onNavigate(3),
                         cs: cs,
                         tt: tt,
@@ -117,7 +119,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: _ActionTile(
                         icon: Icons.auto_stories_outlined,
-                        label: 'Reading',
+                        label: loc.classTabReading,
                         onTap: () => onNavigate(4),
                         cs: cs,
                         tt: tt,
@@ -131,13 +133,13 @@ class HomeDashboardScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Row(
                 children: [
-                  _SectionHeader(title: 'Recent Students', cs: cs, tt: tt),
+                  _SectionHeader(title: loc.homeRecentStudents, cs: cs, tt: tt),
                   const Spacer(),
                   Padding(
                     padding: const EdgeInsets.only(right: 12, top: 24),
                     child: TextButton(
                       onPressed: () => onNavigate(1),
-                      child: const Text('See all'),
+                      child: Text(loc.homeSeeAll),
                     ),
                   ),
                 ],
@@ -153,7 +155,7 @@ class HomeDashboardScreen extends ConsumerWidget {
               error: (e, _) => SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
-                  child: Text('Error: $e',
+                  child: Text(loc.commonError('$e'),
                       style: tt.bodyMedium?.copyWith(color: cs.error)),
                 ),
               ),
@@ -219,7 +221,7 @@ class _Greeting extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(_greeting(),
+                Text(_greeting(context),
                     style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant)),
                 const SizedBox(height: 4),
                 Text(name,
@@ -238,11 +240,12 @@ class _Greeting extends StatelessWidget {
     );
   }
 
-  String _greeting() {
+  String _greeting(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning,';
-    if (hour < 17) return 'Good afternoon,';
-    return 'Good evening,';
+    if (hour < 12) return loc.homeGreetingMorning;
+    if (hour < 17) return loc.homeGreetingAfternoon;
+    return loc.homeGreetingEvening;
   }
 }
 
@@ -366,7 +369,9 @@ class _StudentRow extends StatelessWidget {
                         color: cs.onSurface, fontWeight: FontWeight.w600),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis),
-                Text('No. ${student.studentNumber}',
+                Text(
+                    AppLocalizations.of(context)!
+                        .classStudentNumber(student.studentNumber),
                     style: tt.labelSmall
                         ?.copyWith(color: cs.onSurfaceVariant)),
               ],
@@ -393,6 +398,7 @@ class _EmptyStudents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
       child: GlassCard(
@@ -403,17 +409,17 @@ class _EmptyStudents extends StatelessWidget {
                 size: 48,
                 color: cs.onSurfaceVariant.withValues(alpha: 0.5)),
             const SizedBox(height: 12),
-            Text('No students yet',
+            Text(loc.studentsEmptyTitle,
                 style: tt.titleMedium?.copyWith(color: cs.onSurface)),
             const SizedBox(height: 4),
-            Text('Add your first student to get started.',
+            Text(loc.homeAddFirstStudent,
                 textAlign: TextAlign.center,
                 style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: onAdd,
               icon: const Icon(Icons.add),
-              label: const Text('Add Student'),
+              label: Text(loc.dashboardAddStudent),
             ),
           ],
         ),

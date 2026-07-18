@@ -463,5 +463,14 @@
 
   "notifTitle": "Bildirimler",
   "notifEmptyTitle": "Bildirim yok",
-  "notifEmptySubtitle": "Her şeyi gördünüz."
+  "notifEmptySubtitle": "Her şeyi gördünüz.",
+
+  "homeTeacherFallback": "Öğretmen",
+  "homeGreetingMorning": "Günaydın,",
+  "homeGreetingAfternoon": "İyi günler,",
+  "homeGreetingEvening": "İyi akşamlar,",
+  "homeQuickActions": "Hızlı İşlemler",
+  "homeRecentStudents": "Son Öğrenciler",
+  "homeSeeAll": "Tümünü gör",
+  "homeAddFirstStudent": "Başlamak için ilk öğrencinizi ekleyin."
 }
