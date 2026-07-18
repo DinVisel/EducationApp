@@ -40,6 +40,7 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return GlassScaffold(
       appBar: AppBar(
         title: Text(classroom.name),
@@ -48,13 +49,21 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
           controller: _tabs,
           isScrollable: true,
           tabs: [
-            const Tab(icon: Icon(Icons.groups_outlined), text: 'Students'),
-            const Tab(icon: Icon(Icons.assignment_outlined), text: 'Homework'),
-            const Tab(icon: Icon(Icons.quiz_outlined), text: 'Quizzes'),
-            const Tab(icon: Icon(Icons.auto_stories_outlined), text: 'Reading'),
+            Tab(
+                icon: const Icon(Icons.groups_outlined),
+                text: loc.classTabStudents),
+            Tab(
+                icon: const Icon(Icons.assignment_outlined),
+                text: loc.classTabHomework),
+            Tab(
+                icon: const Icon(Icons.quiz_outlined),
+                text: loc.classTabQuizzes),
+            Tab(
+                icon: const Icon(Icons.auto_stories_outlined),
+                text: loc.classTabReading),
             Tab(
               icon: const Icon(Icons.fact_check_outlined),
-              text: AppLocalizations.of(context)!.attendanceTabLabel,
+              text: loc.attendanceTabLabel,
             ),
           ],
         ),
@@ -63,7 +72,7 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
           ? FloatingActionButton.extended(
               onPressed: () => _addStudents(context, ref),
               icon: const Icon(Icons.person_add_alt),
-              label: const Text('Add Students'),
+              label: Text(loc.classAddStudents),
             )
           : null,
       body: TabBarView(
@@ -90,8 +99,9 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
           .unenroll(classroom.id, s.id);
     } catch (e) {
       if (ctx.mounted) {
-        ScaffoldMessenger.of(ctx)
-            .showSnackBar(SnackBar(content: Text('Could not remove: $e')));
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+            content:
+                Text(AppLocalizations.of(ctx)!.classCouldNotRemove('$e'))));
       }
     }
   }
@@ -120,10 +130,11 @@ class _RosterTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final detailAsync = ref.watch(classroomDetailProvider(classroom.id));
     return detailAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(loc.commonError('$e'))),
       data: (detail) {
         if (detail.students.isEmpty) return const _EmptyRoster();
         return RefreshIndicator(
@@ -190,7 +201,9 @@ class _RosterTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis),
                 if (student.studentNumber.isNotEmpty)
-                  Text('No. ${student.studentNumber}',
+                  Text(
+                      AppLocalizations.of(context)!
+                          .classStudentNumber(student.studentNumber),
                       style: tt.labelSmall
                           ?.copyWith(color: cs.onSurfaceVariant)),
               ],
@@ -198,7 +211,7 @@ class _RosterTile extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.remove_circle_outline, color: cs.error),
-            tooltip: 'Remove from class',
+            tooltip: AppLocalizations.of(context)!.classRemoveFromClass,
             onPressed: onRemove,
           ),
         ],
@@ -228,6 +241,7 @@ class _AddStudentsSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final studentsAsync = ref.watch(studentsProvider);
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return SafeArea(
       child: ConstrainedBox(
@@ -241,7 +255,7 @@ class _AddStudentsSheet extends ConsumerWidget {
           ),
           error: (e, _) => Padding(
             padding: const EdgeInsets.all(24),
-            child: Text('Error: $e'),
+            child: Text(loc.commonError('$e')),
           ),
           data: (students) {
             final available =
@@ -252,12 +266,13 @@ class _AddStudentsSheet extends ConsumerWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                  child: Text('Add students', style: tt.titleLarge),
+                  child: Text(loc.classAddStudentsSheetTitle,
+                      style: tt.titleLarge),
                 ),
                 if (available.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(20, 8, 20, 32),
-                    child: Text('All your students are already in this class.'),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                    child: Text(loc.classAllStudentsEnrolled),
                   )
                 else
                   Flexible(
@@ -291,13 +306,15 @@ class _AddStudentsSheet extends ConsumerWidget {
       await ref.read(classroomsProvider.notifier).enroll(classroomId, s.id);
       if (ctx.mounted) {
         ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text('Added ${s.fullName}')),
+          SnackBar(
+              content: Text(
+                  AppLocalizations.of(ctx)!.classStudentAdded(s.fullName))),
         );
       }
     } catch (e) {
       if (ctx.mounted) {
-        ScaffoldMessenger.of(ctx)
-            .showSnackBar(SnackBar(content: Text('Could not add: $e')));
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(ctx)!.classCouldNotAdd('$e'))));
       }
     }
   }
@@ -316,6 +333,7 @@ class _EmptyRoster extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return ListView(
       children: [
         const SizedBox(height: 120),
@@ -323,7 +341,7 @@ class _EmptyRoster extends StatelessWidget {
             size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
         const SizedBox(height: 16),
         Center(
-          child: Text('No students in this class yet',
+          child: Text(loc.classEmptyRosterTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -331,7 +349,7 @@ class _EmptyRoster extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Center(
-          child: Text('Tap “Add Students” to build the roster.',
+          child: Text(loc.classEmptyRosterSubtitle,
               style: Theme.of(context)
                   .textTheme
                   .bodySmall

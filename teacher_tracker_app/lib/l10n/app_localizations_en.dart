@@ -33,6 +33,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSomethingWentWrong => 'Something went wrong.';
 
   @override
+  String commonError(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get commonEdit => 'Edit';
+
+  @override
+  String get commonAdd => 'Add';
+
+  @override
+  String get commonRemove => 'Remove';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get commonDone => 'Done';
+
+  @override
+  String get commonLoading => 'Loading…';
+
+  @override
+  String get commonSearch => 'Search';
+
+  @override
+  String get commonEmpty => 'Nothing here yet.';
+
+  @override
   String get loginTitle => 'Teacher Tracker';
 
   @override
@@ -268,4 +303,111 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attendanceViewHistory => 'View attendance history';
+
+  @override
+  String get classTabStudents => 'Students';
+
+  @override
+  String get classTabHomework => 'Homework';
+
+  @override
+  String get classTabQuizzes => 'Quizzes';
+
+  @override
+  String get classTabReading => 'Reading';
+
+  @override
+  String get classAddStudents => 'Add Students';
+
+  @override
+  String get classRemoveFromClass => 'Remove from class';
+
+  @override
+  String classCouldNotRemove(String error) {
+    return 'Could not remove: $error';
+  }
+
+  @override
+  String classCouldNotAdd(String error) {
+    return 'Could not add: $error';
+  }
+
+  @override
+  String get classEmptyRosterTitle => 'No students in this class yet';
+
+  @override
+  String get classEmptyRosterSubtitle =>
+      'Tap “Add Students” to build the roster.';
+
+  @override
+  String get classAddStudentsSheetTitle => 'Add students';
+
+  @override
+  String get classAllStudentsEnrolled =>
+      'All your students are already in this class.';
+
+  @override
+  String classStudentAdded(String name) {
+    return 'Added $name';
+  }
+
+  @override
+  String classStudentNumber(String number) {
+    return 'No. $number';
+  }
+
+  @override
+  String get classesTitle => 'Classes';
+
+  @override
+  String get classesNewTitle => 'New Class';
+
+  @override
+  String get classesRenameTitle => 'Rename Class';
+
+  @override
+  String get classesNameLabel => 'Class name';
+
+  @override
+  String get classesRename => 'Rename';
+
+  @override
+  String get classesDeleteTitle => 'Delete class?';
+
+  @override
+  String classesDeleteBody(String name) {
+    return 'Remove \"$name\"? Students stay, only the class and its enrollments are removed.';
+  }
+
+  @override
+  String classesStudentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classesCouldNotCreate(String error) {
+    return 'Could not create class: $error';
+  }
+
+  @override
+  String classesCouldNotRename(String error) {
+    return 'Could not rename class: $error';
+  }
+
+  @override
+  String classesCouldNotDelete(String error) {
+    return 'Could not delete class: $error';
+  }
+
+  @override
+  String get classesEmptyTitle => 'No classes yet';
+
+  @override
+  String get classesEmptySubtitle => 'Tap “New Class” to create one.';
 }

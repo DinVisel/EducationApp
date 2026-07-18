@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/classroom.dart';
 import '../state/classrooms_providers.dart';
 import 'class_detail_screen.dart';
@@ -54,6 +55,7 @@ class _ClassesListScreenState extends ConsumerState<ClassesListScreen> {
     final classroomsAsync = ref.watch(classroomsProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return RefreshIndicator(
       onRefresh: () => ref.refresh(classroomsProvider.future),
@@ -71,7 +73,7 @@ class _ClassesListScreenState extends ConsumerState<ClassesListScreen> {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                     20, MediaQuery.of(context).padding.top + 24, 20, 8),
-                child: Text('Classes',
+                child: Text(loc.classesTitle,
                     style: tt.headlineMedium?.copyWith(
                         color: cs.onSurface, fontWeight: FontWeight.w700)),
               ),
@@ -119,30 +121,33 @@ class _ClassesListScreenState extends ConsumerState<ClassesListScreen> {
 
   Future<void> _renameClass(BuildContext ctx, WidgetRef ref, Classroom c) async {
     final messenger = ScaffoldMessenger.of(ctx);
-    final name = await _promptClassName(ctx, title: 'Rename Class', initial: c.name);
+    final loc = AppLocalizations.of(ctx)!;
+    final name =
+        await _promptClassName(ctx, title: loc.classesRenameTitle, initial: c.name);
     if (name == null || name.isEmpty || name == c.name) return;
     try {
       await ref.read(classroomsProvider.notifier).rename(c.id, name);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not rename class: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.classesCouldNotRename('$e'))));
     }
   }
 
   Future<void> _deleteClass(BuildContext ctx, WidgetRef ref, Classroom c) async {
     final messenger = ScaffoldMessenger.of(ctx);
+    final loc = AppLocalizations.of(ctx)!;
     final ok = await showDialog<bool>(
       context: ctx,
       builder: (d) => AlertDialog(
-        title: const Text('Delete class?'),
-        content: Text('Remove "${c.name}"? Students stay, only the class and '
-            'its enrollments are removed.'),
+        title: Text(loc.classesDeleteTitle),
+        content: Text(loc.classesDeleteBody(c.name)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(d, false),
-              child: const Text('Cancel')),
+              child: Text(loc.commonCancel)),
           FilledButton(
               onPressed: () => Navigator.pop(d, true),
-              child: const Text('Delete')),
+              child: Text(loc.commonDelete)),
         ],
       ),
     );
@@ -150,7 +155,8 @@ class _ClassesListScreenState extends ConsumerState<ClassesListScreen> {
     try {
       await ref.read(classroomsProvider.notifier).remove(c.id);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not delete class: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.classesCouldNotDelete('$e'))));
     }
   }
 
@@ -162,18 +168,21 @@ class _ClassesListScreenState extends ConsumerState<ClassesListScreen> {
 /// it too.
 Future<void> createClass(BuildContext ctx, WidgetRef ref) async {
   final messenger = ScaffoldMessenger.of(ctx);
-  final name = await _promptClassName(ctx, title: 'New Class');
+  final loc = AppLocalizations.of(ctx)!;
+  final name = await _promptClassName(ctx, title: loc.classesNewTitle);
   if (name == null || name.isEmpty) return;
   try {
     await ref.read(classroomsProvider.notifier).add(name);
   } catch (e) {
-    messenger.showSnackBar(SnackBar(content: Text('Could not create class: $e')));
+    messenger.showSnackBar(
+        SnackBar(content: Text(loc.classesCouldNotCreate('$e'))));
   }
 }
 
 Future<String?> _promptClassName(BuildContext ctx,
     {required String title, String? initial}) {
   final controller = TextEditingController(text: initial);
+  final loc = AppLocalizations.of(ctx)!;
   return showDialog<String>(
     context: ctx,
     builder: (d) => AlertDialog(
@@ -182,15 +191,15 @@ Future<String?> _promptClassName(BuildContext ctx,
         controller: controller,
         autofocus: true,
         textCapitalization: TextCapitalization.words,
-        decoration: const InputDecoration(labelText: 'Class name'),
+        decoration: InputDecoration(labelText: loc.classesNameLabel),
         onSubmitted: (v) => Navigator.pop(d, v.trim()),
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(d), child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(d), child: Text(loc.commonCancel)),
         FilledButton(
             onPressed: () => Navigator.pop(d, controller.text.trim()),
-            child: const Text('Save')),
+            child: Text(loc.commonSave)),
       ],
     ),
   );
@@ -235,8 +244,8 @@ class _ClassCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis),
                 Text(
-                  '${classroom.studentCount} '
-                  '${classroom.studentCount == 1 ? 'student' : 'students'}',
+                  AppLocalizations.of(context)!
+                      .classesStudentCount(classroom.studentCount),
                   style: tt.labelMedium?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ],
@@ -245,9 +254,13 @@ class _ClassCard extends StatelessWidget {
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, color: cs.onSurfaceVariant),
             onSelected: (v) => v == 'rename' ? onRename() : onDelete(),
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'rename', child: Text('Rename')),
-              PopupMenuItem(value: 'delete', child: Text('Delete')),
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                  value: 'rename',
+                  child: Text(AppLocalizations.of(context)!.classesRename)),
+              PopupMenuItem(
+                  value: 'delete',
+                  child: Text(AppLocalizations.of(context)!.commonDelete)),
             ],
           ),
         ],
@@ -262,6 +275,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -269,13 +283,13 @@ class _Empty extends StatelessWidget {
           Icon(Icons.class_outlined,
               size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          Text('No classes yet',
+          Text(loc.classesEmptyTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
                   ?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text('Tap “New Class” to create one.',
+          Text(loc.classesEmptySubtitle,
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
@@ -303,8 +317,9 @@ class _Retry extends StatelessWidget {
           child: Text(message, textAlign: TextAlign.center),
         ),
         Center(
-          child:
-              FilledButton.tonal(onPressed: onRetry, child: const Text('Retry')),
+          child: FilledButton.tonal(
+              onPressed: onRetry,
+              child: Text(AppLocalizations.of(context)!.commonRetry)),
         ),
       ],
     );

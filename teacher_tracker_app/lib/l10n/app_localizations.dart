@@ -146,6 +146,72 @@ abstract class AppLocalizations {
   /// **'Something went wrong.'**
   String get commonSomethingWentWrong;
 
+  /// No description provided for @commonError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String commonError(String error);
+
+  /// No description provided for @commonSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// No description provided for @commonEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get commonEdit;
+
+  /// No description provided for @commonAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get commonAdd;
+
+  /// No description provided for @commonRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get commonRemove;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// No description provided for @commonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get commonDone;
+
+  /// No description provided for @commonLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get commonLoading;
+
+  /// No description provided for @commonSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get commonSearch;
+
+  /// No description provided for @commonEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet.'**
+  String get commonEmpty;
+
   /// No description provided for @loginTitle.
   ///
   /// In en, this message translates to:
@@ -601,6 +667,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View attendance history'**
   String get attendanceViewHistory;
+
+  /// No description provided for @classTabStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Students'**
+  String get classTabStudents;
+
+  /// No description provided for @classTabHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework'**
+  String get classTabHomework;
+
+  /// No description provided for @classTabQuizzes.
+  ///
+  /// In en, this message translates to:
+  /// **'Quizzes'**
+  String get classTabQuizzes;
+
+  /// No description provided for @classTabReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get classTabReading;
+
+  /// No description provided for @classAddStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Students'**
+  String get classAddStudents;
+
+  /// No description provided for @classRemoveFromClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from class'**
+  String get classRemoveFromClass;
+
+  /// No description provided for @classCouldNotRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not remove: {error}'**
+  String classCouldNotRemove(String error);
+
+  /// No description provided for @classCouldNotAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add: {error}'**
+  String classCouldNotAdd(String error);
+
+  /// No description provided for @classEmptyRosterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No students in this class yet'**
+  String get classEmptyRosterTitle;
+
+  /// No description provided for @classEmptyRosterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap “Add Students” to build the roster.'**
+  String get classEmptyRosterSubtitle;
+
+  /// No description provided for @classAddStudentsSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add students'**
+  String get classAddStudentsSheetTitle;
+
+  /// No description provided for @classAllStudentsEnrolled.
+  ///
+  /// In en, this message translates to:
+  /// **'All your students are already in this class.'**
+  String get classAllStudentsEnrolled;
+
+  /// No description provided for @classStudentAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {name}'**
+  String classStudentAdded(String name);
+
+  /// No description provided for @classStudentNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'No. {number}'**
+  String classStudentNumber(String number);
+
+  /// No description provided for @classesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get classesTitle;
+
+  /// No description provided for @classesNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Class'**
+  String get classesNewTitle;
+
+  /// No description provided for @classesRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Class'**
+  String get classesRenameTitle;
+
+  /// No description provided for @classesNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class name'**
+  String get classesNameLabel;
+
+  /// No description provided for @classesRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get classesRename;
+
+  /// No description provided for @classesDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete class?'**
+  String get classesDeleteTitle;
+
+  /// No description provided for @classesDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{name}\"? Students stay, only the class and its enrollments are removed.'**
+  String classesDeleteBody(String name);
+
+  /// No description provided for @classesStudentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student} other{{count} students}}'**
+  String classesStudentCount(int count);
+
+  /// No description provided for @classesCouldNotCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create class: {error}'**
+  String classesCouldNotCreate(String error);
+
+  /// No description provided for @classesCouldNotRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not rename class: {error}'**
+  String classesCouldNotRename(String error);
+
+  /// No description provided for @classesCouldNotDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete class: {error}'**
+  String classesCouldNotDelete(String error);
+
+  /// No description provided for @classesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes yet'**
+  String get classesEmptyTitle;
+
+  /// No description provided for @classesEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap “New Class” to create one.'**
+  String get classesEmptySubtitle;
 }
 
 class _AppLocalizationsDelegate

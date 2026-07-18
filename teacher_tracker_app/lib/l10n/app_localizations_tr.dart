@@ -33,6 +33,41 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonSomethingWentWrong => 'Bir şeyler ters gitti.';
 
   @override
+  String commonError(String error) {
+    return 'Hata: $error';
+  }
+
+  @override
+  String get commonSave => 'Kaydet';
+
+  @override
+  String get commonDelete => 'Sil';
+
+  @override
+  String get commonEdit => 'Düzenle';
+
+  @override
+  String get commonAdd => 'Ekle';
+
+  @override
+  String get commonRemove => 'Kaldır';
+
+  @override
+  String get commonClose => 'Kapat';
+
+  @override
+  String get commonDone => 'Tamam';
+
+  @override
+  String get commonLoading => 'Yükleniyor…';
+
+  @override
+  String get commonSearch => 'Ara';
+
+  @override
+  String get commonEmpty => 'Burada henüz bir şey yok.';
+
+  @override
   String get loginTitle => 'Teacher Tracker';
 
   @override
@@ -268,4 +303,111 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get attendanceViewHistory => 'Yoklama geçmişini gör';
+
+  @override
+  String get classTabStudents => 'Öğrenciler';
+
+  @override
+  String get classTabHomework => 'Ödevler';
+
+  @override
+  String get classTabQuizzes => 'Sınavlar';
+
+  @override
+  String get classTabReading => 'Okuma';
+
+  @override
+  String get classAddStudents => 'Öğrenci Ekle';
+
+  @override
+  String get classRemoveFromClass => 'Sınıftan çıkar';
+
+  @override
+  String classCouldNotRemove(String error) {
+    return 'Çıkarılamadı: $error';
+  }
+
+  @override
+  String classCouldNotAdd(String error) {
+    return 'Eklenemedi: $error';
+  }
+
+  @override
+  String get classEmptyRosterTitle => 'Bu sınıfta henüz öğrenci yok';
+
+  @override
+  String get classEmptyRosterSubtitle =>
+      'Listeyi oluşturmak için “Öğrenci Ekle”ye dokunun.';
+
+  @override
+  String get classAddStudentsSheetTitle => 'Öğrenci ekle';
+
+  @override
+  String get classAllStudentsEnrolled => 'Tüm öğrencileriniz zaten bu sınıfta.';
+
+  @override
+  String classStudentAdded(String name) {
+    return '$name eklendi';
+  }
+
+  @override
+  String classStudentNumber(String number) {
+    return 'No. $number';
+  }
+
+  @override
+  String get classesTitle => 'Sınıflar';
+
+  @override
+  String get classesNewTitle => 'Yeni Sınıf';
+
+  @override
+  String get classesRenameTitle => 'Sınıfı Yeniden Adlandır';
+
+  @override
+  String get classesNameLabel => 'Sınıf adı';
+
+  @override
+  String get classesRename => 'Yeniden adlandır';
+
+  @override
+  String get classesDeleteTitle => 'Sınıf silinsin mi?';
+
+  @override
+  String classesDeleteBody(String name) {
+    return '\"$name\" kaldırılsın mı? Öğrenciler kalır, yalnızca sınıf ve kayıtları silinir.';
+  }
+
+  @override
+  String classesStudentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count öğrenci',
+      one: '1 öğrenci',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classesCouldNotCreate(String error) {
+    return 'Sınıf oluşturulamadı: $error';
+  }
+
+  @override
+  String classesCouldNotRename(String error) {
+    return 'Sınıf yeniden adlandırılamadı: $error';
+  }
+
+  @override
+  String classesCouldNotDelete(String error) {
+    return 'Sınıf silinemedi: $error';
+  }
+
+  @override
+  String get classesEmptyTitle => 'Henüz sınıf yok';
+
+  @override
+  String get classesEmptySubtitle =>
+      'Bir tane oluşturmak için “Yeni Sınıf”a dokunun.';
 }
