@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../core/time_ago.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/post.dart';
 import '../../../models/post_comment.dart';
 import '../data/feed_repository.dart';
@@ -33,11 +35,13 @@ class _PostCommentsScreenState extends ConsumerState<PostCommentsScreen> {
     if (text.isEmpty || _sending) return;
     setState(() => _sending = true);
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     try {
       await ref.read(feedCommentActionsProvider).add(widget.post.id, text);
       _input.clear();
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not comment: $e')));
+      messenger
+          .showSnackBar(SnackBar(content: Text(loc.commentsCouldNotAdd('$e'))));
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -45,25 +49,28 @@ class _PostCommentsScreenState extends ConsumerState<PostCommentsScreen> {
 
   Future<void> _delete(PostComment c) async {
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     try {
       await ref.read(feedCommentActionsProvider).remove(widget.post.id, c.id);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not delete: $e')));
+      messenger
+          .showSnackBar(SnackBar(content: Text(loc.feedCouldNotDelete('$e'))));
     }
   }
 
   Future<void> _report(PostComment c) async {
     final messenger = ScaffoldMessenger.of(context);
-    final reason = await showReportDialog(context, 'comment');
+    final loc = AppLocalizations.of(context)!;
+    final reason = await showReportDialog(context, loc.reportCommentTitle);
     if (reason == null) return;
     try {
       await ref
           .read(feedRepositoryProvider)
           .reportComment(widget.post.id, c.id, reason);
-      messenger.showSnackBar(const SnackBar(
-          content: Text('Reported — thanks. An admin will review it.')));
+      messenger.showSnackBar(SnackBar(content: Text(loc.feedReported)));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not report: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.feedCouldNotReport('$e'))));
     }
   }
 
@@ -72,10 +79,11 @@ class _PostCommentsScreenState extends ConsumerState<PostCommentsScreen> {
     final commentsAsync = ref.watch(postCommentsProvider(widget.post.id));
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return GlassScaffold(
       appBar: AppBar(
-        title: const Text('Comments'),
+        title: Text(loc.commentsTitle),
         backgroundColor: Colors.transparent,
       ),
       body: SafeArea(
@@ -85,11 +93,11 @@ class _PostCommentsScreenState extends ConsumerState<PostCommentsScreen> {
               child: commentsAsync.when(
                 loading: () =>
                     const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
+                error: (e, _) => Center(child: Text(loc.commonError('$e'))),
                 data: (comments) {
                   if (comments.isEmpty) {
                     return Center(
-                      child: Text('No comments yet — be the first.',
+                      child: Text(loc.commentsEmpty,
                           style: tt.bodyMedium
                               ?.copyWith(color: cs.onSurfaceVariant)),
                     );
@@ -138,6 +146,7 @@ class _CommentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     return GlassCard(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -150,13 +159,13 @@ class _CommentCard extends StatelessWidget {
                     style: tt.titleSmall?.copyWith(
                         color: cs.onSurface, fontWeight: FontWeight.w700)),
               ),
-              Text(_fmtWhen(comment.createdAt),
+              Text(timeAgo(loc, comment.createdAt),
                   style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
               if (comment.isMine)
                 IconButton(
                   visualDensity: VisualDensity.compact,
                   icon: Icon(Icons.delete_outline, size: 18, color: cs.error),
-                  tooltip: 'Delete',
+                  tooltip: loc.commonDelete,
                   onPressed: onDelete,
                 )
               else
@@ -164,7 +173,7 @@ class _CommentCard extends StatelessWidget {
                   visualDensity: VisualDensity.compact,
                   icon: Icon(Icons.flag_outlined,
                       size: 18, color: cs.onSurfaceVariant),
-                  tooltip: 'Report',
+                  tooltip: loc.commonReport,
                   onPressed: onReport,
                 ),
             ],
@@ -175,16 +184,6 @@ class _CommentCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static String _fmtWhen(DateTime d) {
-    final local = d.toLocal();
-    final diff = DateTime.now().difference(local);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-    if (diff.inDays < 1) return '${diff.inHours}h ago';
-    return '${local.day.toString().padLeft(2, '0')}.'
-        '${local.month.toString().padLeft(2, '0')}.${local.year}';
   }
 }
 
@@ -201,6 +200,7 @@ class _Composer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: EdgeInsets.fromLTRB(
           12, 8, 12, 8 + MediaQuery.of(context).viewInsets.bottom),
@@ -214,8 +214,8 @@ class _Composer extends StatelessWidget {
               minLines: 1,
               maxLines: 4,
               onSubmitted: (_) => onSend(),
-              decoration: const InputDecoration(
-                hintText: 'Add a comment…',
+              decoration: InputDecoration(
+                hintText: loc.commentsHint,
               ),
             ),
           ),

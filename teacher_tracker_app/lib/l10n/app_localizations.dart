@@ -212,6 +212,48 @@ abstract class AppLocalizations {
   /// **'Nothing here yet.'**
   String get commonEmpty;
 
+  /// No description provided for @commonShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get commonShare;
+
+  /// No description provided for @commonReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get commonReport;
+
+  /// No description provided for @commonUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed: {error}'**
+  String commonUploadFailed(String error);
+
+  /// No description provided for @commonTimeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get commonTimeJustNow;
+
+  /// No description provided for @commonTimeMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m ago'**
+  String commonTimeMinutesAgo(int minutes);
+
+  /// No description provided for @commonTimeHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h ago'**
+  String commonTimeHoursAgo(int hours);
+
+  /// No description provided for @commonTimeDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d ago'**
+  String commonTimeDaysAgo(int days);
+
   /// No description provided for @loginTitle.
   ///
   /// In en, this message translates to:
@@ -829,6 +871,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap “New Class” to create one.'**
   String get classesEmptySubtitle;
+
+  /// No description provided for @feedShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} shared a post'**
+  String feedShareSubject(String name);
+
+  /// No description provided for @feedQuizAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned \"{title}\" to {className}'**
+  String feedQuizAssigned(String title, String className);
+
+  /// No description provided for @feedCouldNotAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not assign: {error}'**
+  String feedCouldNotAssign(String error);
+
+  /// No description provided for @feedPinToProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin to profile'**
+  String get feedPinToProfile;
+
+  /// No description provided for @feedUnpinFromProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin from profile'**
+  String get feedUnpinFromProfile;
+
+  /// No description provided for @feedDeletePostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete post?'**
+  String get feedDeletePostTitle;
+
+  /// No description provided for @feedDeletePostBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes it from the feed for everyone.'**
+  String get feedDeletePostBody;
+
+  /// No description provided for @feedCouldNotDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete: {error}'**
+  String feedCouldNotDelete(String error);
+
+  /// No description provided for @feedReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported — thanks. An admin will review it.'**
+  String get feedReported;
+
+  /// No description provided for @feedCouldNotReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not report: {error}'**
+  String feedCouldNotReport(String error);
+
+  /// No description provided for @feedQuizQuestionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 question} other{{count} questions}}'**
+  String feedQuizQuestionCount(int count);
+
+  /// No description provided for @feedNotRatedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not rated yet'**
+  String get feedNotRatedYet;
+
+  /// No description provided for @feedAssignToClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to My Class'**
+  String get feedAssignToClass;
+
+  /// No description provided for @feedAssignWhichClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to which class?'**
+  String get feedAssignWhichClass;
+
+  /// No description provided for @feedNoClassesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no classes yet. Create one first.'**
+  String get feedNoClassesYet;
+
+  /// No description provided for @newPostPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Post published'**
+  String get newPostPublished;
+
+  /// No description provided for @newPostCouldNotPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not publish: {error}'**
+  String newPostCouldNotPublish(String error);
+
+  /// No description provided for @newPostTextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Share something'**
+  String get newPostTextLabel;
+
+  /// No description provided for @newPostTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'An exercise, a tip, a resource…'**
+  String get newPostTextHint;
+
+  /// No description provided for @newPostTextRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Write something to post'**
+  String get newPostTextRequired;
+
+  /// No description provided for @newPostSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get newPostSubject;
+
+  /// No description provided for @newPostGradeLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade level (optional)'**
+  String get newPostGradeLevel;
+
+  /// No description provided for @newPostShareQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a quiz (optional)'**
+  String get newPostShareQuiz;
+
+  /// No description provided for @newPostAttachQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach one of my quizzes'**
+  String get newPostAttachQuiz;
+
+  /// No description provided for @newPostQuizFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get newPostQuizFallback;
+
+  /// No description provided for @newPostAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get newPostAttachments;
+
+  /// No description provided for @newPostAddFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Add files'**
+  String get newPostAddFiles;
+
+  /// No description provided for @newPostAttachmentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercises, videos, or files other teachers can download.'**
+  String get newPostAttachmentsHint;
+
+  /// No description provided for @newPostPublishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing…'**
+  String get newPostPublishing;
+
+  /// No description provided for @newPostSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Post to hub'**
+  String get newPostSubmit;
+
+  /// No description provided for @newPostShareWhichQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Share which quiz?'**
+  String get newPostShareWhichQuiz;
+
+  /// No description provided for @newPostNoQuizzes.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven’t created any quizzes yet.'**
+  String get newPostNoQuizzes;
+
+  /// No description provided for @newPostQuizSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{className} · {questions}'**
+  String newPostQuizSubtitle(String className, String questions);
+
+  /// No description provided for @reportPostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report post'**
+  String get reportPostTitle;
+
+  /// No description provided for @reportCommentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report comment'**
+  String get reportCommentTitle;
+
+  /// No description provided for @reportReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get reportReasonLabel;
+
+  /// No description provided for @reportReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Why are you reporting this?'**
+  String get reportReasonHint;
+
+  /// No description provided for @postDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get postDetailTitle;
+
+  /// No description provided for @postDetailLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'This post couldn\'t be loaded.'**
+  String get postDetailLoadError;
+
+  /// No description provided for @postDetailCouldNotRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not rate: {error}'**
+  String postDetailCouldNotRate(String error);
+
+  /// No description provided for @commentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get commentsTitle;
+
+  /// No description provided for @commentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet — be the first.'**
+  String get commentsEmpty;
+
+  /// No description provided for @commentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment…'**
+  String get commentsHint;
+
+  /// No description provided for @commentsCouldNotAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not comment: {error}'**
+  String commentsCouldNotAdd(String error);
 }
 
 class _AppLocalizationsDelegate

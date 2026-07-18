@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/file_object.dart';
 import '../../../models/grade_level.dart';
 import '../../../models/my_quiz.dart';
@@ -63,6 +64,7 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
     if (result == null || !mounted) return;
 
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     setState(() => _uploading = true);
     final repo = ref.read(filesRepositoryProvider);
     try {
@@ -89,7 +91,8 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
         if (mounted) setState(() => _attachments.add(uploaded));
       }
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.commonUploadFailed('$e'))));
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
@@ -124,6 +127,7 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
     setState(() => _saving = true);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final loc = AppLocalizations.of(context)!;
     try {
       await ref.read(feedProvider.notifier).create(
             text: _text.text.trim(),
@@ -132,11 +136,12 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
             sharedQuizId: _sharedQuizId,
             fileIds: _attachments.map((f) => f.id).toList(),
           );
-      messenger.showSnackBar(const SnackBar(content: Text('Post published')));
+      messenger.showSnackBar(SnackBar(content: Text(loc.newPostPublished)));
       navigator.pop();
     } catch (e) {
       if (mounted) setState(() => _saving = false);
-      messenger.showSnackBar(SnackBar(content: Text('Could not publish: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.newPostCouldNotPublish('$e'))));
     }
   }
 
@@ -144,11 +149,12 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final busy = _saving || _uploading;
 
     return GlassScaffold(
       appBar: AppBar(
-        title: const Text('New Post'),
+        title: Text(loc.navNewPost),
         backgroundColor: Colors.transparent,
       ),
       body: Form(
@@ -161,16 +167,17 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
               textCapitalization: TextCapitalization.sentences,
               minLines: 3,
               maxLines: 8,
-              decoration: const InputDecoration(
-                labelText: 'Share something',
-                hintText: 'An exercise, a tip, a resource…',
+              decoration: InputDecoration(
+                labelText: loc.newPostTextLabel,
+                hintText: loc.newPostTextHint,
                 alignLabelWithHint: true,
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Write something to post' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? loc.newPostTextRequired
+                  : null,
             ),
             const SizedBox(height: 20),
-            Text('Subject',
+            Text(loc.newPostSubject,
                 style: tt.titleMedium?.copyWith(
                     color: cs.onSurface, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
@@ -190,7 +197,7 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            Text('Grade level (optional)',
+            Text(loc.newPostGradeLevel,
                 style: tt.titleMedium?.copyWith(
                     color: cs.onSurface, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
@@ -208,7 +215,7 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
               ],
             ),
             const SizedBox(height: 24),
-            Text('Share a quiz (optional)',
+            Text(loc.newPostShareQuiz,
                 style: tt.titleMedium?.copyWith(
                     color: cs.onSurface, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
@@ -216,7 +223,7 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
               OutlinedButton.icon(
                 onPressed: _pickQuiz,
                 icon: const Icon(Icons.quiz_outlined),
-                label: const Text('Attach one of my quizzes'),
+                label: Text(loc.newPostAttachQuiz),
               )
             else
               GlassCard(
@@ -226,7 +233,7 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
                     Icon(Icons.quiz, color: cs.tertiary),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(_sharedQuizTitle ?? 'Quiz',
+                      child: Text(_sharedQuizTitle ?? loc.newPostQuizFallback,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style:
@@ -245,14 +252,14 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
             const SizedBox(height: 24),
             Row(
               children: [
-                Text('Attachments',
+                Text(loc.newPostAttachments,
                     style: tt.titleMedium?.copyWith(
                         color: cs.onSurface, fontWeight: FontWeight.w600)),
                 const Spacer(),
                 TextButton.icon(
                   onPressed: _uploading ? null : _pickFiles,
                   icon: const Icon(Icons.attach_file),
-                  label: const Text('Add files'),
+                  label: Text(loc.newPostAddFiles),
                 ),
               ],
             ),
@@ -265,7 +272,7 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 4, bottom: 8),
                 child: Text(
-                  'Exercises, videos, or files other teachers can download.',
+                  loc.newPostAttachmentsHint,
                   style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
@@ -303,7 +310,7 @@ class _NewPostScreenState extends ConsumerState<NewPostScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.send),
-              label: Text(_saving ? 'Publishing…' : 'Post to hub'),
+              label: Text(_saving ? loc.newPostPublishing : loc.newPostSubmit),
             ),
           ],
         ),
@@ -325,6 +332,7 @@ class _QuizPickerSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final quizzesAsync = ref.watch(_myQuizzesProvider);
 
     return SafeArea(
@@ -337,20 +345,21 @@ class _QuizPickerSheet extends ConsumerWidget {
             padding: EdgeInsets.all(40),
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (e, _) =>
-              Padding(padding: const EdgeInsets.all(24), child: Text('Error: $e')),
+          error: (e, _) => Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(loc.commonError('$e'))),
           data: (quizzes) => Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                child: Text('Share which quiz?', style: tt.titleLarge),
+                child: Text(loc.newPostShareWhichQuiz, style: tt.titleLarge),
               ),
               if (quizzes.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 8, 20, 32),
-                  child: Text('You haven’t created any quizzes yet.'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  child: Text(loc.newPostNoQuizzes),
                 )
               else
                 Flexible(
@@ -362,8 +371,8 @@ class _QuizPickerSheet extends ConsumerWidget {
                       return ListTile(
                         leading: const Icon(Icons.quiz_outlined),
                         title: Text(q.title),
-                        subtitle: Text('${q.className} · ${q.questionCount} '
-                            'question${q.questionCount == 1 ? '' : 's'}'),
+                        subtitle: Text(loc.newPostQuizSubtitle(q.className,
+                            loc.feedQuizQuestionCount(q.questionCount))),
                         onTap: () => Navigator.pop(ctx, q),
                       );
                     },

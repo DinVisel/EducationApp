@@ -68,6 +68,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonEmpty => 'Nothing here yet.';
 
   @override
+  String get commonShare => 'Share';
+
+  @override
+  String get commonReport => 'Report';
+
+  @override
+  String commonUploadFailed(String error) {
+    return 'Upload failed: $error';
+  }
+
+  @override
+  String get commonTimeJustNow => 'just now';
+
+  @override
+  String commonTimeMinutesAgo(int minutes) {
+    return '${minutes}m ago';
+  }
+
+  @override
+  String commonTimeHoursAgo(int hours) {
+    return '${hours}h ago';
+  }
+
+  @override
+  String commonTimeDaysAgo(int days) {
+    return '${days}d ago';
+  }
+
+  @override
   String get loginTitle => 'Teacher Tracker';
 
   @override
@@ -410,4 +439,164 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classesEmptySubtitle => 'Tap “New Class” to create one.';
+
+  @override
+  String feedShareSubject(String name) {
+    return '$name shared a post';
+  }
+
+  @override
+  String feedQuizAssigned(String title, String className) {
+    return 'Assigned \"$title\" to $className';
+  }
+
+  @override
+  String feedCouldNotAssign(String error) {
+    return 'Could not assign: $error';
+  }
+
+  @override
+  String get feedPinToProfile => 'Pin to profile';
+
+  @override
+  String get feedUnpinFromProfile => 'Unpin from profile';
+
+  @override
+  String get feedDeletePostTitle => 'Delete post?';
+
+  @override
+  String get feedDeletePostBody =>
+      'This removes it from the feed for everyone.';
+
+  @override
+  String feedCouldNotDelete(String error) {
+    return 'Could not delete: $error';
+  }
+
+  @override
+  String get feedReported => 'Reported — thanks. An admin will review it.';
+
+  @override
+  String feedCouldNotReport(String error) {
+    return 'Could not report: $error';
+  }
+
+  @override
+  String feedQuizQuestionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions',
+      one: '1 question',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feedNotRatedYet => 'Not rated yet';
+
+  @override
+  String get feedAssignToClass => 'Assign to My Class';
+
+  @override
+  String get feedAssignWhichClass => 'Assign to which class?';
+
+  @override
+  String get feedNoClassesYet => 'You have no classes yet. Create one first.';
+
+  @override
+  String get newPostPublished => 'Post published';
+
+  @override
+  String newPostCouldNotPublish(String error) {
+    return 'Could not publish: $error';
+  }
+
+  @override
+  String get newPostTextLabel => 'Share something';
+
+  @override
+  String get newPostTextHint => 'An exercise, a tip, a resource…';
+
+  @override
+  String get newPostTextRequired => 'Write something to post';
+
+  @override
+  String get newPostSubject => 'Subject';
+
+  @override
+  String get newPostGradeLevel => 'Grade level (optional)';
+
+  @override
+  String get newPostShareQuiz => 'Share a quiz (optional)';
+
+  @override
+  String get newPostAttachQuiz => 'Attach one of my quizzes';
+
+  @override
+  String get newPostQuizFallback => 'Quiz';
+
+  @override
+  String get newPostAttachments => 'Attachments';
+
+  @override
+  String get newPostAddFiles => 'Add files';
+
+  @override
+  String get newPostAttachmentsHint =>
+      'Exercises, videos, or files other teachers can download.';
+
+  @override
+  String get newPostPublishing => 'Publishing…';
+
+  @override
+  String get newPostSubmit => 'Post to hub';
+
+  @override
+  String get newPostShareWhichQuiz => 'Share which quiz?';
+
+  @override
+  String get newPostNoQuizzes => 'You haven’t created any quizzes yet.';
+
+  @override
+  String newPostQuizSubtitle(String className, String questions) {
+    return '$className · $questions';
+  }
+
+  @override
+  String get reportPostTitle => 'Report post';
+
+  @override
+  String get reportCommentTitle => 'Report comment';
+
+  @override
+  String get reportReasonLabel => 'Reason';
+
+  @override
+  String get reportReasonHint => 'Why are you reporting this?';
+
+  @override
+  String get postDetailTitle => 'Post';
+
+  @override
+  String get postDetailLoadError => 'This post couldn\'t be loaded.';
+
+  @override
+  String postDetailCouldNotRate(String error) {
+    return 'Could not rate: $error';
+  }
+
+  @override
+  String get commentsTitle => 'Comments';
+
+  @override
+  String get commentsEmpty => 'No comments yet — be the first.';
+
+  @override
+  String get commentsHint => 'Add a comment…';
+
+  @override
+  String commentsCouldNotAdd(String error) {
+    return 'Could not comment: $error';
+  }
 }

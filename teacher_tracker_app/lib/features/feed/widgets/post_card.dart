@@ -4,6 +4,8 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/config.dart';
 import '../../../core/design.dart';
+import '../../../core/time_ago.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/classroom.dart';
 import '../../../models/post.dart';
 import '../../../models/post_subject.dart';
@@ -46,6 +48,7 @@ class PostCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return GlassCard(
       padding: const EdgeInsets.all(16),
@@ -83,7 +86,7 @@ class PostCard extends ConsumerWidget {
                           ],
                         ],
                       ),
-                      Text(_fmtWhen(post.createdAt),
+                      Text(timeAgo(loc, post.createdAt),
                           style: tt.labelSmall
                               ?.copyWith(color: cs.onSurfaceVariant)),
                     ],
@@ -144,8 +147,8 @@ class PostCard extends ConsumerWidget {
               _ActionButton(
                 icon: Icons.ios_share,
                 color: cs.onSurfaceVariant,
-                label: 'Share',
-                onTap: () => _share(post),
+                label: loc.commonShare,
+                onTap: () => _share(loc, post),
               ),
             ],
           ),
@@ -156,9 +159,9 @@ class PostCard extends ConsumerWidget {
 
   // Shares a link to this post. If the recipient has the app, the OS deep-links
   // straight to the post; otherwise the web fallback sends them to the store.
-  void _share(Post post) {
+  void _share(AppLocalizations loc, Post post) {
     final url = '$publicWebBaseUrl/post/${post.id}';
-    Share.share(url, subject: '${post.authorName} shared a post');
+    Share.share(url, subject: loc.feedShareSubject(post.authorName));
   }
 
   // "Assign to My Class": pick one of the teacher's classes, then clone the
@@ -167,6 +170,7 @@ class PostCard extends ConsumerWidget {
     final quiz = post.sharedQuiz;
     if (quiz == null) return;
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
 
     final classroom = await showModalBottomSheet<Classroom>(
       context: context,
@@ -178,21 +182,11 @@ class PostCard extends ConsumerWidget {
     try {
       await ref.read(quizzesRepositoryProvider).clone(quiz.quizId, classroom.id);
       messenger.showSnackBar(SnackBar(
-          content: Text('Assigned "${quiz.title}" to ${classroom.name}')));
+          content: Text(loc.feedQuizAssigned(quiz.title, classroom.name))));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not assign: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.feedCouldNotAssign('$e'))));
     }
-  }
-
-  static String _fmtWhen(DateTime d) {
-    final local = d.toLocal();
-    final diff = DateTime.now().difference(local);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-    if (diff.inDays < 1) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${local.day.toString().padLeft(2, '0')}.'
-        '${local.month.toString().padLeft(2, '0')}.${local.year}';
   }
 }
 
@@ -251,6 +245,7 @@ class _PostMenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return PopupMenuButton<String>(
       icon: Icon(Icons.more_horiz, color: cs.onSurfaceVariant),
       onSelected: (v) {
@@ -269,29 +264,32 @@ class _PostMenu extends ConsumerWidget {
           if (showPinAction)
             PopupMenuItem(
               value: post.isPinned ? 'unpin' : 'pin',
-              child: Text(post.isPinned ? 'Unpin from profile' : 'Pin to profile'),
+              child: Text(post.isPinned
+                  ? loc.feedUnpinFromProfile
+                  : loc.feedPinToProfile),
             ),
-          const PopupMenuItem(value: 'delete', child: Text('Delete')),
+          PopupMenuItem(value: 'delete', child: Text(loc.commonDelete)),
         ] else
-          const PopupMenuItem(value: 'report', child: Text('Report')),
+          PopupMenuItem(value: 'report', child: Text(loc.commonReport)),
       ],
     );
   }
 
   Future<void> _confirmDelete(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: const Text('Delete post?'),
-        content: const Text('This removes it from the feed for everyone.'),
+        title: Text(loc.feedDeletePostTitle),
+        content: Text(loc.feedDeletePostBody),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(d, false),
-              child: const Text('Cancel')),
+              child: Text(loc.commonCancel)),
           FilledButton(
               onPressed: () => Navigator.pop(d, true),
-              child: const Text('Delete')),
+              child: Text(loc.commonDelete)),
         ],
       ),
     );
@@ -299,20 +297,23 @@ class _PostMenu extends ConsumerWidget {
     try {
       await onDelete?.call();
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not delete: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.feedCouldNotDelete('$e'))));
     }
   }
 
   Future<void> _report(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
-    final reason = await showReportDialog(context, 'post');
+    final loc = AppLocalizations.of(context)!;
+    final reason = await showReportDialog(context, loc.reportPostTitle);
     if (reason == null) return;
     try {
       await ref.read(feedRepositoryProvider).reportPost(post.id, reason);
-      messenger.showSnackBar(const SnackBar(
-          content: Text('Reported — thanks. An admin will review it.')));
+      messenger
+          .showSnackBar(SnackBar(content: Text(loc.feedReported)));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not report: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.feedCouldNotReport('$e'))));
     }
   }
 }
@@ -366,6 +367,7 @@ class _SharedQuizCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final quiz = post.sharedQuiz!;
 
     return GlassCard(
@@ -388,8 +390,9 @@ class _SharedQuizCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text('${quiz.questionCount} question'
-              '${quiz.questionCount == 1 ? '' : 's'} · ${quiz.category.label}',
+          Text(
+              '${loc.feedQuizQuestionCount(quiz.questionCount)}'
+              ' · ${quiz.category.label}',
               style: tt.labelMedium?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 10),
           Row(
@@ -406,7 +409,7 @@ class _SharedQuizCard extends StatelessWidget {
                   style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                 )
               else
-                Text('Not rated yet',
+                Text(loc.feedNotRatedYet,
                     style:
                         tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
             ],
@@ -417,7 +420,7 @@ class _SharedQuizCard extends StatelessWidget {
             child: FilledButton.tonalIcon(
               onPressed: onAssign,
               icon: const Icon(Icons.add_task, size: 18),
-              label: const Text('Assign to My Class'),
+              label: Text(loc.feedAssignToClass),
             ),
           ),
         ],
@@ -464,6 +467,7 @@ class _ClassPickerSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final classesAsync = ref.watch(classroomsProvider);
 
     return SafeArea(
@@ -476,20 +480,21 @@ class _ClassPickerSheet extends ConsumerWidget {
             padding: EdgeInsets.all(40),
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (e, _) =>
-              Padding(padding: const EdgeInsets.all(24), child: Text('Error: $e')),
+          error: (e, _) => Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(loc.commonError('$e'))),
           data: (classes) => Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                child: Text('Assign to which class?', style: tt.titleLarge),
+                child: Text(loc.feedAssignWhichClass, style: tt.titleLarge),
               ),
               if (classes.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 8, 20, 32),
-                  child: Text('You have no classes yet. Create one first.'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  child: Text(loc.feedNoClassesYet),
                 )
               else
                 Flexible(

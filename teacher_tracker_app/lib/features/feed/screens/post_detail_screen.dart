@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/post.dart';
 import '../data/feed_repository.dart';
 import '../widgets/post_card.dart';
@@ -72,24 +73,26 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
       await _load(); // refresh average/count/myRating from the server
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Could not rate: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                AppLocalizations.of(context)!.postDetailCouldNotRate('$e'))));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return GlassScaffold(
       appBar: AppBar(
-        title: const Text('Post'),
+        title: Text(loc.postDetailTitle),
         backgroundColor: Colors.transparent,
       ),
-      body: SafeArea(child: _body()),
+      body: SafeArea(child: _body(loc)),
     );
   }
 
-  Widget _body() {
+  Widget _body(AppLocalizations loc) {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -100,9 +103,9 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text("This post couldn't be loaded."),
+              Text(loc.postDetailLoadError),
               const SizedBox(height: 12),
-              FilledButton(onPressed: _load, child: const Text('Retry')),
+              FilledButton(onPressed: _load, child: Text(loc.commonRetry)),
             ],
           ),
         ),

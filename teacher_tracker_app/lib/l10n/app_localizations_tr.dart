@@ -68,6 +68,35 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonEmpty => 'Burada henüz bir şey yok.';
 
   @override
+  String get commonShare => 'Paylaş';
+
+  @override
+  String get commonReport => 'Bildir';
+
+  @override
+  String commonUploadFailed(String error) {
+    return 'Yükleme başarısız: $error';
+  }
+
+  @override
+  String get commonTimeJustNow => 'az önce';
+
+  @override
+  String commonTimeMinutesAgo(int minutes) {
+    return '$minutes dk önce';
+  }
+
+  @override
+  String commonTimeHoursAgo(int hours) {
+    return '$hours sa önce';
+  }
+
+  @override
+  String commonTimeDaysAgo(int days) {
+    return '$days gün önce';
+  }
+
+  @override
   String get loginTitle => 'Teacher Tracker';
 
   @override
@@ -410,4 +439,166 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get classesEmptySubtitle =>
       'Bir tane oluşturmak için “Yeni Sınıf”a dokunun.';
+
+  @override
+  String feedShareSubject(String name) {
+    return '$name bir gönderi paylaştı';
+  }
+
+  @override
+  String feedQuizAssigned(String title, String className) {
+    return '\"$title\", $className sınıfına atandı';
+  }
+
+  @override
+  String feedCouldNotAssign(String error) {
+    return 'Atanamadı: $error';
+  }
+
+  @override
+  String get feedPinToProfile => 'Profile sabitle';
+
+  @override
+  String get feedUnpinFromProfile => 'Profilden kaldır';
+
+  @override
+  String get feedDeletePostTitle => 'Gönderi silinsin mi?';
+
+  @override
+  String get feedDeletePostBody =>
+      'Bu, gönderiyi herkes için akıştan kaldırır.';
+
+  @override
+  String feedCouldNotDelete(String error) {
+    return 'Silinemedi: $error';
+  }
+
+  @override
+  String get feedReported =>
+      'Bildirildi — teşekkürler. Bir yönetici inceleyecek.';
+
+  @override
+  String feedCouldNotReport(String error) {
+    return 'Bildirilemedi: $error';
+  }
+
+  @override
+  String feedQuizQuestionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count soru',
+      one: '1 soru',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feedNotRatedYet => 'Henüz puanlanmadı';
+
+  @override
+  String get feedAssignToClass => 'Sınıfıma Ata';
+
+  @override
+  String get feedAssignWhichClass => 'Hangi sınıfa atansın?';
+
+  @override
+  String get feedNoClassesYet =>
+      'Henüz sınıfınız yok. Önce bir tane oluşturun.';
+
+  @override
+  String get newPostPublished => 'Gönderi yayınlandı';
+
+  @override
+  String newPostCouldNotPublish(String error) {
+    return 'Yayınlanamadı: $error';
+  }
+
+  @override
+  String get newPostTextLabel => 'Bir şeyler paylaş';
+
+  @override
+  String get newPostTextHint => 'Bir alıştırma, bir ipucu, bir kaynak…';
+
+  @override
+  String get newPostTextRequired => 'Paylaşmak için bir şeyler yazın';
+
+  @override
+  String get newPostSubject => 'Konu';
+
+  @override
+  String get newPostGradeLevel => 'Sınıf düzeyi (isteğe bağlı)';
+
+  @override
+  String get newPostShareQuiz => 'Bir sınav paylaş (isteğe bağlı)';
+
+  @override
+  String get newPostAttachQuiz => 'Sınavlarımdan birini ekle';
+
+  @override
+  String get newPostQuizFallback => 'Sınav';
+
+  @override
+  String get newPostAttachments => 'Ekler';
+
+  @override
+  String get newPostAddFiles => 'Dosya ekle';
+
+  @override
+  String get newPostAttachmentsHint =>
+      'Diğer öğretmenlerin indirebileceği alıştırmalar, videolar veya dosyalar.';
+
+  @override
+  String get newPostPublishing => 'Yayınlanıyor…';
+
+  @override
+  String get newPostSubmit => 'Hub\'a gönder';
+
+  @override
+  String get newPostShareWhichQuiz => 'Hangi sınav paylaşılsın?';
+
+  @override
+  String get newPostNoQuizzes => 'Henüz hiç sınav oluşturmadınız.';
+
+  @override
+  String newPostQuizSubtitle(String className, String questions) {
+    return '$className · $questions';
+  }
+
+  @override
+  String get reportPostTitle => 'Gönderiyi bildir';
+
+  @override
+  String get reportCommentTitle => 'Yorumu bildir';
+
+  @override
+  String get reportReasonLabel => 'Sebep';
+
+  @override
+  String get reportReasonHint => 'Bunu neden bildiriyorsunuz?';
+
+  @override
+  String get postDetailTitle => 'Gönderi';
+
+  @override
+  String get postDetailLoadError => 'Bu gönderi yüklenemedi.';
+
+  @override
+  String postDetailCouldNotRate(String error) {
+    return 'Puanlanamadı: $error';
+  }
+
+  @override
+  String get commentsTitle => 'Yorumlar';
+
+  @override
+  String get commentsEmpty => 'Henüz yorum yok — ilk siz olun.';
+
+  @override
+  String get commentsHint => 'Bir yorum ekle…';
+
+  @override
+  String commentsCouldNotAdd(String error) {
+    return 'Yorum yapılamadı: $error';
+  }
 }
