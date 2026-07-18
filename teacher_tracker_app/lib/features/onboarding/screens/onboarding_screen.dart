@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/design.dart';
 import '../../../core/onboarding/onboarding_controller.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../classes/screens/classes_list_screen.dart';
 import '../../classes/state/classrooms_providers.dart';
 import '../../students/screens/student_form_screen.dart';
@@ -51,6 +52,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
     return GlassScaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -66,11 +68,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   LiquidProgressBar(value: (_step + 1) / _stepCount),
                   const SizedBox(height: AppSpacing.xl),
-                  _buildStep(theme),
+                  _buildStep(theme, loc),
                   const SizedBox(height: AppSpacing.lg),
                   TextButton(
                     onPressed: _finish,
-                    child: const Text('Skip for now'),
+                    child: Text(loc.onboardingSkip),
                   ),
                 ],
               ),
@@ -81,44 +83,41 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Widget _buildStep(ThemeData theme) {
+  Widget _buildStep(ThemeData theme, AppLocalizations loc) {
     switch (_step) {
       case 0:
         return _Step(
           icon: Icons.waving_hand_outlined,
-          title: 'Welcome to Teacher Tracker',
-          body: "Let's get your class set up in a few quick steps.",
-          buttonLabel: 'Get started',
+          title: loc.onboardingWelcomeTitle,
+          body: loc.onboardingWelcomeBody,
+          buttonLabel: loc.onboardingGetStarted,
           onPressed: _next,
           theme: theme,
         );
       case 1:
         return _Step(
           icon: Icons.class_outlined,
-          title: 'Create your first class',
-          body: 'Classes group your students so you can post homework, '
-              'quizzes, and track reading together.',
-          buttonLabel: 'Create a class',
+          title: loc.onboardingClassTitle,
+          body: loc.onboardingClassBody,
+          buttonLabel: loc.onboardingCreateClass,
           onPressed: _createClass,
           theme: theme,
         );
       case 2:
         return _Step(
           icon: Icons.person_add_alt_1_outlined,
-          title: 'Add your first student',
-          body: 'Add a student profile to start tracking homework, '
-              'reading, and notes.',
-          buttonLabel: 'Add a student',
+          title: loc.onboardingStudentTitle,
+          body: loc.onboardingStudentBody,
+          buttonLabel: loc.onboardingAddStudent,
           onPressed: _addStudent,
           theme: theme,
         );
       default:
         return _Step(
           icon: Icons.celebration_outlined,
-          title: "You're all set",
-          body: 'Open a class any time to publish assignments and quizzes '
-              'to your students.',
-          buttonLabel: 'Go to your Hub',
+          title: loc.onboardingDoneTitle,
+          body: loc.onboardingDoneBody,
+          buttonLabel: loc.onboardingGoHub,
           onPressed: _finish,
           theme: theme,
         );

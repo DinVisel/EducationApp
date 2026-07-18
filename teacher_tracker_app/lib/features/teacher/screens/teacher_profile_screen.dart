@@ -18,14 +18,15 @@ class TeacherProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final teacher = ref.watch(currentTeacherProvider);
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(loc.profileTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
+            tooltip: loc.settingsTitle,
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const TeacherSettingsScreen()),
             ),
@@ -96,7 +97,8 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
                 : widget.teacher.copyWith(avatarFileId: uploaded.id),
           );
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.commonUploadFailed('$e'))));
     } finally {
       if (mounted) setState(() => _uploadingImage = false);
     }
@@ -124,7 +126,7 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
             children: [
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Your posts',
+                child: Text(AppLocalizations.of(context)!.profileYourPosts,
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge

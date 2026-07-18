@@ -286,7 +286,7 @@ class _AddStudentsSheet extends ConsumerWidget {
                           title: Text(s.fullName),
                           subtitle: s.studentNumber.isEmpty
                               ? null
-                              : Text('No. ${s.studentNumber}'),
+                              : Text(loc.classStudentNumber(s.studentNumber)),
                           trailing: const Icon(Icons.add),
                           onTap: () => _enroll(ctx, ref, s),
                         );

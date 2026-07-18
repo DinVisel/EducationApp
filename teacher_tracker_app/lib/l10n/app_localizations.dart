@@ -2335,6 +2335,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'re all caught up.'**
   String get notifEmptySubtitle;
+
+  /// No description provided for @homeTeacherFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get homeTeacherFallback;
+
+  /// No description provided for @homeGreetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning,'**
+  String get homeGreetingMorning;
+
+  /// No description provided for @homeGreetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon,'**
+  String get homeGreetingAfternoon;
+
+  /// No description provided for @homeGreetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening,'**
+  String get homeGreetingEvening;
+
+  /// No description provided for @homeQuickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get homeQuickActions;
+
+  /// No description provided for @homeRecentStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Students'**
+  String get homeRecentStudents;
+
+  /// No description provided for @homeSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get homeSeeAll;
+
+  /// No description provided for @homeAddFirstStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first student to get started.'**
+  String get homeAddFirstStudent;
+
+  /// No description provided for @stuAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments'**
+  String get stuAssignments;
+
+  /// No description provided for @stuMyClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'My Classes'**
+  String get stuMyClasses;
+
+  /// No description provided for @stuNoClassesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in any class yet'**
+  String get stuNoClassesTitle;
+
+  /// No description provided for @stuNoClassesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your teacher will enroll you in a class.'**
+  String get stuNoClassesSubtitle;
+
+  /// No description provided for @stuStudentFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get stuStudentFallback;
+
+  /// No description provided for @stuStudentNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Student No. {number}'**
+  String stuStudentNumber(String number);
+
+  /// No description provided for @stuEnrolledClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled classes'**
+  String get stuEnrolledClasses;
+
+  /// No description provided for @stuMyAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'My Assignments'**
+  String get stuMyAssignments;
+
+  /// No description provided for @stuCouldNotUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update: {error}'**
+  String stuCouldNotUpdate(String error);
+
+  /// No description provided for @stuMarkNotDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark not done'**
+  String get stuMarkNotDone;
+
+  /// No description provided for @stuAssignmentsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Work your teacher assigns will show up here.'**
+  String get stuAssignmentsEmptyHint;
+
+  /// No description provided for @stuMyQuizzes.
+  ///
+  /// In en, this message translates to:
+  /// **'My Quizzes'**
+  String get stuMyQuizzes;
+
+  /// No description provided for @stuScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Score {score}/{total}'**
+  String stuScore(int score, int total);
+
+  /// No description provided for @stuTapToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to start'**
+  String get stuTapToStart;
+
+  /// No description provided for @stuQuizzesEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Quizzes your teacher assigns will show up here.'**
+  String get stuQuizzesEmptyHint;
+
+  /// No description provided for @stuQuizCouldNotSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not submit: {error}'**
+  String stuQuizCouldNotSubmit(String error);
+
+  /// No description provided for @stuQuizNoQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'This quiz has no questions.'**
+  String get stuQuizNoQuestions;
+
+  /// No description provided for @stuQuizQuestionOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current} of {total}'**
+  String stuQuizQuestionOf(int current, int total);
+
+  /// No description provided for @stuQuizNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get stuQuizNext;
+
+  /// No description provided for @stuQuizSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting…'**
+  String get stuQuizSubmitting;
+
+  /// No description provided for @stuQuizFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get stuQuizFinish;
+
+  /// No description provided for @stuQuizAlreadyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Already completed'**
+  String get stuQuizAlreadyDone;
+
+  /// No description provided for @stuQuizComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz complete!'**
+  String get stuQuizComplete;
+
+  /// No description provided for @stuQuizPctCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% correct'**
+  String stuQuizPctCorrect(int percent);
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// No description provided for @profileYourPosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Your posts'**
+  String get profileYourPosts;
+
+  /// No description provided for @profileChangeCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Change cover'**
+  String get profileChangeCover;
+
+  /// No description provided for @profileChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get profileChangePhoto;
+
+  /// No description provided for @attachLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Download link for \"{name}\" copied'**
+  String attachLinkCopied(String name);
+
+  /// No description provided for @attachCouldNotOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open file: {error}'**
+  String attachCouldNotOpen(String error);
+
+  /// No description provided for @attachStoragePermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage permission needed to save: {message}'**
+  String attachStoragePermission(String message);
+
+  /// No description provided for @attachCouldNotDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not download: {error}'**
+  String attachCouldNotDownload(String error);
+
+  /// No description provided for @attachSaveToDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to device'**
+  String get attachSaveToDevice;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Teacher Tracker'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s get your class set up in a few quick steps.'**
+  String get onboardingWelcomeBody;
+
+  /// No description provided for @onboardingGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingGetStarted;
+
+  /// No description provided for @onboardingClassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first class'**
+  String get onboardingClassTitle;
+
+  /// No description provided for @onboardingClassBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes group your students so you can post homework, quizzes, and track reading together.'**
+  String get onboardingClassBody;
+
+  /// No description provided for @onboardingCreateClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a class'**
+  String get onboardingCreateClass;
+
+  /// No description provided for @onboardingStudentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first student'**
+  String get onboardingStudentTitle;
+
+  /// No description provided for @onboardingStudentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a student profile to start tracking homework, reading, and notes.'**
+  String get onboardingStudentBody;
+
+  /// No description provided for @onboardingAddStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a student'**
+  String get onboardingAddStudent;
+
+  /// No description provided for @onboardingDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set'**
+  String get onboardingDoneTitle;
+
+  /// No description provided for @onboardingDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a class any time to publish assignments and quizzes to your students.'**
+  String get onboardingDoneBody;
+
+  /// No description provided for @onboardingGoHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to your Hub'**
+  String get onboardingGoHub;
 }
 
 class _AppLocalizationsDelegate

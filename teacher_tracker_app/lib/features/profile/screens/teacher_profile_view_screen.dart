@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/state/auth_controller.dart';
 import '../data/profile_repository.dart';
 import '../widgets/profile_cover_header.dart';
@@ -21,15 +22,16 @@ class TeacherProfileViewScreen extends ConsumerWidget {
     final teacherAsync = ref.watch(teacherProfileProvider(userId));
     final myUserId = ref.watch(currentTeacherProvider)?.userId;
     final isMe = myUserId == userId;
+    final loc = AppLocalizations.of(context)!;
 
     return GlassScaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(loc.profileTitle),
         backgroundColor: Colors.transparent,
       ),
       body: teacherAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(loc.commonError('$e'))),
         data: (teacher) => RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(teacherProfileProvider(userId));

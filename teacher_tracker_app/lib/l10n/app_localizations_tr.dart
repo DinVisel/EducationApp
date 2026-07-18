@@ -1293,4 +1293,191 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get notifEmptySubtitle => 'Her şeyi gördünüz.';
+
+  @override
+  String get homeTeacherFallback => 'Öğretmen';
+
+  @override
+  String get homeGreetingMorning => 'Günaydın,';
+
+  @override
+  String get homeGreetingAfternoon => 'İyi günler,';
+
+  @override
+  String get homeGreetingEvening => 'İyi akşamlar,';
+
+  @override
+  String get homeQuickActions => 'Hızlı İşlemler';
+
+  @override
+  String get homeRecentStudents => 'Son Öğrenciler';
+
+  @override
+  String get homeSeeAll => 'Tümünü gör';
+
+  @override
+  String get homeAddFirstStudent => 'Başlamak için ilk öğrencinizi ekleyin.';
+
+  @override
+  String get stuAssignments => 'Ödevler';
+
+  @override
+  String get stuMyClasses => 'Sınıflarım';
+
+  @override
+  String get stuNoClassesTitle => 'Henüz bir sınıfta değilsiniz';
+
+  @override
+  String get stuNoClassesSubtitle => 'Öğretmeniniz sizi bir sınıfa kaydedecek.';
+
+  @override
+  String get stuStudentFallback => 'Öğrenci';
+
+  @override
+  String stuStudentNumber(String number) {
+    return 'Öğrenci No. $number';
+  }
+
+  @override
+  String get stuEnrolledClasses => 'Kayıtlı sınıflar';
+
+  @override
+  String get stuMyAssignments => 'Ödevlerim';
+
+  @override
+  String stuCouldNotUpdate(String error) {
+    return 'Güncellenemedi: $error';
+  }
+
+  @override
+  String get stuMarkNotDone => 'Yapılmadı işaretle';
+
+  @override
+  String get stuAssignmentsEmptyHint =>
+      'Öğretmeninizin verdiği çalışmalar burada görünecek.';
+
+  @override
+  String get stuMyQuizzes => 'Sınavlarım';
+
+  @override
+  String stuScore(int score, int total) {
+    return 'Puan $score/$total';
+  }
+
+  @override
+  String get stuTapToStart => 'Başlamak için dokunun';
+
+  @override
+  String get stuQuizzesEmptyHint =>
+      'Öğretmeninizin verdiği sınavlar burada görünecek.';
+
+  @override
+  String stuQuizCouldNotSubmit(String error) {
+    return 'Gönderilemedi: $error';
+  }
+
+  @override
+  String get stuQuizNoQuestions => 'Bu sınavda soru yok.';
+
+  @override
+  String stuQuizQuestionOf(int current, int total) {
+    return 'Soru $current / $total';
+  }
+
+  @override
+  String get stuQuizNext => 'İleri';
+
+  @override
+  String get stuQuizSubmitting => 'Gönderiliyor…';
+
+  @override
+  String get stuQuizFinish => 'Bitir';
+
+  @override
+  String get stuQuizAlreadyDone => 'Zaten tamamlandı';
+
+  @override
+  String get stuQuizComplete => 'Sınav tamamlandı!';
+
+  @override
+  String stuQuizPctCorrect(int percent) {
+    return '%$percent doğru';
+  }
+
+  @override
+  String get profileTitle => 'Profil';
+
+  @override
+  String get profileYourPosts => 'Gönderileriniz';
+
+  @override
+  String get profileChangeCover => 'Kapağı değiştir';
+
+  @override
+  String get profileChangePhoto => 'Fotoğrafı değiştir';
+
+  @override
+  String attachLinkCopied(String name) {
+    return '\"$name\" için indirme bağlantısı kopyalandı';
+  }
+
+  @override
+  String attachCouldNotOpen(String error) {
+    return 'Dosya açılamadı: $error';
+  }
+
+  @override
+  String attachStoragePermission(String message) {
+    return 'Kaydetmek için depolama izni gerekli: $message';
+  }
+
+  @override
+  String attachCouldNotDownload(String error) {
+    return 'İndirilemedi: $error';
+  }
+
+  @override
+  String get attachSaveToDevice => 'Cihaza kaydet';
+
+  @override
+  String get onboardingSkip => 'Şimdilik atla';
+
+  @override
+  String get onboardingWelcomeTitle => 'Teacher Tracker\'a hoş geldiniz';
+
+  @override
+  String get onboardingWelcomeBody => 'Sınıfınızı birkaç hızlı adımda kuralım.';
+
+  @override
+  String get onboardingGetStarted => 'Başla';
+
+  @override
+  String get onboardingClassTitle => 'İlk sınıfınızı oluşturun';
+
+  @override
+  String get onboardingClassBody =>
+      'Sınıflar öğrencilerinizi gruplayarak ödev, sınav paylaşmanızı ve okumayı birlikte takip etmenizi sağlar.';
+
+  @override
+  String get onboardingCreateClass => 'Sınıf oluştur';
+
+  @override
+  String get onboardingStudentTitle => 'İlk öğrencinizi ekleyin';
+
+  @override
+  String get onboardingStudentBody =>
+      'Ödev, okuma ve notları takip etmeye başlamak için bir öğrenci profili ekleyin.';
+
+  @override
+  String get onboardingAddStudent => 'Öğrenci ekle';
+
+  @override
+  String get onboardingDoneTitle => 'Her şey hazır';
+
+  @override
+  String get onboardingDoneBody =>
+      'Öğrencilerinize ödev ve sınav yayınlamak için istediğiniz zaman bir sınıf açın.';
+
+  @override
+  String get onboardingGoHub => 'Hub\'ınıza gidin';
 }

@@ -99,7 +99,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             error: (e, _) => [
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: Center(child: Text('Error: $e')),
+                child: Center(child: Text(loc.commonError('$e'))),
               ),
             ],
             data: (posts) {

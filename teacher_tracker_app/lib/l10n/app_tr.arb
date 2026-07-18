@@ -504,5 +504,34 @@
   "stuQuizAlreadyDone": "Zaten tamamlandı",
   "stuQuizComplete": "Sınav tamamlandı!",
   "stuQuizPctCorrect": "%{percent} doğru",
-  "@stuQuizPctCorrect": { "placeholders": { "percent": { "type": "int" } } }
+  "@stuQuizPctCorrect": { "placeholders": { "percent": { "type": "int" } } },
+
+  "profileTitle": "Profil",
+  "profileYourPosts": "Gönderileriniz",
+  "profileChangeCover": "Kapağı değiştir",
+  "profileChangePhoto": "Fotoğrafı değiştir",
+
+  "attachLinkCopied": "\"{name}\" için indirme bağlantısı kopyalandı",
+  "@attachLinkCopied": { "placeholders": { "name": { "type": "String" } } },
+  "attachCouldNotOpen": "Dosya açılamadı: {error}",
+  "@attachCouldNotOpen": { "placeholders": { "error": { "type": "String" } } },
+  "attachStoragePermission": "Kaydetmek için depolama izni gerekli: {message}",
+  "@attachStoragePermission": { "placeholders": { "message": { "type": "String" } } },
+  "attachCouldNotDownload": "İndirilemedi: {error}",
+  "@attachCouldNotDownload": { "placeholders": { "error": { "type": "String" } } },
+  "attachSaveToDevice": "Cihaza kaydet",
+
+  "onboardingSkip": "Şimdilik atla",
+  "onboardingWelcomeTitle": "Teacher Tracker'a hoş geldiniz",
+  "onboardingWelcomeBody": "Sınıfınızı birkaç hızlı adımda kuralım.",
+  "onboardingGetStarted": "Başla",
+  "onboardingClassTitle": "İlk sınıfınızı oluşturun",
+  "onboardingClassBody": "Sınıflar öğrencilerinizi gruplayarak ödev, sınav paylaşmanızı ve okumayı birlikte takip etmenizi sağlar.",
+  "onboardingCreateClass": "Sınıf oluştur",
+  "onboardingStudentTitle": "İlk öğrencinizi ekleyin",
+  "onboardingStudentBody": "Ödev, okuma ve notları takip etmeye başlamak için bir öğrenci profili ekleyin.",
+  "onboardingAddStudent": "Öğrenci ekle",
+  "onboardingDoneTitle": "Her şey hazır",
+  "onboardingDoneBody": "Öğrencilerinize ödev ve sınav yayınlamak için istediğiniz zaman bir sınıf açın.",
+  "onboardingGoHub": "Hub'ınıza gidin"
 }

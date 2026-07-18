@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../feed/state/feed_providers.dart';
 import '../../feed/widgets/post_card.dart';
 
@@ -29,7 +30,7 @@ class TeacherPostsList extends ConsumerWidget {
       ),
       error: (e, _) => Padding(
         padding: const EdgeInsets.all(24),
-        child: Center(child: Text('Error: $e')),
+        child: Center(child: Text(AppLocalizations.of(context)!.commonError('$e'))),
       ),
       data: (posts) {
         if (posts.isEmpty) {
@@ -70,7 +71,7 @@ class _EmptyPosts extends StatelessWidget {
           Icon(Icons.forum_outlined,
               size: 48, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
           const SizedBox(height: 12),
-          Text('No posts yet',
+          Text(AppLocalizations.of(context)!.feedEmptyTitle,
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium

@@ -514,5 +514,34 @@
   "stuQuizAlreadyDone": "Already completed",
   "stuQuizComplete": "Quiz complete!",
   "stuQuizPctCorrect": "{percent}% correct",
-  "@stuQuizPctCorrect": { "placeholders": { "percent": { "type": "int" } } }
+  "@stuQuizPctCorrect": { "placeholders": { "percent": { "type": "int" } } },
+
+  "profileTitle": "Profile",
+  "profileYourPosts": "Your posts",
+  "profileChangeCover": "Change cover",
+  "profileChangePhoto": "Change photo",
+
+  "attachLinkCopied": "Download link for \"{name}\" copied",
+  "@attachLinkCopied": { "placeholders": { "name": { "type": "String" } } },
+  "attachCouldNotOpen": "Could not open file: {error}",
+  "@attachCouldNotOpen": { "placeholders": { "error": { "type": "String" } } },
+  "attachStoragePermission": "Storage permission needed to save: {message}",
+  "@attachStoragePermission": { "placeholders": { "message": { "type": "String" } } },
+  "attachCouldNotDownload": "Could not download: {error}",
+  "@attachCouldNotDownload": { "placeholders": { "error": { "type": "String" } } },
+  "attachSaveToDevice": "Save to device",
+
+  "onboardingSkip": "Skip for now",
+  "onboardingWelcomeTitle": "Welcome to Teacher Tracker",
+  "onboardingWelcomeBody": "Let's get your class set up in a few quick steps.",
+  "onboardingGetStarted": "Get started",
+  "onboardingClassTitle": "Create your first class",
+  "onboardingClassBody": "Classes group your students so you can post homework, quizzes, and track reading together.",
+  "onboardingCreateClass": "Create a class",
+  "onboardingStudentTitle": "Add your first student",
+  "onboardingStudentBody": "Add a student profile to start tracking homework, reading, and notes.",
+  "onboardingAddStudent": "Add a student",
+  "onboardingDoneTitle": "You're all set",
+  "onboardingDoneBody": "Open a class any time to publish assignments and quizzes to your students.",
+  "onboardingGoHub": "Go to your Hub"
 }

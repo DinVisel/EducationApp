@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gal/gal.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../data/files_repository.dart';
 import '../state/file_url_providers.dart';
 
@@ -47,6 +48,7 @@ class _AttachmentTileState extends ConsumerState<AttachmentTile> {
   /// platform can't launch it.
   Future<void> _open(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     try {
       final url = await ref.read(filesRepositoryProvider).getDownloadUrl(fileId);
       final uri = Uri.parse(url);
@@ -54,11 +56,12 @@ class _AttachmentTileState extends ConsumerState<AttachmentTile> {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!launched) {
         await Clipboard.setData(ClipboardData(text: url));
-        messenger.showSnackBar(SnackBar(
-            content: Text('Download link for "$fileName" copied')));
+        messenger.showSnackBar(
+            SnackBar(content: Text(loc.attachLinkCopied(fileName))));
       }
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not open file: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.attachCouldNotOpen('$e'))));
     }
   }
 
@@ -67,6 +70,7 @@ class _AttachmentTileState extends ConsumerState<AttachmentTile> {
     if (_downloading) return;
     setState(() => _downloading = true);
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     try {
       final message = await ref.read(filesRepositoryProvider).downloadToDevice(
             fileId: fileId,
@@ -78,10 +82,10 @@ class _AttachmentTileState extends ConsumerState<AttachmentTile> {
     } on GalException catch (e) {
       // Gallery permission denied / not granted — point the user at settings.
       messenger.showSnackBar(SnackBar(
-          content: Text('Storage permission needed to save: ${e.type.message}')));
+          content: Text(loc.attachStoragePermission(e.type.message))));
     } catch (e) {
-      messenger
-          .showSnackBar(SnackBar(content: Text('Could not download: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.attachCouldNotDownload('$e'))));
     } finally {
       if (mounted) setState(() => _downloading = false);
     }
@@ -123,7 +127,7 @@ class _AttachmentTileState extends ConsumerState<AttachmentTile> {
                         visualDensity: VisualDensity.compact,
                         icon: Icon(Icons.download_outlined,
                             size: 20, color: cs.primary),
-                        tooltip: 'Save to device',
+                        tooltip: AppLocalizations.of(context)!.attachSaveToDevice,
                         onPressed: () => _download(context),
                       ),
                 Icon(Icons.open_in_new, size: 18, color: cs.onSurfaceVariant),

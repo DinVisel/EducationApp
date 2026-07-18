@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../files/state/file_url_providers.dart';
 
 /// A profile header: a cover photo with an overlapping avatar and the name.
@@ -35,6 +36,7 @@ class ProfileCoverHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Column(
       children: [
@@ -51,7 +53,7 @@ class ProfileCoverHeader extends StatelessWidget {
                   top: 12,
                   child: _EditButton(
                     icon: Icons.photo_camera_outlined,
-                    tooltip: 'Change cover',
+                    tooltip: loc.profileChangeCover,
                     onPressed: busy ? null : onEditCover,
                   ),
                 ),
@@ -84,7 +86,7 @@ class ProfileCoverHeader extends StatelessWidget {
                           bottom: 0,
                           child: _EditButton(
                             icon: Icons.photo_camera_outlined,
-                            tooltip: 'Change photo',
+                            tooltip: loc.profileChangePhoto,
                             onPressed: busy ? null : onEditAvatar,
                           ),
                         ),

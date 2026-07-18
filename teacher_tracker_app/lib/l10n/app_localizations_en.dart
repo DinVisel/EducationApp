@@ -1291,4 +1291,192 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifEmptySubtitle => 'You\'re all caught up.';
+
+  @override
+  String get homeTeacherFallback => 'Teacher';
+
+  @override
+  String get homeGreetingMorning => 'Good morning,';
+
+  @override
+  String get homeGreetingAfternoon => 'Good afternoon,';
+
+  @override
+  String get homeGreetingEvening => 'Good evening,';
+
+  @override
+  String get homeQuickActions => 'Quick Actions';
+
+  @override
+  String get homeRecentStudents => 'Recent Students';
+
+  @override
+  String get homeSeeAll => 'See all';
+
+  @override
+  String get homeAddFirstStudent => 'Add your first student to get started.';
+
+  @override
+  String get stuAssignments => 'Assignments';
+
+  @override
+  String get stuMyClasses => 'My Classes';
+
+  @override
+  String get stuNoClassesTitle => 'Not in any class yet';
+
+  @override
+  String get stuNoClassesSubtitle => 'Your teacher will enroll you in a class.';
+
+  @override
+  String get stuStudentFallback => 'Student';
+
+  @override
+  String stuStudentNumber(String number) {
+    return 'Student No. $number';
+  }
+
+  @override
+  String get stuEnrolledClasses => 'Enrolled classes';
+
+  @override
+  String get stuMyAssignments => 'My Assignments';
+
+  @override
+  String stuCouldNotUpdate(String error) {
+    return 'Could not update: $error';
+  }
+
+  @override
+  String get stuMarkNotDone => 'Mark not done';
+
+  @override
+  String get stuAssignmentsEmptyHint =>
+      'Work your teacher assigns will show up here.';
+
+  @override
+  String get stuMyQuizzes => 'My Quizzes';
+
+  @override
+  String stuScore(int score, int total) {
+    return 'Score $score/$total';
+  }
+
+  @override
+  String get stuTapToStart => 'Tap to start';
+
+  @override
+  String get stuQuizzesEmptyHint =>
+      'Quizzes your teacher assigns will show up here.';
+
+  @override
+  String stuQuizCouldNotSubmit(String error) {
+    return 'Could not submit: $error';
+  }
+
+  @override
+  String get stuQuizNoQuestions => 'This quiz has no questions.';
+
+  @override
+  String stuQuizQuestionOf(int current, int total) {
+    return 'Question $current of $total';
+  }
+
+  @override
+  String get stuQuizNext => 'Next';
+
+  @override
+  String get stuQuizSubmitting => 'Submitting…';
+
+  @override
+  String get stuQuizFinish => 'Finish';
+
+  @override
+  String get stuQuizAlreadyDone => 'Already completed';
+
+  @override
+  String get stuQuizComplete => 'Quiz complete!';
+
+  @override
+  String stuQuizPctCorrect(int percent) {
+    return '$percent% correct';
+  }
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get profileYourPosts => 'Your posts';
+
+  @override
+  String get profileChangeCover => 'Change cover';
+
+  @override
+  String get profileChangePhoto => 'Change photo';
+
+  @override
+  String attachLinkCopied(String name) {
+    return 'Download link for \"$name\" copied';
+  }
+
+  @override
+  String attachCouldNotOpen(String error) {
+    return 'Could not open file: $error';
+  }
+
+  @override
+  String attachStoragePermission(String message) {
+    return 'Storage permission needed to save: $message';
+  }
+
+  @override
+  String attachCouldNotDownload(String error) {
+    return 'Could not download: $error';
+  }
+
+  @override
+  String get attachSaveToDevice => 'Save to device';
+
+  @override
+  String get onboardingSkip => 'Skip for now';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to Teacher Tracker';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Let\'s get your class set up in a few quick steps.';
+
+  @override
+  String get onboardingGetStarted => 'Get started';
+
+  @override
+  String get onboardingClassTitle => 'Create your first class';
+
+  @override
+  String get onboardingClassBody =>
+      'Classes group your students so you can post homework, quizzes, and track reading together.';
+
+  @override
+  String get onboardingCreateClass => 'Create a class';
+
+  @override
+  String get onboardingStudentTitle => 'Add your first student';
+
+  @override
+  String get onboardingStudentBody =>
+      'Add a student profile to start tracking homework, reading, and notes.';
+
+  @override
+  String get onboardingAddStudent => 'Add a student';
+
+  @override
+  String get onboardingDoneTitle => 'You\'re all set';
+
+  @override
+  String get onboardingDoneBody =>
+      'Open a class any time to publish assignments and quizzes to your students.';
+
+  @override
+  String get onboardingGoHub => 'Go to your Hub';
 }
