@@ -2155,6 +2155,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark completed'**
   String get classReadingMarkCompleted;
+
+  /// No description provided for @adminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminTitle;
+
+  /// No description provided for @adminReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get adminReports;
+
+  /// No description provided for @adminUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get adminUsers;
+
+  /// No description provided for @adminOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get adminOpen;
+
+  /// No description provided for @adminResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get adminResolved;
+
+  /// No description provided for @adminNoOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'No open reports 🎉'**
+  String get adminNoOpen;
+
+  /// No description provided for @adminNoResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'No resolved reports.'**
+  String get adminNoResolved;
+
+  /// No description provided for @adminReportTitlePost.
+  ///
+  /// In en, this message translates to:
+  /// **'Post report'**
+  String get adminReportTitlePost;
+
+  /// No description provided for @adminReportTitleComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment report'**
+  String get adminReportTitleComment;
+
+  /// No description provided for @adminContentRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'[content removed]'**
+  String get adminContentRemoved;
+
+  /// No description provided for @adminReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String adminReason(String reason);
+
+  /// No description provided for @adminReportedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported by {name}'**
+  String adminReportedBy(String name);
+
+  /// No description provided for @adminDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get adminDismiss;
+
+  /// No description provided for @adminRemoveContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove content'**
+  String get adminRemoveContent;
+
+  /// No description provided for @adminContentRemovedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Content removed'**
+  String get adminContentRemovedMsg;
+
+  /// No description provided for @adminReportDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Report dismissed'**
+  String get adminReportDismissed;
+
+  /// No description provided for @adminActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed: {error}'**
+  String adminActionFailed(String error);
+
+  /// No description provided for @adminRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminRoleAdmin;
+
+  /// No description provided for @adminRoleStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get adminRoleStudent;
+
+  /// No description provided for @adminRoleTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get adminRoleTeacher;
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/admin_report.dart';
 import '../state/admin_providers.dart';
 
@@ -23,6 +24,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
     final async = ref.watch(adminReportsProvider(_resolved));
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -36,14 +38,14 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Reports',
+                  Text(loc.adminReports,
                       style: tt.headlineMedium?.copyWith(
                           color: cs.onSurface, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 12),
                   SegmentedButton<bool>(
-                    segments: const [
-                      ButtonSegment(value: false, label: Text('Open')),
-                      ButtonSegment(value: true, label: Text('Resolved')),
+                    segments: [
+                      ButtonSegment(value: false, label: Text(loc.adminOpen)),
+                      ButtonSegment(value: true, label: Text(loc.adminResolved)),
                     ],
                     selected: {_resolved},
                     onSelectionChanged: (s) =>
@@ -63,7 +65,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
             error: (e, _) => [
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: Center(child: Text('Error: $e')),
+                child: Center(child: Text(loc.commonError('$e'))),
               ),
             ],
             data: (reports) {
@@ -73,7 +75,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                     hasScrollBody: false,
                     child: Center(
                       child: Text(
-                        _resolved ? 'No resolved reports.' : 'No open reports 🎉',
+                        _resolved ? loc.adminNoResolved : loc.adminNoOpen,
                         style: tt.titleMedium
                             ?.copyWith(color: cs.onSurfaceVariant),
                       ),
@@ -107,6 +109,7 @@ class _ReportCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     final removed = report.targetText == null;
 
     return GlassCard(
@@ -124,12 +127,15 @@ class _ReportCard extends ConsumerWidget {
                 color: cs.primary,
               ),
               const SizedBox(width: 8),
-              Text('${report.targetType} report',
+              Text(
+                  report.targetType == 'Post'
+                      ? loc.adminReportTitlePost
+                      : loc.adminReportTitleComment,
                   style: tt.titleSmall?.copyWith(
                       color: cs.onSurface, fontWeight: FontWeight.w700)),
               const Spacer(),
               if (report.isResolved)
-                Text(report.resolution ?? 'Resolved',
+                Text(report.resolution ?? loc.adminResolved,
                     style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
             ],
           ),
@@ -143,7 +149,7 @@ class _ReportCard extends ConsumerWidget {
             ),
             child: Text(
               removed
-                  ? '[content removed]'
+                  ? loc.adminContentRemoved
                   : '“${report.targetText}”'
                       '${report.targetAuthorName != null ? '\n— ${report.targetAuthorName}' : ''}',
               style: tt.bodyMedium?.copyWith(
@@ -152,10 +158,10 @@ class _ReportCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Text('Reason: ${report.reason}',
+          Text(loc.adminReason(report.reason),
               style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
           const SizedBox(height: 2),
-          Text('Reported by ${report.reporterName}',
+          Text(loc.adminReportedBy(report.reporterName),
               style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
           if (!report.isResolved) ...[
             const SizedBox(height: 12),
@@ -164,14 +170,14 @@ class _ReportCard extends ConsumerWidget {
               children: [
                 TextButton(
                   onPressed: () => _act(context, ref, remove: false),
-                  child: const Text('Dismiss'),
+                  child: Text(loc.adminDismiss),
                 ),
                 const SizedBox(width: 8),
                 FilledButton.tonal(
                   onPressed: removed
                       ? null
                       : () => _act(context, ref, remove: true),
-                  child: const Text('Remove content'),
+                  child: Text(loc.adminRemoveContent),
                 ),
               ],
             ),
@@ -184,15 +190,18 @@ class _ReportCard extends ConsumerWidget {
   Future<void> _act(BuildContext context, WidgetRef ref,
       {required bool remove}) async {
     final messenger = ScaffoldMessenger.of(context);
+    final loc = AppLocalizations.of(context)!;
     try {
       final actions = ref.read(adminActionsProvider);
       remove
           ? await actions.removeContent(report.id)
           : await actions.dismiss(report.id);
       messenger.showSnackBar(SnackBar(
-          content: Text(remove ? 'Content removed' : 'Report dismissed')));
+          content: Text(
+              remove ? loc.adminContentRemovedMsg : loc.adminReportDismissed)));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Action failed: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(loc.adminActionFailed('$e'))));
     }
   }
 }

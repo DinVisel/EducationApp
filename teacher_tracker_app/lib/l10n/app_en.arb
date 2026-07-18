@@ -436,5 +436,29 @@
   "classHwStudentHomeworkHint": "Individual homework per student (add from a student’s page).",
 
   "classReadingAddBook": "Add Book",
-  "classReadingMarkCompleted": "Mark completed"
+  "classReadingMarkCompleted": "Mark completed",
+
+  "adminTitle": "Admin",
+  "adminReports": "Reports",
+  "adminUsers": "Users",
+  "adminOpen": "Open",
+  "adminResolved": "Resolved",
+  "adminNoOpen": "No open reports 🎉",
+  "adminNoResolved": "No resolved reports.",
+  "adminReportTitlePost": "Post report",
+  "adminReportTitleComment": "Comment report",
+  "adminContentRemoved": "[content removed]",
+  "adminReason": "Reason: {reason}",
+  "@adminReason": { "placeholders": { "reason": { "type": "String" } } },
+  "adminReportedBy": "Reported by {name}",
+  "@adminReportedBy": { "placeholders": { "name": { "type": "String" } } },
+  "adminDismiss": "Dismiss",
+  "adminRemoveContent": "Remove content",
+  "adminContentRemovedMsg": "Content removed",
+  "adminReportDismissed": "Report dismissed",
+  "adminActionFailed": "Action failed: {error}",
+  "@adminActionFailed": { "placeholders": { "error": { "type": "String" } } },
+  "adminRoleAdmin": "Admin",
+  "adminRoleStudent": "Student",
+  "adminRoleTeacher": "Teacher"
 }

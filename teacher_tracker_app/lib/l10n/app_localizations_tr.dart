@@ -1195,4 +1195,70 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get classReadingMarkCompleted => 'Tamamlandı işaretle';
+
+  @override
+  String get adminTitle => 'Yönetici';
+
+  @override
+  String get adminReports => 'Raporlar';
+
+  @override
+  String get adminUsers => 'Kullanıcılar';
+
+  @override
+  String get adminOpen => 'Açık';
+
+  @override
+  String get adminResolved => 'Çözüldü';
+
+  @override
+  String get adminNoOpen => 'Açık rapor yok 🎉';
+
+  @override
+  String get adminNoResolved => 'Çözülmüş rapor yok.';
+
+  @override
+  String get adminReportTitlePost => 'Gönderi raporu';
+
+  @override
+  String get adminReportTitleComment => 'Yorum raporu';
+
+  @override
+  String get adminContentRemoved => '[içerik kaldırıldı]';
+
+  @override
+  String adminReason(String reason) {
+    return 'Sebep: $reason';
+  }
+
+  @override
+  String adminReportedBy(String name) {
+    return 'Bildiren: $name';
+  }
+
+  @override
+  String get adminDismiss => 'Yoksay';
+
+  @override
+  String get adminRemoveContent => 'İçeriği kaldır';
+
+  @override
+  String get adminContentRemovedMsg => 'İçerik kaldırıldı';
+
+  @override
+  String get adminReportDismissed => 'Rapor yoksayıldı';
+
+  @override
+  String adminActionFailed(String error) {
+    return 'İşlem başarısız: $error';
+  }
+
+  @override
+  String get adminRoleAdmin => 'Yönetici';
+
+  @override
+  String get adminRoleStudent => 'Öğrenci';
+
+  @override
+  String get adminRoleTeacher => 'Öğretmen';
 }

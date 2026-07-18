@@ -426,5 +426,29 @@
   "classHwStudentHomeworkHint": "Öğrenci başına bireysel ödev (öğrencinin sayfasından ekleyin).",
 
   "classReadingAddBook": "Kitap Ekle",
-  "classReadingMarkCompleted": "Tamamlandı işaretle"
+  "classReadingMarkCompleted": "Tamamlandı işaretle",
+
+  "adminTitle": "Yönetici",
+  "adminReports": "Raporlar",
+  "adminUsers": "Kullanıcılar",
+  "adminOpen": "Açık",
+  "adminResolved": "Çözüldü",
+  "adminNoOpen": "Açık rapor yok 🎉",
+  "adminNoResolved": "Çözülmüş rapor yok.",
+  "adminReportTitlePost": "Gönderi raporu",
+  "adminReportTitleComment": "Yorum raporu",
+  "adminContentRemoved": "[içerik kaldırıldı]",
+  "adminReason": "Sebep: {reason}",
+  "@adminReason": { "placeholders": { "reason": { "type": "String" } } },
+  "adminReportedBy": "Bildiren: {name}",
+  "@adminReportedBy": { "placeholders": { "name": { "type": "String" } } },
+  "adminDismiss": "Yoksay",
+  "adminRemoveContent": "İçeriği kaldır",
+  "adminContentRemovedMsg": "İçerik kaldırıldı",
+  "adminReportDismissed": "Rapor yoksayıldı",
+  "adminActionFailed": "İşlem başarısız: {error}",
+  "@adminActionFailed": { "placeholders": { "error": { "type": "String" } } },
+  "adminRoleAdmin": "Yönetici",
+  "adminRoleStudent": "Öğrenci",
+  "adminRoleTeacher": "Öğretmen"
 }

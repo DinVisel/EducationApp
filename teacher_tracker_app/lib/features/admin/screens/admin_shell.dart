@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/state/auth_controller.dart';
 import 'admin_reports_screen.dart';
 import 'admin_users_screen.dart';
@@ -21,15 +22,16 @@ class _AdminShellState extends ConsumerState<AdminShell> {
   @override
   Widget build(BuildContext context) {
     const pages = [AdminReportsScreen(), AdminUsersScreen()];
+    final loc = AppLocalizations.of(context)!;
 
     return GlassScaffold(
       appBar: AppBar(
-        title: const Text('Admin'),
+        title: Text(loc.adminTitle),
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Sign out',
+            tooltip: loc.settingsSignOut,
             onPressed: () => ref.read(authControllerProvider.notifier).logout(),
           ),
         ],
@@ -38,16 +40,16 @@ class _AdminShellState extends ConsumerState<AdminShell> {
       bottomNavigationBar: GlassNavBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
+        destinations: [
           GlassNavDestination(
             icon: Icons.flag_outlined,
             selectedIcon: Icons.flag,
-            label: 'Reports',
+            label: loc.adminReports,
           ),
           GlassNavDestination(
             icon: Icons.people_outline,
             selectedIcon: Icons.people,
-            label: 'Users',
+            label: loc.adminUsers,
           ),
         ],
       ),

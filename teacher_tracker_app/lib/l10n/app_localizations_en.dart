@@ -1193,4 +1193,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classReadingMarkCompleted => 'Mark completed';
+
+  @override
+  String get adminTitle => 'Admin';
+
+  @override
+  String get adminReports => 'Reports';
+
+  @override
+  String get adminUsers => 'Users';
+
+  @override
+  String get adminOpen => 'Open';
+
+  @override
+  String get adminResolved => 'Resolved';
+
+  @override
+  String get adminNoOpen => 'No open reports 🎉';
+
+  @override
+  String get adminNoResolved => 'No resolved reports.';
+
+  @override
+  String get adminReportTitlePost => 'Post report';
+
+  @override
+  String get adminReportTitleComment => 'Comment report';
+
+  @override
+  String get adminContentRemoved => '[content removed]';
+
+  @override
+  String adminReason(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String adminReportedBy(String name) {
+    return 'Reported by $name';
+  }
+
+  @override
+  String get adminDismiss => 'Dismiss';
+
+  @override
+  String get adminRemoveContent => 'Remove content';
+
+  @override
+  String get adminContentRemovedMsg => 'Content removed';
+
+  @override
+  String get adminReportDismissed => 'Report dismissed';
+
+  @override
+  String adminActionFailed(String error) {
+    return 'Action failed: $error';
+  }
+
+  @override
+  String get adminRoleAdmin => 'Admin';
+
+  @override
+  String get adminRoleStudent => 'Student';
+
+  @override
+  String get adminRoleTeacher => 'Teacher';
 }

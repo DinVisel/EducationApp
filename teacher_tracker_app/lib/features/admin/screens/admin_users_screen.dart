@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/admin_user.dart';
 import '../state/admin_providers.dart';
 
@@ -14,6 +15,7 @@ class AdminUsersScreen extends ConsumerWidget {
     final async = ref.watch(adminUsersProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -26,7 +28,7 @@ class AdminUsersScreen extends ConsumerWidget {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                     20, MediaQuery.of(context).padding.top + 24, 20, 8),
-                child: Text('Users',
+                child: Text(loc.adminUsers,
                     style: tt.headlineMedium?.copyWith(
                         color: cs.onSurface, fontWeight: FontWeight.w700)),
               ),
@@ -41,7 +43,7 @@ class AdminUsersScreen extends ConsumerWidget {
               error: (e, _) => [
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Center(child: Text('Error: $e')),
+                  child: Center(child: Text(loc.commonError('$e'))),
                 ),
               ],
               data: (users) => [
@@ -70,6 +72,7 @@ class _UserCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
     return GlassCard(
       padding: const EdgeInsets.all(14),
       child: Row(
@@ -99,7 +102,7 @@ class _UserCard extends StatelessWidget {
               color: cs.primaryContainer.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(user.role,
+            child: Text(_roleLabel(loc, user.role),
                 style: tt.labelSmall?.copyWith(
                     color: cs.onSurface, fontWeight: FontWeight.w600)),
           ),
@@ -116,6 +119,19 @@ class _UserCard extends StatelessWidget {
         return Icons.school_outlined;
       default:
         return Icons.person_outline;
+    }
+  }
+
+  static String _roleLabel(AppLocalizations loc, String role) {
+    switch (role) {
+      case 'Admin':
+        return loc.adminRoleAdmin;
+      case 'Student':
+        return loc.adminRoleStudent;
+      case 'Teacher':
+        return loc.adminRoleTeacher;
+      default:
+        return role;
     }
   }
 }
