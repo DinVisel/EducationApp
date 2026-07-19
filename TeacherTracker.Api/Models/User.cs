@@ -7,13 +7,25 @@ public class User
 {
     public int Id { get; set; }
 
-    // Login identifier; unique (see AppDbContext).
-    public string Email { get; set; } = string.Empty;
+    // Login identifier for email/password and social accounts; unique (see
+    // AppDbContext). Null for a Method A "access card" student — they log in with
+    // an AccessCode/QR instead of an email, and the unique index treats NULLs as
+    // distinct (same trick as GoogleSubject/AppleSubject) so many code-only
+    // students don't collide.
+    public string? Email { get; set; }
 
     // Hashed with ASP.NET Core's PasswordHasher; never store or return plaintext.
+    // Empty for pure-social and access-card accounts (no password login).
     public string PasswordHash { get; set; } = string.Empty;
 
     public UserRole Role { get; set; }
+
+    // Method A (Access Card) passwordless login for young students. The typed
+    // AccessCode is short and human-friendly ("A3B7Q9"); the QR encodes a long
+    // random secret whose SHA-256 we store (never the raw value, mirroring
+    // password-reset tokens). Both are unique and null for every non-card account.
+    public string? AccessCode { get; set; }
+    public string? AccessQrTokenHash { get; set; }
 
     // Provider subject ids ("sub" claim) for social sign-in. Each is the stable,
     // per-app identifier the provider assigns to the user; null until the account

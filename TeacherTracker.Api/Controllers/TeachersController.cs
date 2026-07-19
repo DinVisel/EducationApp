@@ -41,7 +41,7 @@ public class TeachersController : ControllerBase
             teacher.UserId,
             teacher.FirstName,
             teacher.LastName,
-            teacher.User!.Email,
+            teacher.User!.Email ?? string.Empty,
             teacher.AvatarFileObjectId,
             teacher.CoverFileObjectId));
     }

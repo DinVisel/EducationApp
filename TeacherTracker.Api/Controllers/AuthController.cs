@@ -47,19 +47,40 @@ public class AuthController : ControllerBase
         if (await _db.Users.AnyAsync(u => u.Email == email))
             return Conflict("An account with that email already exists.");
 
-        // A teacher account is a User (identity) + a Teacher profile.
-        var teacher = new Teacher
+        if (!TryParseSelfSignupRole(dto.Role ?? nameof(UserRole.Teacher), out var role))
+            return BadRequest("Role must be Teacher or Student.");
+
+        // An account is a User (identity) + the profile matching its role. A
+        // student registering here is the Method B path — they still need teacher
+        // approval (via a class code) before joining any class.
+        Teacher? teacher = null;
+        Student? student = null;
+        User user;
+        if (role == UserRole.Teacher)
         {
-            FirstName = dto.FirstName.Trim(),
-            LastName = dto.LastName.Trim(),
-        };
-        var user = new User { Email = email, Role = UserRole.Teacher, Teacher = teacher };
+            teacher = new Teacher
+            {
+                FirstName = dto.FirstName.Trim(),
+                LastName = dto.LastName.Trim(),
+            };
+            user = new User { Email = email, Role = UserRole.Teacher, Teacher = teacher };
+        }
+        else
+        {
+            student = new Student
+            {
+                FirstName = dto.FirstName.Trim(),
+                LastName = dto.LastName.Trim(),
+                RegistrationType = StudentRegistrationType.SelfRegistered,
+            };
+            user = new User { Email = email, Role = UserRole.Student, Student = student };
+        }
         user.PasswordHash = _hasher.HashPassword(user, dto.Password);
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
-        return Ok(await IssueAsync(user, teacher, null));
+        return Ok(await IssueAsync(user, teacher, student));
     }
 
     [EnableRateLimiting("auth")]
@@ -86,6 +107,40 @@ public class AuthController : ControllerBase
         }
 
         return Ok(await IssueAsync(user, user.Teacher, user.Student));
+    }
+
+    // ── Method A: Access Card passwordless login (ages 8-10) ────────────────
+
+    /// Logs a young student in by their typed access code — no email/password.
+    /// Rate-limited (the code is short and therefore guessable in bulk).
+    [EnableRateLimiting("auth")]
+    [HttpPost("access-code")]
+    public async Task<ActionResult<AuthResponseDto>> AccessCode(AccessCodeLoginDto dto)
+    {
+        var code = dto.Code.Trim().ToUpperInvariant();
+        var user = await _db.Users
+            .Include(u => u.Student)
+            .FirstOrDefaultAsync(u => u.AccessCode == code);
+        if (user is null || user.Student is null)
+            return Unauthorized("That access code is not valid.");
+
+        return Ok(await IssueAsync(user, null, user.Student));
+    }
+
+    /// Logs a young student in by scanning their access-card QR. The QR encodes a
+    /// long secret; we match on its hash (never stored in plaintext).
+    [EnableRateLimiting("auth")]
+    [HttpPost("access-qr")]
+    public async Task<ActionResult<AuthResponseDto>> AccessQr(AccessQrLoginDto dto)
+    {
+        var hash = TokenService.HashToken(dto.Token.Trim());
+        var user = await _db.Users
+            .Include(u => u.Student)
+            .FirstOrDefaultAsync(u => u.AccessQrTokenHash == hash);
+        if (user is null || user.Student is null)
+            return Unauthorized("That access card is not valid.");
+
+        return Ok(await IssueAsync(user, null, user.Student));
     }
 
     [EnableRateLimiting("auth")]
@@ -316,7 +371,7 @@ public class AuthController : ControllerBase
     {
         var email = dto.Email.Trim().ToLowerInvariant();
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
-        if (user is not null)
+        if (user is not null && user.Email is not null)
         {
             var rawToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
             user.PasswordResetTokenHash = TokenService.HashToken(rawToken);
@@ -478,7 +533,7 @@ public class AuthController : ControllerBase
             t.AvatarFileObjectId, t.CoverFileObjectId);
 
     private static TeacherDto ToDto(Teacher t, User u) =>
-        new(t.Id, u.Id, t.FirstName, t.LastName, u.Email,
+        new(t.Id, u.Id, t.FirstName, t.LastName, u.Email ?? string.Empty,
             t.AvatarFileObjectId, t.CoverFileObjectId);
 
     private static StudentProfileDto ToProfileDto(Student s) =>

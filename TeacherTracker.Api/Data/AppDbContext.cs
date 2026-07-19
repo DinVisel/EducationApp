@@ -35,6 +35,7 @@ public class AppDbContext : DbContext
     public DbSet<StudentQuizAnswer> StudentQuizAnswers { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Attendance> Attendances { get; set; }
+    public DbSet<ClassJoinRequest> ClassJoinRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,6 +54,16 @@ public class AppDbContext : DbContext
             .IsUnique();
         modelBuilder.Entity<User>()
             .HasIndex(u => u.AppleSubject)
+            .IsUnique();
+
+        // Method A access-card credentials: each maps to at most one account, and
+        // login is a direct lookup by them. NULLs are distinct (same as the social
+        // subjects above), so all non-card accounts coexist without colliding.
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.AccessCode)
+            .IsUnique();
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.AccessQrTokenHash)
             .IsUnique();
 
         // Store the role as readable text rather than an int.
@@ -118,6 +129,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Student>()
             .HasIndex(s => s.TeacherId);
 
+        // Store the onboarding type as readable text rather than an int.
+        modelBuilder.Entity<Student>()
+            .Property(s => s.RegistrationType)
+            .HasConversion<string>();
+
         // Store the enum as readable text rather than an int.
         modelBuilder.Entity<Book>()
             .Property(b => b.Status)
@@ -129,6 +145,12 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(c => c.TeacherId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // The global join code (Method B) must be unique so a lookup resolves to
+        // exactly one class.
+        modelBuilder.Entity<Classroom>()
+            .HasIndex(c => c.ClassCode)
+            .IsUnique();
 
         // A student can only be enrolled in a given classroom once.
         modelBuilder.Entity<Enrollment>()
@@ -147,6 +169,35 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(e => e.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // --- Class join requests (Method B "Waiting Lobby") ---
+
+        // Store the status as readable text rather than an int.
+        modelBuilder.Entity<ClassJoinRequest>()
+            .Property(r => r.Status)
+            .HasConversion<string>();
+
+        // Removing either side removes the request.
+        modelBuilder.Entity<ClassJoinRequest>()
+            .HasOne(r => r.Classroom)
+            .WithMany()
+            .HasForeignKey(r => r.ClassroomId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ClassJoinRequest>()
+            .HasOne(r => r.Student)
+            .WithMany()
+            .HasForeignKey(r => r.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // The lobby view lists a class's requests by status; the student's view
+        // lists their own. Cover both. Uniqueness of a *live* request per
+        // (student, class) is enforced in the controller so a rejected student can
+        // re-request (a filtered unique index isn't portable across providers).
+        modelBuilder.Entity<ClassJoinRequest>()
+            .HasIndex(r => new { r.ClassroomId, r.Status });
+        modelBuilder.Entity<ClassJoinRequest>()
+            .HasIndex(r => r.StudentId);
 
         // Deleting a classroom removes the assignments published to it.
         modelBuilder.Entity<Assignment>()

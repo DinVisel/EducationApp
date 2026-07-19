@@ -7,6 +7,11 @@ public class Classroom
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
 
+    // Global, human-shareable join code (e.g. "MAT101") for Method B onboarding:
+    // an older student types it in the app to request to join (see
+    // ClassJoinRequest). Generated on create; unique (see AppDbContext).
+    public string ClassCode { get; set; } = string.Empty;
+
     public int TeacherId { get; set; }
     public Teacher? Teacher { get; set; }
 

@@ -7,6 +7,7 @@ using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
+using TeacherTracker.Api.Notifications;
 
 namespace TeacherTracker.Api.Controllers;
 
@@ -20,10 +21,12 @@ namespace TeacherTracker.Api.Controllers;
 public class StudentModuleController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly INotificationPublisher _publisher;
 
-    public StudentModuleController(AppDbContext db)
+    public StudentModuleController(AppDbContext db, INotificationPublisher publisher)
     {
         _db = db;
+        _publisher = publisher;
     }
 
     private int StudentId => User.GetStudentId();
@@ -56,6 +59,99 @@ public class StudentModuleController : ControllerBase
             .ToListAsync();
 
         return Ok(classes);
+    }
+
+    // ── Method B: join a class via its code (the Waiting Lobby) ─────────────
+
+    /// Submits a class code to request to join. Creates a Pending request (NOT an
+    /// enrollment) and notifies the teacher — the student gets no access until the
+    /// teacher approves.
+    [HttpPost("class-requests")]
+    public async Task<ActionResult<ClassJoinRequestDto>> RequestToJoin(JoinClassDto dto)
+    {
+        var code = dto.ClassCode.Trim().ToUpperInvariant();
+        var classroom = await _db.Classrooms
+            .Include(c => c.Teacher)
+            .FirstOrDefaultAsync(c => c.ClassCode == code);
+        if (classroom is null)
+            return NotFound("No class matches that code.");
+
+        // Already a member?
+        if (await _db.Enrollments.AnyAsync(e =>
+                e.ClassroomId == classroom.Id && e.StudentId == StudentId))
+            return Conflict("You are already in this class.");
+
+        // A live (pending) request already exists?
+        var existing = await _db.ClassJoinRequests.FirstOrDefaultAsync(r =>
+            r.ClassroomId == classroom.Id && r.StudentId == StudentId &&
+            r.Status == ClassJoinRequestStatus.Pending);
+        if (existing is not null)
+            return Conflict("You already have a pending request for this class.");
+
+        var request = new ClassJoinRequest
+        {
+            StudentId = StudentId,
+            ClassroomId = classroom.Id,
+            Status = ClassJoinRequestStatus.Pending,
+        };
+        _db.ClassJoinRequests.Add(request);
+
+        // Notify the class's teacher.
+        var teacherUserId = classroom.Teacher!.UserId;
+        var studentName = await _db.Students
+            .Where(s => s.Id == StudentId)
+            .Select(s => (s.FirstName + " " + s.LastName).Trim())
+            .FirstOrDefaultAsync() ?? "A student";
+        _db.Notifications.Add(new Notification
+        {
+            RecipientUserId = teacherUserId,
+            Type = NotificationType.ClassJoinRequested,
+            Text = $"{studentName} wants to join {classroom.Name}.",
+        });
+
+        await _db.SaveChangesAsync();
+        await _publisher.NotifyAsync(new[] { teacherUserId });
+
+        return Ok(new ClassJoinRequestDto(
+            request.Id, classroom.Id, classroom.Name,
+            (classroom.Teacher.FirstName + " " + classroom.Teacher.LastName).Trim(),
+            request.Status.ToString(), request.CreatedAt, null));
+    }
+
+    /// The student's own join requests (pending and decided), newest first.
+    [HttpGet("class-requests")]
+    public async Task<ActionResult<IEnumerable<ClassJoinRequestDto>>> MyRequests()
+    {
+        var requests = await _db.ClassJoinRequests
+            .AsNoTracking()
+            .Where(r => r.StudentId == StudentId)
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new ClassJoinRequestDto(
+                r.Id,
+                r.ClassroomId,
+                r.Classroom!.Name,
+                (r.Classroom.Teacher!.FirstName + " " + r.Classroom.Teacher.LastName).Trim(),
+                r.Status.ToString(),
+                r.CreatedAt,
+                r.DecidedAt))
+            .ToListAsync();
+
+        return Ok(requests);
+    }
+
+    /// Cancels the student's own pending request.
+    [HttpDelete("class-requests/{id:int}")]
+    public async Task<IActionResult> CancelRequest(int id)
+    {
+        var request = await _db.ClassJoinRequests.FirstOrDefaultAsync(r =>
+            r.Id == id && r.StudentId == StudentId &&
+            r.Status == ClassJoinRequestStatus.Pending);
+        if (request is null)
+            return NotFound();
+
+        _db.ClassJoinRequests.Remove(request);
+        await _db.SaveChangesAsync();
+        return NoContent();
     }
 
     [HttpGet("assignments")]

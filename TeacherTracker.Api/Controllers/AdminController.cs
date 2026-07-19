@@ -39,7 +39,7 @@ public class AdminController : ControllerBase
                 r.Id,
                 r.Reason,
                 r.CreatedAt,
-                r.Reporter!.Email,
+                r.Reporter!.Email ?? string.Empty,
                 r.PostId != null ? "Post" : "Comment",
                 r.PostId ?? r.PostCommentId,
                 r.PostId != null
@@ -122,7 +122,7 @@ public class AdminController : ControllerBase
         {
             var term = search.Trim().ToLower();
             query = query.Where(u =>
-                u.Email.ToLower().Contains(term)
+                (u.Email != null && u.Email.ToLower().Contains(term))
                 || (u.Teacher != null
                     && (u.Teacher.FirstName + " " + u.Teacher.LastName).ToLower().Contains(term))
                 || (u.Student != null
@@ -137,7 +137,7 @@ public class AdminController : ControllerBase
             .Take(pageSize)
             .Select(u => new AdminUserDto(
                 u.Id,
-                u.Email,
+                u.Email ?? string.Empty,
                 u.Role,
                 u.Teacher != null
                     ? u.Teacher.FirstName + " " + u.Teacher.LastName
@@ -217,7 +217,7 @@ public class AdminController : ControllerBase
                 : null);
 
         return Ok(new AdminUserDto(
-            user.Id, user.Email, user.Role, name, user.CreatedAt, user.IsDeleted));
+            user.Id, user.Email ?? string.Empty, user.Role, name, user.CreatedAt, user.IsDeleted));
     }
 
     /// Platform-wide analytics: headline KPIs plus 30-day daily time series for new

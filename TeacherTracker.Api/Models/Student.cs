@@ -7,6 +7,11 @@ public class Student
     public string LastName { get; set; } = string.Empty;
     public string StudentNumber { get; set; } = string.Empty;
 
+    // Which onboarding pipeline created this record. Defaults to TeacherManaged
+    // (the original flow) so every pre-existing row keeps its meaning.
+    public StudentRegistrationType RegistrationType { get; set; }
+        = StudentRegistrationType.TeacherManaged;
+
     // Detailed profile (all optional).
     public DateOnly? DateOfBirth { get; set; }
     public string? Gender { get; set; }

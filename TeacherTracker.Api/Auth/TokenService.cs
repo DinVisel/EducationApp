@@ -49,7 +49,9 @@ public class TokenService
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email),
+            // Access-card students have no email; omit the claim rather than emit
+            // an empty one (the Claim ctor rejects a null value).
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new("role", user.Role.ToString()),
             new(ClaimTypes.Role, user.Role.ToString()),
