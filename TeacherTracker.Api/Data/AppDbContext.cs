@@ -45,6 +45,16 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Email)
             .IsUnique();
 
+        // A provider subject maps to at most one account. Both Postgres and SQLite
+        // treat NULLs as distinct in a unique index, so the many accounts without
+        // a given provider linked don't collide.
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.GoogleSubject)
+            .IsUnique();
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.AppleSubject)
+            .IsUnique();
+
         // Store the role as readable text rather than an int.
         modelBuilder.Entity<User>()
             .Property(u => u.Role)

@@ -33,6 +33,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonSomethingWentWrong => 'Bir şeyler ters gitti.';
 
   @override
+  String get commonOr => 'veya';
+
+  @override
   String get connectivityOffline => 'Çevrimdışısınız';
 
   @override
@@ -179,6 +182,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get loginInvalidCredentials => 'E-posta veya şifre hatalı.';
+
+  @override
+  String get loginContinueWithGoogle => 'Google ile devam et';
 
   @override
   String get registerTitle => 'Hesap oluştur';

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../core/api/error_mapper.dart';
 import '../../../core/design.dart';
@@ -44,6 +46,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() => _submitting = true);
+    try {
+      await ref.read(authControllerProvider.notifier).signInWithGoogle();
+    } on GoogleSignInException catch (e) {
+      // User dismissed the sheet — not an error worth surfacing.
+      if (e.code == GoogleSignInExceptionCode.canceled) return;
+      if (mounted) _showError(e);
+    } catch (e) {
+      if (mounted) _showError(e);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    setState(() => _submitting = true);
+    try {
+      await ref.read(authControllerProvider.notifier).signInWithApple();
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) return;
+      if (mounted) _showError(e);
+    } catch (e) {
+      if (mounted) _showError(e);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  void _showError(Object e) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(_message(context, e))));
   }
 
   @override
@@ -123,6 +159,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(loc.loginSignIn),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        const Expanded(child: Divider()),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm),
+                          child: Text(loc.commonOr,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant)),
+                        ),
+                        const Expanded(child: Divider()),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    OutlinedButton.icon(
+                      onPressed: _submitting ? null : _signInWithGoogle,
+                      icon: const Icon(Icons.g_mobiledata, size: 28),
+                      label: Text(loc.loginContinueWithGoogle),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    SignInWithAppleButton(
+                      onPressed: _submitting ? () {} : _signInWithApple,
+                      style: theme.brightness == Brightness.dark
+                          ? SignInWithAppleButtonStyle.white
+                          : SignInWithAppleButtonStyle.black,
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(

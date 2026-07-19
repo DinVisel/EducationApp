@@ -113,6 +113,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+// Social sign-in (Apple / Google): verify provider ID tokens against their public
+// keys + our configured audiences, then issue our own JWT (see AuthController).
+builder.Services.Configure<SocialAuthOptions>(
+    builder.Configuration.GetSection(SocialAuthOptions.SectionName));
+builder.Services.AddSingleton<SocialTokenVerifier>();
+
 // --- Real-time notifications (SignalR) ---
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();

@@ -15,6 +15,14 @@ public class User
 
     public UserRole Role { get; set; }
 
+    // Provider subject ids ("sub" claim) for social sign-in. Each is the stable,
+    // per-app identifier the provider assigns to the user; null until the account
+    // links that provider. Unique (see AppDbContext) so a subject maps to one
+    // account. A pure-social account has an empty PasswordHash (no password login
+    // until it sets one via forgot/reset-password).
+    public string? GoogleSubject { get; set; }
+    public string? AppleSubject { get; set; }
+
     // Forces a password change on next sign-in. Set when a teacher provisions a
     // student login (the teacher picked the initial password), cleared once the
     // student sets their own via /auth/change-password.

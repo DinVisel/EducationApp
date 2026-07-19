@@ -146,6 +146,12 @@ abstract class AppLocalizations {
   /// **'Something went wrong.'**
   String get commonSomethingWentWrong;
 
+  /// No description provided for @commonOr.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get commonOr;
+
   /// No description provided for @connectivityOffline.
   ///
   /// In en, this message translates to:
@@ -397,6 +403,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid email or password.'**
   String get loginInvalidCredentials;
+
+  /// No description provided for @loginContinueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get loginContinueWithGoogle;
 
   /// No description provided for @registerTitle.
   ///

@@ -9,6 +9,7 @@
   "commonPasswordsDoNotMatch": "Şifreler eşleşmiyor",
   "commonNetworkError": "Ağ hatası. Sunucu çalışıyor mu?",
   "commonSomethingWentWrong": "Bir şeyler ters gitti.",
+  "commonOr": "veya",
   "connectivityOffline": "Çevrimdışısınız",
   "connectivityBackOnline": "Tekrar çevrimiçi",
   "commonError": "Hata: {error}",
@@ -62,6 +63,7 @@
   "loginForgotPassword": "Şifremi unuttum",
   "loginSignIn": "Giriş yap",
   "loginNoAccount": "Hesabınız yok mu? Kayıt olun",
+  "loginContinueWithGoogle": "Google ile devam et",
   "loginInvalidCredentials": "E-posta veya şifre hatalı.",
 
   "registerTitle": "Hesap oluştur",

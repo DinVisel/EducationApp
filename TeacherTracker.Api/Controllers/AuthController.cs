@@ -23,13 +23,16 @@ public class AuthController : ControllerBase
     private readonly AppDbContext _db;
     private readonly TokenService _tokens;
     private readonly IEmailService _email;
+    private readonly SocialTokenVerifier _social;
     private readonly PasswordHasher<User> _hasher = new();
 
-    public AuthController(AppDbContext db, TokenService tokens, IEmailService email)
+    public AuthController(
+        AppDbContext db, TokenService tokens, IEmailService email, SocialTokenVerifier social)
     {
         _db = db;
         _tokens = tokens;
         _email = email;
+        _social = social;
     }
 
     [EnableRateLimiting("auth")]
@@ -79,6 +82,104 @@ public class AuthController : ControllerBase
         }
 
         return Ok(await IssueAsync(user, user.Teacher, user.Student));
+    }
+
+    [EnableRateLimiting("auth")]
+    [HttpPost("google")]
+    public async Task<ActionResult<AuthResponseDto>> Google(SocialLoginDto dto)
+    {
+        SocialIdentity identity;
+        try
+        {
+            identity = await _social.VerifyGoogleAsync(dto.IdToken);
+        }
+        catch
+        {
+            return Unauthorized("Could not verify the Google sign-in.");
+        }
+
+        return await SocialSignInAsync(SocialProvider.Google, identity);
+    }
+
+    [EnableRateLimiting("auth")]
+    [HttpPost("apple")]
+    public async Task<ActionResult<AuthResponseDto>> Apple(SocialLoginDto dto)
+    {
+        SocialIdentity identity;
+        try
+        {
+            identity = await _social.VerifyAppleAsync(
+                dto.IdToken, dto.Nonce, dto.FirstName, dto.LastName);
+        }
+        catch
+        {
+            return Unauthorized("Could not verify the Apple sign-in.");
+        }
+
+        return await SocialSignInAsync(SocialProvider.Apple, identity);
+    }
+
+    private enum SocialProvider { Google, Apple }
+
+    // Shared social sign-in: match the account by provider subject, else link by
+    // verified email, else create a new Teacher account (never Admin). Issues our
+    // own token pair, so everything downstream is identical to password login.
+    private async Task<ActionResult<AuthResponseDto>> SocialSignInAsync(
+        SocialProvider provider, SocialIdentity identity)
+    {
+        // 1. Returning user: match on the provider's stable subject id.
+        System.Linq.Expressions.Expression<Func<User, bool>> bySubject =
+            provider == SocialProvider.Google
+                ? u => u.GoogleSubject == identity.Subject
+                : u => u.AppleSubject == identity.Subject;
+        var user = await _db.Users
+            .Include(u => u.Teacher)
+            .Include(u => u.Student)
+            .FirstOrDefaultAsync(bySubject);
+
+        if (user is not null)
+            return Ok(await IssueAsync(user, user.Teacher, user.Student));
+
+        var email = identity.Email?.Trim().ToLowerInvariant();
+
+        // 2. Existing account with the same verified email: link this provider.
+        if (!string.IsNullOrEmpty(email))
+        {
+            user = await _db.Users
+                .Include(u => u.Teacher)
+                .Include(u => u.Student)
+                .FirstOrDefaultAsync(u => u.Email == email);
+            if (user is not null)
+            {
+                LinkSubject(user, provider, identity.Subject);
+                await _db.SaveChangesAsync();
+                return Ok(await IssueAsync(user, user.Teacher, user.Student));
+            }
+        }
+
+        // 3. New account. A verified email is required so we can key/link it.
+        if (string.IsNullOrEmpty(email))
+            return BadRequest("A verified email is required to create an account.");
+
+        var teacher = new Teacher
+        {
+            FirstName = identity.FirstName?.Trim() ?? string.Empty,
+            LastName = identity.LastName?.Trim() ?? string.Empty,
+        };
+        // No password login until the account sets one via forgot/reset-password.
+        var newUser = new User { Email = email, Role = UserRole.Teacher, Teacher = teacher };
+        LinkSubject(newUser, provider, identity.Subject);
+
+        _db.Users.Add(newUser);
+        await _db.SaveChangesAsync();
+
+        return Ok(await IssueAsync(newUser, teacher, null));
+    }
+
+    private static void LinkSubject(User user, SocialProvider provider, string subject)
+    {
+        if (provider == SocialProvider.Google) user.GoogleSubject = subject;
+        else user.AppleSubject = subject;
     }
 
     [EnableRateLimiting("auth")]

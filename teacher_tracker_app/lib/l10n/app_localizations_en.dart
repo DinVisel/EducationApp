@@ -33,6 +33,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSomethingWentWrong => 'Something went wrong.';
 
   @override
+  String get commonOr => 'or';
+
+  @override
   String get connectivityOffline => 'You\'re offline';
 
   @override
@@ -179,6 +182,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginInvalidCredentials => 'Invalid email or password.';
+
+  @override
+  String get loginContinueWithGoogle => 'Continue with Google';
 
   @override
   String get registerTitle => 'Create account';

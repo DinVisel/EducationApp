@@ -67,6 +67,32 @@ class AuthController extends AsyncNotifier<AuthState?> {
     ));
   }
 
+  /// Signs in with Google and persists the returned token pair (the backend
+  /// links or creates the account). Errors (including user cancellation) bubble
+  /// up for the caller to handle.
+  Future<void> signInWithGoogle() async {
+    final result = await ref.read(authRepositoryProvider).signInWithGoogle();
+    await ref.read(tokenStoreProvider).saveTokens(result.token, result.refreshToken);
+    state = AsyncData(AuthState(
+      role: result.role,
+      teacher: result.teacher,
+      student: result.student,
+      mustChangePassword: result.mustChangePassword,
+    ));
+  }
+
+  /// Signs in with Apple and persists the returned token pair.
+  Future<void> signInWithApple() async {
+    final result = await ref.read(authRepositoryProvider).signInWithApple();
+    await ref.read(tokenStoreProvider).saveTokens(result.token, result.refreshToken);
+    state = AsyncData(AuthState(
+      role: result.role,
+      teacher: result.teacher,
+      student: result.student,
+      mustChangePassword: result.mustChangePassword,
+    ));
+  }
+
   Future<void> register({
     required String firstName,
     required String lastName,

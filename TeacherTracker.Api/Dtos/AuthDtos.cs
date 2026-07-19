@@ -35,6 +35,16 @@ public record ChangePasswordDto(
 public record RefreshRequestDto(
     [Required] string RefreshToken);
 
+/// Sent to the social sign-in endpoints (/auth/google, /auth/apple): the
+/// provider ID token to verify. [Nonce] (when the client used one) is checked
+/// against the token's `nonce` claim. Apple only returns the user's name on the
+/// first authorization, so the client forwards it here for account creation.
+public record SocialLoginDto(
+    [Required] string IdToken,
+    string? Nonce = null,
+    string? FirstName = null,
+    string? LastName = null);
+
 public record LogoutRequestDto(
     [Required] string RefreshToken);
 

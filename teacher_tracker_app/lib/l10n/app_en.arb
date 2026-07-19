@@ -9,6 +9,7 @@
   "commonPasswordsDoNotMatch": "Passwords do not match",
   "commonNetworkError": "Network error. Is the server running?",
   "commonSomethingWentWrong": "Something went wrong.",
+  "commonOr": "or",
   "connectivityOffline": "You're offline",
   "connectivityBackOnline": "Back online",
   "commonError": "Error: {error}",
@@ -63,6 +64,7 @@
   "loginSignIn": "Sign in",
   "loginNoAccount": "Don't have an account? Register",
   "loginInvalidCredentials": "Invalid email or password.",
+  "loginContinueWithGoogle": "Continue with Google",
 
   "registerTitle": "Create account",
   "registerFirstName": "First name",

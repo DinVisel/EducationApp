@@ -1,9 +1,26 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/config.dart';
 import '../../../models/student_profile.dart';
 import '../../../models/teacher.dart';
+
+/// Thrown when a social provider completed but didn't hand back the ID token we
+/// need to send to the backend (distinct from a user cancelling the sheet).
+class SocialSignInException implements Exception {
+  const SocialSignInException(this.message);
+  final String message;
+  @override
+  String toString() => message;
+}
+
+// google_sign_in requires a one-time initialize() per process; guard it.
+bool _googleInitialized = false;
 
 /// Access token + rotating refresh token + role + the profile matching the
 /// role. Exactly one of [teacher] / [student] is set depending on the account
@@ -70,6 +87,70 @@ class AuthRepository {
       'email': email,
       'password': password,
     });
+    return _parse(res.data!);
+  }
+
+  /// Signs in with Google: runs the native flow to get an ID token, then trades
+  /// it with the backend for our own token pair (creating/linking the account
+  /// server-side). Throws [GoogleSignInException] (e.g. on cancel) or
+  /// [SocialSignInException].
+  Future<AuthResult> signInWithGoogle() async {
+    final signIn = GoogleSignIn.instance;
+    if (!_googleInitialized) {
+      await signIn.initialize(
+        clientId: googleIosClientId.isEmpty ? null : googleIosClientId,
+        serverClientId:
+            googleServerClientId.isEmpty ? null : googleServerClientId,
+      );
+      _googleInitialized = true;
+    }
+
+    final account = await signIn.authenticate();
+    final idToken = account.authentication.idToken;
+    if (idToken == null) {
+      throw const SocialSignInException(
+          'Google did not return an identity token.');
+    }
+
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/v1/auth/google',
+      data: {'idToken': idToken},
+    );
+    return _parse(res.data!);
+  }
+
+  /// Signs in with Apple: runs the native flow (with a one-time nonce the server
+  /// checks against the token) and forwards the ID token — plus the name, which
+  /// Apple only returns on the first authorization — to the backend. Throws
+  /// [SignInWithAppleAuthorizationException] (e.g. on cancel) or
+  /// [SocialSignInException].
+  Future<AuthResult> signInWithApple() async {
+    final nonce = _randomNonce();
+    final credential = await SignInWithApple.getAppleIDCredential(
+      scopes: const [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      // Apple echoes this verbatim into the token's `nonce` claim; the backend
+      // compares it to bind the token to this attempt.
+      nonce: nonce,
+    );
+
+    final idToken = credential.identityToken;
+    if (idToken == null) {
+      throw const SocialSignInException(
+          'Apple did not return an identity token.');
+    }
+
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/v1/auth/apple',
+      data: {
+        'idToken': idToken,
+        'nonce': nonce,
+        'firstName': credential.givenName,
+        'lastName': credential.familyName,
+      },
+    );
     return _parse(res.data!);
   }
 
@@ -143,6 +224,15 @@ class AuthRepository {
       data: teacher.toWriteJson(),
     );
     return Teacher.fromJson(res.data!);
+  }
+
+  // A random, single-use nonce for the Apple sign-in flow.
+  static String _randomNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(
+        length, (_) => charset[random.nextInt(charset.length)]).join();
   }
 
   AuthResult _parse(Map<String, dynamic> json) {
