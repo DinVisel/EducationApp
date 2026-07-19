@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../models/onboarding.dart';
 import '../../../models/student_assignment.dart';
 import '../../../models/student_quiz.dart';
 import '../../auth/state/auth_controller.dart';
@@ -37,6 +38,14 @@ final studentClassesProvider =
   final auth = ref.watch(authControllerProvider).value;
   if (auth == null || !auth.isStudent) return [];
   return ref.read(studentModuleRepositoryProvider).getClasses();
+});
+
+/// The signed-in student's class join requests (Method B lobby status).
+final studentJoinRequestsProvider =
+    FutureProvider<List<ClassJoinRequest>>((ref) async {
+  final auth = ref.watch(authControllerProvider).value;
+  if (auth == null || !auth.isStudent) return [];
+  return ref.read(studentModuleRepositoryProvider).myRequests();
 });
 
 /// The signed-in student's quizzes (their attempts across all classes). Empty

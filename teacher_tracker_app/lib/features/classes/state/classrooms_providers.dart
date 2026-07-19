@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/classroom.dart';
+import '../../../models/onboarding.dart';
 import '../../auth/state/auth_controller.dart';
 import '../data/classrooms_repository.dart';
 
@@ -82,4 +83,10 @@ final classroomsProvider =
 final classroomDetailProvider =
     FutureProvider.family<ClassroomDetail, int>((ref, id) {
   return ref.watch(classroomsRepositoryProvider).getById(id);
+});
+
+/// A class's pending join requests (the Waiting Lobby), keyed by classroom id.
+final classLobbyProvider =
+    FutureProvider.family<List<LobbyEntry>, int>((ref, classroomId) {
+  return ref.watch(classroomsRepositoryProvider).getJoinRequests(classroomId);
 });

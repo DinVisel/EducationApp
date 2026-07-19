@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/design.dart';
 import '../../../l10n/app_localizations.dart';
@@ -10,6 +12,8 @@ import '../../quizzes/screens/class_quizzes_tab.dart';
 import '../../students/screens/student_detail_screen.dart';
 import '../../students/state/students_providers.dart';
 import '../state/classrooms_providers.dart';
+import 'access_cards_screen.dart';
+import 'class_lobby_screen.dart';
 import 'tabs/class_homework_tab.dart';
 import 'tabs/class_reading_tab.dart';
 
@@ -45,6 +49,39 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
       appBar: AppBar(
         title: Text(classroom.name),
         backgroundColor: Colors.transparent,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.group_add_outlined),
+            tooltip: 'Onboarding',
+            onSelected: (value) => _onMenu(context, value),
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'code',
+                child: ListTile(
+                  leading: Icon(Icons.qr_code_2),
+                  title: Text('Class code'),
+                  subtitle: Text('Share so students can request to join'),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'cards',
+                child: ListTile(
+                  leading: Icon(Icons.badge_outlined),
+                  title: Text('Access cards'),
+                  subtitle: Text('Code/QR logins for young students'),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'lobby',
+                child: ListTile(
+                  leading: Icon(Icons.hourglass_top),
+                  title: Text('Waiting lobby'),
+                  subtitle: Text('Approve students who entered the code'),
+                ),
+              ),
+            ],
+          ),
+        ],
         bottom: TabBar(
           controller: _tabs,
           isScrollable: true,
@@ -104,6 +141,72 @@ class _ClassDetailScreenState extends ConsumerState<ClassDetailScreen>
                 Text(AppLocalizations.of(ctx)!.classCouldNotRemove('$e'))));
       }
     }
+  }
+
+  void _onMenu(BuildContext context, String value) {
+    switch (value) {
+      case 'code':
+        _showClassCode(context);
+      case 'cards':
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => AccessCardsScreen(
+              classroomId: classroom.id, className: classroom.name),
+        ));
+      case 'lobby':
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => ClassLobbyScreen(
+              classroomId: classroom.id, className: classroom.name),
+        ));
+    }
+  }
+
+  // The global class code lives on the roster detail (ClassroomDetailDto).
+  void _showClassCode(BuildContext context) {
+    final detail = ref.read(classroomDetailProvider(classroom.id)).value;
+    final code = detail?.classCode ?? '';
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Class code'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Older students enter this code in the app to request '
+                'to join. You approve them from the Waiting lobby.'),
+            const SizedBox(height: AppSpacing.md),
+            SelectableText(
+              code.isEmpty ? '—' : code,
+              style: Theme.of(ctx).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold, letterSpacing: 6),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: code.isEmpty
+                ? null
+                : () {
+                    Clipboard.setData(ClipboardData(text: code));
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('Class code copied.')));
+                  },
+            icon: const Icon(Icons.copy),
+            label: const Text('Copy'),
+          ),
+          TextButton.icon(
+            onPressed: code.isEmpty
+                ? null
+                : () => Share.share(
+                    'Join my class "${classroom.name}" with code $code'),
+            icon: const Icon(Icons.share),
+            label: const Text('Share'),
+          ),
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Close')),
+        ],
+      ),
+    );
   }
 
   Future<void> _addStudents(BuildContext context, WidgetRef ref) async {

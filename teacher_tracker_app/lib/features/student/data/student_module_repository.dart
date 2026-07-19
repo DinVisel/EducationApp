@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../models/onboarding.dart';
 import '../../../models/student_assignment.dart';
 import '../../../models/student_quiz.dart';
 
@@ -59,6 +60,30 @@ class StudentModuleRepository {
     );
     return QuizResult.fromJson(res.data!);
   }
+
+  // ── Method B: join a class by code (Waiting Lobby) ────────────────────────
+
+  /// Submits a class code to request to join. The student stays out of the class
+  /// (a Pending request) until the teacher approves.
+  Future<ClassJoinRequest> requestToJoin(String classCode) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/v1/student/class-requests',
+      data: {'classCode': classCode},
+    );
+    return ClassJoinRequest.fromJson(res.data!);
+  }
+
+  /// The student's own join requests (pending and decided), newest first.
+  Future<List<ClassJoinRequest>> myRequests() async {
+    final res = await _dio.get<List<dynamic>>('/api/v1/student/class-requests');
+    return (res.data ?? [])
+        .map((e) => ClassJoinRequest.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Cancels the student's own pending request.
+  Future<void> cancelRequest(int requestId) =>
+      _dio.delete<void>('/api/v1/student/class-requests/$requestId');
 }
 
 final studentModuleRepositoryProvider = Provider<StudentModuleRepository>(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/design.dart';
 import '../../../l10n/app_localizations.dart';
 import '../state/student_providers.dart';
+import 'join_class_screen.dart';
 
 /// The classes the signed-in student is enrolled in.
 class StudentClassesScreen extends ConsumerWidget {
@@ -18,6 +19,16 @@ class StudentClassesScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          await Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => const JoinClassScreen(),
+          ));
+          ref.invalidate(studentClassesProvider);
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Join a class'),
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(studentClassesProvider.future),
         child: async.when(

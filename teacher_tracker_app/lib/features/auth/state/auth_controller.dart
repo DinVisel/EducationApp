@@ -67,6 +67,19 @@ class AuthController extends AsyncNotifier<AuthState?> {
     ));
   }
 
+  /// Method A: signs a young student in with their access code (no password)
+  /// and persists the returned session.
+  Future<void> loginWithAccessCode(String code) async {
+    await _applyAuth(
+        await ref.read(authRepositoryProvider).loginWithAccessCode(code.trim()));
+  }
+
+  /// Method A: signs a student in from a scanned access-card QR token.
+  Future<void> loginWithAccessQr(String token) async {
+    await _applyAuth(
+        await ref.read(authRepositoryProvider).loginWithAccessQr(token.trim()));
+  }
+
   /// Signs in with Google and persists the returned token pair (the backend
   /// links or creates the account). Errors bubble up for the caller to handle —
   /// including [RoleSelectionRequired], which means a new account must pick a
@@ -108,12 +121,14 @@ class AuthController extends AsyncNotifier<AuthState?> {
     required String lastName,
     required String email,
     required String password,
+    String? role,
   }) async {
     final result = await ref.read(authRepositoryProvider).register(
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email: email.trim(),
           password: password,
+          role: role,
         );
     await ref.read(tokenStoreProvider).saveTokens(result.token, result.refreshToken);
     state = AsyncData(AuthState(

@@ -79,12 +79,14 @@ class AuthRepository {
     required String lastName,
     required String email,
     required String password,
+    String? role,
   }) async {
     final res = await _dio.post<Map<String, dynamic>>('/api/v1/auth/register', data: {
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
       'password': password,
+      if (role != null) 'role': role,
     });
     return _parse(res.data!);
   }
@@ -97,6 +99,25 @@ class AuthRepository {
       'email': email,
       'password': password,
     });
+    return _parse(res.data!);
+  }
+
+  /// Method A passwordless login: a young student enters their printed access
+  /// code (no email/password). Returns a normal student session.
+  Future<AuthResult> loginWithAccessCode(String code) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/v1/auth/access-code',
+      data: {'code': code},
+    );
+    return _parse(res.data!);
+  }
+
+  /// Method A login via a scanned access-card QR (carries the long QR secret).
+  Future<AuthResult> loginWithAccessQr(String token) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/v1/auth/access-qr',
+      data: {'token': token},
+    );
     return _parse(res.data!);
   }
 

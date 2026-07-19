@@ -10,6 +10,7 @@ import '../../../core/utils/validators.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/auth_repository.dart';
 import '../state/auth_controller.dart';
+import 'access_code_login_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -242,6 +243,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed:
                           _submitting ? null : () => context.push('/register'),
                       child: Text(loc.loginNoAccount),
+                    ),
+                    TextButton.icon(
+                      onPressed: _submitting
+                          ? null
+                          : () => Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => const AccessCodeLoginScreen(),
+                              )),
+                      icon: const Icon(Icons.badge_outlined, size: 18),
+                      label: const Text('I have an access code'),
                     ),
                   ],
                 ),
