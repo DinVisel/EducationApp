@@ -122,7 +122,8 @@ public class AuthController : ControllerBase
             _tokens.AccessTokenExpiresAtUtc,
             user.Role.ToString(),
             user.Teacher is null ? null : ToDto(user.Teacher, user),
-            user.Student is null ? null : ToProfileDto(user.Student)));
+            user.Student is null ? null : ToProfileDto(user.Student),
+            user.MustChangePassword));
     }
 
     [Authorize]
@@ -184,6 +185,38 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
+    /// Lets a signed-in account (any role) change its own password by proving the
+    /// current one. Clears the first-login `MustChangePassword` gate, ends the
+    /// account's *other* sessions (revokes their refresh tokens), and returns a
+    /// fresh token pair so the current session stays signed in.
+    [Authorize]
+    [EnableRateLimiting("auth")]
+    [HttpPost("change-password")]
+    public async Task<ActionResult<AuthResponseDto>> ChangePassword(ChangePasswordDto dto)
+    {
+        var user = await _db.Users
+            .Include(u => u.Teacher)
+            .Include(u => u.Student)
+            .FirstOrDefaultAsync(u => u.Id == User.GetUserId());
+        if (user is null)
+            return Unauthorized();
+
+        var check = _hasher.VerifyHashedPassword(user, user.PasswordHash, dto.CurrentPassword);
+        if (check == PasswordVerificationResult.Failed)
+            return BadRequest("Your current password is incorrect.");
+
+        user.PasswordHash = _hasher.HashPassword(user, dto.NewPassword);
+        user.MustChangePassword = false;
+
+        // A password change ends every existing session; IssueAsync then mints a
+        // new pair for this one.
+        await _db.RefreshTokens
+            .Where(t => t.UserId == user.Id && t.RevokedAtUtc == null)
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAtUtc, DateTime.UtcNow));
+
+        return Ok(await IssueAsync(user, user.Teacher, user.Student));
+    }
+
     /// The current identity (any role), used to restore a session from a saved
     /// token at startup. Returns the profile matching the account's role.
     [Authorize]
@@ -200,7 +233,8 @@ public class AuthController : ControllerBase
         return Ok(new SessionDto(
             user.Role.ToString(),
             user.Teacher is null ? null : ToDto(user.Teacher, user),
-            user.Student is null ? null : ToProfileDto(user.Student)));
+            user.Student is null ? null : ToProfileDto(user.Student),
+            user.MustChangePassword));
     }
 
     [Authorize(Roles = nameof(UserRole.Teacher))]
@@ -267,7 +301,8 @@ public class AuthController : ControllerBase
             _tokens.AccessTokenExpiresAtUtc,
             user.Role.ToString(),
             teacher is null ? null : ToDto(teacher, user),
-            student is null ? null : ToProfileDto(student));
+            student is null ? null : ToProfileDto(student),
+            user.MustChangePassword);
     }
 
     private static TeacherDto ToDto(Teacher t) =>

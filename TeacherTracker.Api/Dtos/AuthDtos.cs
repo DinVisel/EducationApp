@@ -28,6 +28,10 @@ public record UpdateProfileDto(
     int? AvatarFileId = null,
     int? CoverFileId = null);
 
+public record ChangePasswordDto(
+    [Required] string CurrentPassword,
+    [Required, MinLength(6), MaxLength(100)] string NewPassword);
+
 public record RefreshRequestDto(
     [Required] string RefreshToken);
 
@@ -35,16 +39,22 @@ public record LogoutRequestDto(
     [Required] string RefreshToken);
 
 /// Returned by register/login/refresh: the short-lived access token (+ its
-/// expiry), the rotating refresh token, the account role, and the matching
-/// profile (teacher or student, depending on the role).
+/// expiry), the rotating refresh token, the account role, the matching profile
+/// (teacher or student, depending on the role), and whether the account must
+/// change its password before continuing (first-login gate).
 public record AuthResponseDto(
     string Token,
     string RefreshToken,
     DateTime AccessTokenExpiresAtUtc,
     string Role,
     TeacherDto? Teacher,
-    StudentProfileDto? Student = null);
+    StudentProfileDto? Student = null,
+    bool MustChangePassword = false);
 
 /// The current identity without a token — used to restore a session at startup
-/// regardless of role.
-public record SessionDto(string Role, TeacherDto? Teacher, StudentProfileDto? Student);
+/// regardless of role. `MustChangePassword` gates first-login on the client.
+public record SessionDto(
+    string Role,
+    TeacherDto? Teacher,
+    StudentProfileDto? Student,
+    bool MustChangePassword = false);

@@ -15,20 +15,31 @@ class AuthResult {
     required this.role,
     required this.teacher,
     required this.student,
+    this.mustChangePassword = false,
   });
   final String token;
   final String refreshToken;
   final String role;
   final Teacher? teacher;
   final StudentProfile? student;
+
+  /// True when the account must set a new password before continuing (e.g. a
+  /// teacher-provisioned student on first sign-in).
+  final bool mustChangePassword;
 }
 
 /// The current identity restored from a saved token (no token echoed back).
 class Session {
-  const Session({required this.role, this.teacher, this.student});
+  const Session({
+    required this.role,
+    this.teacher,
+    this.student,
+    this.mustChangePassword = false,
+  });
   final String role;
   final Teacher? teacher;
   final StudentProfile? student;
+  final bool mustChangePassword;
 }
 
 class AuthRepository {
@@ -76,6 +87,7 @@ class AuthRepository {
       student: student == null
           ? null
           : StudentProfile.fromJson(student as Map<String, dynamic>),
+      mustChangePassword: json['mustChangePassword'] as bool? ?? false,
     );
   }
 
@@ -108,6 +120,23 @@ class AuthRepository {
     });
   }
 
+  /// Changes the signed-in account's password (any role) by proving the current
+  /// one. Clears the server's first-login gate and returns a fresh token pair
+  /// (the server ends other sessions), which the caller must persist.
+  Future<AuthResult> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/v1/auth/change-password',
+      data: {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      },
+    );
+    return _parse(res.data!);
+  }
+
   Future<Teacher> updateProfile(Teacher teacher) async {
     final res = await _dio.put<Map<String, dynamic>>(
       '/api/v1/auth/me',
@@ -128,6 +157,7 @@ class AuthRepository {
       student: student == null
           ? null
           : StudentProfile.fromJson(student as Map<String, dynamic>),
+      mustChangePassword: json['mustChangePassword'] as bool? ?? false,
     );
   }
 }

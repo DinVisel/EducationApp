@@ -15,6 +15,11 @@ public class User
 
     public UserRole Role { get; set; }
 
+    // Forces a password change on next sign-in. Set when a teacher provisions a
+    // student login (the teacher picked the initial password), cleared once the
+    // student sets their own via /auth/change-password.
+    public bool MustChangePassword { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // SHA-256 hex hash of an active password-reset token; null when none is

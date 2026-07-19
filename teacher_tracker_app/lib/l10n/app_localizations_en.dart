@@ -1415,6 +1415,80 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get stuHome => 'Home';
+
+  @override
+  String stuHomeGreeting(String name) {
+    return 'Hi, $name';
+  }
+
+  @override
+  String get stuHomeDueSoon => 'Due soon';
+
+  @override
+  String get stuHomeNoDueSoon => 'Nothing due soon. Nice work!';
+
+  @override
+  String get stuHomeQuizProgress => 'Quiz progress';
+
+  @override
+  String stuHomeQuizzesDone(int done, int total) {
+    return '$done/$total done';
+  }
+
+  @override
+  String stuHomePendingQuizzes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quizzes to solve',
+      one: '1 quiz to solve',
+      zero: 'All caught up',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String stuHomeClassesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '1 class',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stuHomeSeeAll => 'See all';
+
+  @override
+  String get changePasswordTitle => 'Change password';
+
+  @override
+  String get changePasswordSubtitle =>
+      'Enter your current password and choose a new one.';
+
+  @override
+  String get changePasswordFirstLoginSubtitle =>
+      'Set your own password to finish signing in.';
+
+  @override
+  String get changePasswordCurrentLabel => 'Current password';
+
+  @override
+  String get changePasswordNewLabel => 'New password';
+
+  @override
+  String get changePasswordConfirmLabel => 'Confirm new password';
+
+  @override
+  String get changePasswordSubmit => 'Change password';
+
+  @override
+  String get changePasswordSuccess => 'Password changed.';
+
+  @override
   String get profileTitle => 'Profile';
 
   @override

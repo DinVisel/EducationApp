@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/screens/change_password_screen.dart';
 import '../../auth/state/auth_controller.dart';
 import '../state/student_providers.dart';
 
@@ -67,6 +68,21 @@ class StudentProfileScreen extends ConsumerWidget {
                 classesAsync.maybeWhen(
                     data: (c) => c.length.toString(), orElse: () => '—'),
                 style: tt.titleMedium?.copyWith(color: cs.onSurface),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          GlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.lock_outline, color: cs.primary),
+              title: Text(loc.changePasswordTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ChangePasswordScreen(),
+                ),
               ),
             ),
           ),

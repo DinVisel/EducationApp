@@ -159,7 +159,14 @@ public class StudentsController : ControllerBase
         if (await _db.Users.AnyAsync(u => u.Email == email))
             return Conflict("An account with that email already exists.");
 
-        var user = new User { Email = email, Role = UserRole.Student };
+        // The teacher picked this initial password, so require the student to set
+        // their own on first sign-in.
+        var user = new User
+        {
+            Email = email,
+            Role = UserRole.Student,
+            MustChangePassword = true,
+        };
         user.PasswordHash = _hasher.HashPassword(user, dto.Password);
         student.User = user;
         await _db.SaveChangesAsync();

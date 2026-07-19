@@ -1417,6 +1417,80 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get stuHome => 'Ana Sayfa';
+
+  @override
+  String stuHomeGreeting(String name) {
+    return 'Merhaba, $name';
+  }
+
+  @override
+  String get stuHomeDueSoon => 'Yaklaşan teslimler';
+
+  @override
+  String get stuHomeNoDueSoon => 'Yaklaşan bir şey yok. Aferin!';
+
+  @override
+  String get stuHomeQuizProgress => 'Sınav durumu';
+
+  @override
+  String stuHomeQuizzesDone(int done, int total) {
+    return '$done/$total tamamlandı';
+  }
+
+  @override
+  String stuHomePendingQuizzes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Çözülecek $count sınav',
+      one: 'Çözülecek 1 sınav',
+      zero: 'Hepsi tamam',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String stuHomeClassesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sınıf',
+      one: '1 sınıf',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stuHomeSeeAll => 'Tümünü gör';
+
+  @override
+  String get changePasswordTitle => 'Şifre değiştir';
+
+  @override
+  String get changePasswordSubtitle =>
+      'Mevcut şifreni gir ve yeni bir şifre seç.';
+
+  @override
+  String get changePasswordFirstLoginSubtitle =>
+      'Girişi tamamlamak için kendi şifreni belirle.';
+
+  @override
+  String get changePasswordCurrentLabel => 'Mevcut şifre';
+
+  @override
+  String get changePasswordNewLabel => 'Yeni şifre';
+
+  @override
+  String get changePasswordConfirmLabel => 'Yeni şifreyi onayla';
+
+  @override
+  String get changePasswordSubmit => 'Şifreyi değiştir';
+
+  @override
+  String get changePasswordSuccess => 'Şifre değiştirildi.';
+
+  @override
   String get profileTitle => 'Profil';
 
   @override

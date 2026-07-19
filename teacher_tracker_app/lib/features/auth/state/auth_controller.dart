@@ -10,10 +10,19 @@ import '../data/auth_repository.dart';
 /// [TokenStore]). Teachers carry [teacher]; students carry [student]. Exactly
 /// one is set for a valid session.
 class AuthState {
-  const AuthState({required this.role, this.teacher, this.student});
+  const AuthState({
+    required this.role,
+    this.teacher,
+    this.student,
+    this.mustChangePassword = false,
+  });
   final String role;
   final Teacher? teacher;
   final StudentProfile? student;
+
+  /// True until the account sets its own password (first-login gate). The router
+  /// forces the change-password screen while this is set.
+  final bool mustChangePassword;
 
   bool get isTeacher => role == 'Teacher';
   bool get isStudent => role == 'Student';
@@ -37,6 +46,7 @@ class AuthController extends AsyncNotifier<AuthState?> {
         role: session.role,
         teacher: session.teacher,
         student: session.student,
+        mustChangePassword: session.mustChangePassword,
       );
     } on DioException {
       await store.clear();
@@ -53,6 +63,7 @@ class AuthController extends AsyncNotifier<AuthState?> {
       role: result.role,
       teacher: result.teacher,
       student: result.student,
+      mustChangePassword: result.mustChangePassword,
     ));
   }
 
@@ -89,6 +100,26 @@ class AuthController extends AsyncNotifier<AuthState?> {
     }
     await store.clear();
     state = const AsyncData(null);
+  }
+
+  /// Changes the signed-in account's password. The server returns a fresh token
+  /// pair (other sessions are ended) and clears the first-login gate; we persist
+  /// the new tokens and update state so the router releases the gate.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final result = await ref.read(authRepositoryProvider).changePassword(
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        );
+    await ref.read(tokenStoreProvider).saveTokens(result.token, result.refreshToken);
+    state = AsyncData(AuthState(
+      role: result.role,
+      teacher: result.teacher,
+      student: result.student,
+      mustChangePassword: result.mustChangePassword,
+    ));
   }
 
   /// Updates the current teacher's profile and refreshes session state.

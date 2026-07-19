@@ -2552,6 +2552,108 @@ abstract class AppLocalizations {
   /// **'{percent}% correct'**
   String stuQuizPctCorrect(int percent);
 
+  /// No description provided for @stuHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get stuHome;
+
+  /// No description provided for @stuHomeGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, {name}'**
+  String stuHomeGreeting(String name);
+
+  /// No description provided for @stuHomeDueSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Due soon'**
+  String get stuHomeDueSoon;
+
+  /// No description provided for @stuHomeNoDueSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing due soon. Nice work!'**
+  String get stuHomeNoDueSoon;
+
+  /// No description provided for @stuHomeQuizProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz progress'**
+  String get stuHomeQuizProgress;
+
+  /// No description provided for @stuHomeQuizzesDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} done'**
+  String stuHomeQuizzesDone(int done, int total);
+
+  /// No description provided for @stuHomePendingQuizzes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{All caught up} =1{1 quiz to solve} other{{count} quizzes to solve}}'**
+  String stuHomePendingQuizzes(int count);
+
+  /// No description provided for @stuHomeClassesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 class} other{{count} classes}}'**
+  String stuHomeClassesCount(int count);
+
+  /// No description provided for @stuHomeSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get stuHomeSeeAll;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePasswordTitle;
+
+  /// No description provided for @changePasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current password and choose a new one.'**
+  String get changePasswordSubtitle;
+
+  /// No description provided for @changePasswordFirstLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your own password to finish signing in.'**
+  String get changePasswordFirstLoginSubtitle;
+
+  /// No description provided for @changePasswordCurrentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get changePasswordCurrentLabel;
+
+  /// No description provided for @changePasswordNewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get changePasswordNewLabel;
+
+  /// No description provided for @changePasswordConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get changePasswordConfirmLabel;
+
+  /// No description provided for @changePasswordSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePasswordSubmit;
+
+  /// No description provided for @changePasswordSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed.'**
+  String get changePasswordSuccess;
+
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:

@@ -15,6 +15,7 @@ import 'features/auth/screens/forgot_password_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/auth/screens/reset_password_screen.dart';
+import 'features/auth/screens/change_password_screen.dart';
 import 'features/admin/screens/admin_shell.dart';
 import 'features/auth/state/auth_controller.dart';
 import 'features/feed/screens/post_detail_screen.dart';
@@ -64,6 +65,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         return signedOutAllowed.contains(loc) ? null : '/login';
       }
 
+      // First-login gate (any role): a provisioned account must set its own
+      // password before it can go anywhere else.
+      if (session.mustChangePassword) {
+        return loc == '/change-password' ? null : '/change-password';
+      }
+
       // Signed in: a shared post opens directly, regardless of the role shell.
       if (isPost) return null;
 
@@ -92,6 +99,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         '/register',
         '/forgot-password',
         '/reset-password',
+        // Once the first-login gate is cleared, don't linger here.
+        '/change-password',
       };
       if (authOnlyPages.contains(loc)) return home;
       const shells = {'/home', '/student', '/admin'};
@@ -108,6 +117,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/reset-password',
           builder: (_, _) => const ResetPasswordScreen()),
+      GoRoute(
+          path: '/change-password',
+          builder: (_, _) => const ChangePasswordScreen(forced: true)),
       GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
       GoRoute(path: '/student', builder: (_, _) => const StudentShell()),
