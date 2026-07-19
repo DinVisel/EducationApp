@@ -33,6 +33,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonSomethingWentWrong => 'Bir şeyler ters gitti.';
 
   @override
+  String get connectivityOffline => 'Çevrimdışısınız';
+
+  @override
+  String get connectivityBackOnline => 'Tekrar çevrimiçi';
+
+  @override
   String commonError(String error) {
     return 'Hata: $error';
   }

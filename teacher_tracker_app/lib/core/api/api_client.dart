@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -107,5 +109,74 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
+  // Retry interceptor for transient failures (added after the auth/401 one so a
+  // 401 is resolved by the refresh flow above before we consider a retry). Only
+  // idempotent requests are retried, so create/upload POSTs are never
+  // double-sent.
+  dio.interceptors.add(_RetryInterceptor(dio));
+
   return dio;
 });
+
+/// Retries idempotent requests on transient network failures — connection or
+/// timeout errors, and 5xx responses — with exponential backoff. Non-idempotent
+/// methods (POST/PUT/PATCH/DELETE) are retried only when the caller explicitly
+/// opts in via `Options(extra: {'__retriable': true})`.
+class _RetryInterceptor extends Interceptor {
+  _RetryInterceptor(this._dio);
+
+  final Dio _dio;
+
+  static const _maxRetries = 2;
+  static const _baseDelay = Duration(milliseconds: 400);
+
+  bool _isTransient(DioException err) {
+    switch (err.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.connectionError:
+        return true;
+      case DioExceptionType.badResponse:
+        final code = err.response?.statusCode ?? 0;
+        return code >= 500 && code <= 599;
+      default:
+        return false;
+    }
+  }
+
+  bool _isIdempotent(RequestOptions options) {
+    if (options.extra['__retriable'] == true) return true;
+    final method = options.method.toUpperCase();
+    return method == 'GET' || method == 'HEAD';
+  }
+
+  @override
+  Future<void> onError(
+      DioException err, ErrorInterceptorHandler handler) async {
+    final options = err.requestOptions;
+    final attempt = (options.extra['__retryAttempt'] as int?) ?? 0;
+
+    final cancelled = options.cancelToken?.isCancelled ?? false;
+    if (cancelled ||
+        attempt >= _maxRetries ||
+        !_isTransient(err) ||
+        !_isIdempotent(options)) {
+      return handler.next(err);
+    }
+
+    // Exponential backoff: 400ms, then 800ms.
+    await Future<void>.delayed(_baseDelay * (1 << attempt));
+    if (options.cancelToken?.isCancelled ?? false) {
+      return handler.next(err);
+    }
+
+    options.extra['__retryAttempt'] = attempt + 1;
+    try {
+      final response = await _dio.fetch<dynamic>(options);
+      return handler.resolve(response);
+    } on DioException catch (retryErr) {
+      return handler.next(retryErr);
+    }
+  }
+}

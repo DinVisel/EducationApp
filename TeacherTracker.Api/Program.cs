@@ -12,6 +12,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Formatting.Compact;
 using TeacherTracker.Api.Auth;
+using TeacherTracker.Api.Caching;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Hubs;
 using TeacherTracker.Api.Middleware;
@@ -53,6 +54,12 @@ builder.Services.AddApiVersioning(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<AuditInterceptor>();
+
+// --- Response caching ---
+// Short-TTL in-memory cache + ETag support for read-heavy, teacher-scoped
+// endpoints (classroom roster, quiz lists/analytics). See ApiResponseCache.
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<ApiResponseCache>();
 
 // --- Health checks ---
 // `/health` probes DB connectivity for load balancers / monitoring.

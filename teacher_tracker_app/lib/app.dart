@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/connectivity/connectivity_controller.dart';
 import 'core/design.dart';
 import 'core/locale/locale_controller.dart';
 import 'core/onboarding/onboarding_controller.dart';
@@ -140,6 +141,123 @@ class TeacherTrackerApp extends ConsumerWidget {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         routerConfig: ref.watch(routerProvider),
+        builder: (context, child) => _ConnectivityBanner(
+          child: child ?? const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+}
+
+/// A slim status bar shown above the app when the network drops, plus a brief
+/// "Back online" confirmation when it returns. Driven by [isOnlineProvider].
+class _ConnectivityBanner extends ConsumerStatefulWidget {
+  const _ConnectivityBanner({required this.child});
+  final Widget child;
+
+  @override
+  ConsumerState<_ConnectivityBanner> createState() =>
+      _ConnectivityBannerState();
+}
+
+class _ConnectivityBannerState extends ConsumerState<_ConnectivityBanner> {
+  bool _showBackOnline = false;
+  Timer? _backOnlineTimer;
+
+  @override
+  void dispose() {
+    _backOnlineTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onConnectivityChanged(bool? previous, bool current) {
+    if (previous == false && current == true) {
+      setState(() => _showBackOnline = true);
+      _backOnlineTimer?.cancel();
+      _backOnlineTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _showBackOnline = false);
+      });
+    } else if (!current) {
+      _backOnlineTimer?.cancel();
+      if (_showBackOnline) setState(() => _showBackOnline = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<AsyncValue<bool>>(isOnlineProvider, (prev, next) {
+      _onConnectivityChanged(prev?.value, next.value ?? true);
+    });
+
+    final online = ref.watch(isOnlineProvider).value ?? true;
+    final loc = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+
+    Widget? bar;
+    if (!online) {
+      bar = _StatusBar(
+        key: const ValueKey('offline'),
+        icon: Icons.cloud_off,
+        label: loc.connectivityOffline,
+        background: scheme.errorContainer,
+        foreground: scheme.onErrorContainer,
+      );
+    } else if (_showBackOnline) {
+      bar = _StatusBar(
+        key: const ValueKey('online'),
+        icon: Icons.cloud_done,
+        label: loc.connectivityBackOnline,
+        background: scheme.primaryContainer,
+        foreground: scheme.onPrimaryContainer,
+      );
+    }
+
+    return Column(
+      children: [
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          transitionBuilder: (c, a) => SizeTransition(sizeFactor: a, child: c),
+          child: bar ?? const SizedBox.shrink(),
+        ),
+        Expanded(child: widget.child),
+      ],
+    );
+  }
+}
+
+class _StatusBar extends StatelessWidget {
+  const _StatusBar({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: background,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: foreground),
+              const SizedBox(width: 8),
+              Text(label,
+                  style: TextStyle(
+                      color: foreground, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ),
       ),
     );
   }

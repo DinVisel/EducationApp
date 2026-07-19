@@ -146,6 +146,18 @@ abstract class AppLocalizations {
   /// **'Something went wrong.'**
   String get commonSomethingWentWrong;
 
+  /// No description provided for @connectivityOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline'**
+  String get connectivityOffline;
+
+  /// No description provided for @connectivityBackOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Back online'**
+  String get connectivityBackOnline;
+
   /// No description provided for @commonError.
   ///
   /// In en, this message translates to:

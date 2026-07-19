@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/error_mapper.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// Renders an [AsyncValue] list with shared loading / error / empty / data
@@ -35,7 +36,7 @@ class AsyncList<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return value.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => _ErrorState(message: '$err', onRetry: onRetry),
+      error: (err, _) => _ErrorState(error: err, onRetry: onRetry),
       data: (items) => RefreshIndicator(
         onRefresh: onRefresh,
         child: items.isEmpty
@@ -77,13 +78,14 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
+  const _ErrorState({required this.error, required this.onRetry});
 
-  final String message;
+  final Object error;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
+    final message = messageForError(error, AppLocalizations.of(context)!);
     return ListView(
       children: [
         const SizedBox(height: 100),

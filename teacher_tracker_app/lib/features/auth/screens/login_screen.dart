@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/api/error_mapper.dart';
 import '../../../core/design.dart';
 import '../../../core/utils/validators.dart';
 import '../../../l10n/app_localizations.dart';
@@ -142,12 +142,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   String _message(BuildContext context, Object e) {
     final loc = AppLocalizations.of(context)!;
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is String && data.isNotEmpty) return data;
-      if (e.response?.statusCode == 401) return loc.loginInvalidCredentials;
-      return loc.commonNetworkError;
-    }
-    return loc.commonSomethingWentWrong;
+    return messageForError(e, loc,
+        statusMessages: {401: loc.loginInvalidCredentials});
   }
 }

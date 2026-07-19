@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TeacherTracker.Api.Auth;
+using TeacherTracker.Api.Caching;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
@@ -22,20 +23,36 @@ public class QuizzesController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly INotificationPublisher _publisher;
+    private readonly ApiResponseCache _cache;
 
-    public QuizzesController(AppDbContext db, INotificationPublisher publisher)
+    public QuizzesController(
+        AppDbContext db, INotificationPublisher publisher, ApiResponseCache cache)
     {
         _db = db;
         _publisher = publisher;
+        _cache = cache;
     }
 
     private int TeacherId => User.GetTeacherId();
+
+    // Teacher-scoped cache keys so payloads never leak across accounts.
+    private string QuizListKey(int classroomId) => $"quizzes:{TeacherId}:{classroomId}";
+    private string AnalyticsKey(int classroomId, int quizId) =>
+        $"quizanalytics:{TeacherId}:{classroomId}:{quizId}";
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<QuizDto>>> GetAll(int classroomId)
     {
         if (!await OwnsClassroomAsync(classroomId))
             return NotFound();
+
+        // Cached with ETag/304; invalidated on create/delete below. Participation
+        // counts in the projection also shift on student submissions, so the TTL
+        // is kept short to bound that staleness.
+        var key = QuizListKey(classroomId);
+        var cached = _cache.Get(key);
+        if (cached is not null)
+            return this.Cached(cached);
 
         var quizzes = await _db.Quizzes
             .AsNoTracking()
@@ -44,7 +61,7 @@ public class QuizzesController : ControllerBase
             .Select(Projection)
             .ToListAsync();
 
-        return Ok(quizzes);
+        return this.Cached(_cache.Set(key, quizzes, TimeSpan.FromSeconds(30)));
     }
 
     [HttpGet("{id:int}")]
@@ -139,6 +156,7 @@ public class QuizzesController : ControllerBase
 
         await _db.SaveChangesAsync();
         await _publisher.NotifyAsync(recipientUserIds);
+        _cache.Remove(QuizListKey(classroomId));
 
         var created = await _db.Quizzes
             .AsNoTracking()
@@ -161,6 +179,8 @@ public class QuizzesController : ControllerBase
 
         _db.Quizzes.Remove(quiz);
         await _db.SaveChangesAsync();
+        _cache.Remove(QuizListKey(classroomId));
+        _cache.Remove(AnalyticsKey(classroomId, id));
         return NoContent();
     }
 
@@ -171,6 +191,14 @@ public class QuizzesController : ControllerBase
     {
         if (!await OwnsClassroomAsync(classroomId))
             return NotFound();
+
+        // Cached with ETag/304. Results change on student submissions (handled in
+        // StudentModuleController), so the short TTL bounds that staleness; the
+        // entry is also dropped when the quiz is deleted.
+        var cacheKey = AnalyticsKey(classroomId, id);
+        var cachedAnalytics = _cache.Get(cacheKey);
+        if (cachedAnalytics is not null)
+            return this.Cached(cachedAnalytics);
 
         var quiz = await _db.Quizzes
             .AsNoTracking()
@@ -249,7 +277,7 @@ public class QuizzesController : ControllerBase
                 a.SubmittedAt))
             .ToList();
 
-        return Ok(new QuizAnalyticsDto(
+        var analytics = new QuizAnalyticsDto(
             quiz.Id,
             quiz.Title,
             quiz.Questions.Count,
@@ -257,7 +285,9 @@ public class QuizzesController : ControllerBase
             submitted.Count,
             averagePct,
             results,
-            questionStats));
+            questionStats);
+
+        return this.Cached(_cache.Set(cacheKey, analytics, TimeSpan.FromSeconds(30)));
     }
 
     private Task<bool> OwnsClassroomAsync(int classroomId) =>

@@ -6,15 +6,16 @@ import '../../../models/quiz_draft.dart';
 import '../data/quizzes_repository.dart';
 
 /// Quizzes published to a given classroom, keyed by classroom id.
+/// Auto-disposed: only needed while a class's quiz screen is on-screen.
 final classroomQuizzesProvider =
-    FutureProvider.family<List<Quiz>, int>((ref, classroomId) {
+    FutureProvider.autoDispose.family<List<Quiz>, int>((ref, classroomId) {
   return ref.watch(quizzesRepositoryProvider).getForClass(classroomId);
 });
 
 /// Analytics for a single quiz, keyed by (classroomId, quizId).
-final quizAnalyticsProvider =
-    FutureProvider.family<QuizAnalytics, ({int classroomId, int quizId})>(
-        (ref, key) {
+/// Auto-disposed: only needed while its analytics screen is open.
+final quizAnalyticsProvider = FutureProvider.autoDispose
+    .family<QuizAnalytics, ({int classroomId, int quizId})>((ref, key) {
   return ref
       .watch(quizzesRepositoryProvider)
       .getAnalytics(key.classroomId, key.quizId);

@@ -104,6 +104,10 @@ public class AppDbContext : DbContext
             .HasForeignKey(b => b.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Perf: every Students/Classrooms read scopes by TeacherId.
+        modelBuilder.Entity<Student>()
+            .HasIndex(s => s.TeacherId);
+
         // Store the enum as readable text rather than an int.
         modelBuilder.Entity<Book>()
             .Property(b => b.Status)
@@ -148,6 +152,13 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(a => a.TeacherId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Perf: teacher list = assignments for a classroom ordered by CreatedAt
+        // desc; student list sorts by DueDate. Cover both.
+        modelBuilder.Entity<Assignment>()
+            .HasIndex(a => new { a.ClassroomId, a.CreatedAt });
+        modelBuilder.Entity<Assignment>()
+            .HasIndex(a => a.DueDate);
 
         // Deleting an assignment removes its attachment links (not the files).
         modelBuilder.Entity<AssignmentAttachment>()
@@ -202,6 +213,14 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(p => p.AuthorUserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Perf: the feed filters by Subject and orders by Id desc; the profile
+        // view filters by author and orders by Id desc. These composite indexes
+        // cover both filter+sort patterns (GetFeed in PostsController).
+        modelBuilder.Entity<Post>()
+            .HasIndex(p => new { p.Subject, p.Id });
+        modelBuilder.Entity<Post>()
+            .HasIndex(p => new { p.AuthorUserId, p.Id });
 
         // Deleting a post removes its attachment links (not the files).
         modelBuilder.Entity<PostAttachment>()

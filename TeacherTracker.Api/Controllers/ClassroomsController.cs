@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TeacherTracker.Api.Auth;
+using TeacherTracker.Api.Caching;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
 using TeacherTracker.Api.Models;
@@ -16,14 +17,19 @@ namespace TeacherTracker.Api.Controllers;
 public class ClassroomsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly ApiResponseCache _cache;
 
-    public ClassroomsController(AppDbContext db)
+    public ClassroomsController(AppDbContext db, ApiResponseCache cache)
     {
         _db = db;
+        _cache = cache;
     }
 
     // All queries are scoped to the authenticated teacher (from the JWT).
     private int TeacherId => User.GetTeacherId();
+
+    // Roster cache key — teacher-scoped so it can never leak across accounts.
+    private string RosterKey(int classroomId) => $"roster:{TeacherId}:{classroomId}";
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ClassroomDto>>> GetAll(
@@ -46,6 +52,14 @@ public class ClassroomsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ClassroomDetailDto>> GetById(int id)
     {
+        // Serve a cached roster (with ETag/304) when warm. Invalidated on
+        // enroll/unenroll/rename/delete below; a short TTL also bounds staleness
+        // from cross-controller edits (e.g. a student's name changing).
+        var key = RosterKey(id);
+        var cached = _cache.Get(key);
+        if (cached is not null)
+            return this.Cached(cached);
+
         var classroom = await _db.Classrooms
             .AsNoTracking()
             .Where(c => c.Id == id && c.TeacherId == TeacherId)
@@ -59,7 +73,10 @@ public class ClassroomsController : ControllerBase
                     .ToList()))
             .FirstOrDefaultAsync();
 
-        return classroom is null ? NotFound() : Ok(classroom);
+        if (classroom is null)
+            return NotFound();
+
+        return this.Cached(_cache.Set(key, classroom, TimeSpan.FromSeconds(30)));
     }
 
     [HttpPost]
@@ -88,6 +105,7 @@ public class ClassroomsController : ControllerBase
 
         classroom.Name = dto.Name.Trim();
         await _db.SaveChangesAsync();
+        _cache.Remove(RosterKey(id));
         return NoContent();
     }
 
@@ -101,6 +119,7 @@ public class ClassroomsController : ControllerBase
 
         _db.Classrooms.Remove(classroom);
         await _db.SaveChangesAsync();
+        _cache.Remove(RosterKey(id));
         return NoContent();
     }
 
@@ -117,6 +136,7 @@ public class ClassroomsController : ControllerBase
 
         _db.Enrollments.Add(new Enrollment { ClassroomId = id, StudentId = studentId });
         await _db.SaveChangesAsync();
+        _cache.Remove(RosterKey(id));
         return NoContent();
     }
 
@@ -133,6 +153,7 @@ public class ClassroomsController : ControllerBase
 
         _db.Enrollments.Remove(enrollment);
         await _db.SaveChangesAsync();
+        _cache.Remove(RosterKey(id));
         return NoContent();
     }
 

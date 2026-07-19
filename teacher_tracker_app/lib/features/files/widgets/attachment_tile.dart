@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -180,16 +181,17 @@ class _ImagePreview extends ConsumerWidget {
           ),
         )),
         data: (url) => frame(
-          Image.network(
-            url,
+          CachedNetworkImage(
+            imageUrl: url,
+            // Key on the stable file id, not the volatile presigned URL, so the
+            // cache survives URL rotation.
+            cacheKey: 'file-$fileId',
             fit: BoxFit.cover,
-            loadingBuilder: (ctx, child, progress) => progress == null
-                ? child
-                : const SizedBox(
-                    height: 140,
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-            errorBuilder: (ctx, _, _) => SizedBox(
+            placeholder: (ctx, _) => const SizedBox(
+              height: 140,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            errorWidget: (ctx, _, _) => SizedBox(
               height: 100,
               child: Center(
                 child: Icon(Icons.broken_image_outlined,

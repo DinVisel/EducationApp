@@ -9,6 +9,8 @@
   "commonPasswordsDoNotMatch": "Şifreler eşleşmiyor",
   "commonNetworkError": "Ağ hatası. Sunucu çalışıyor mu?",
   "commonSomethingWentWrong": "Bir şeyler ters gitti.",
+  "connectivityOffline": "Çevrimdışısınız",
+  "connectivityBackOnline": "Tekrar çevrimiçi",
   "commonError": "Hata: {error}",
   "@commonError": { "placeholders": { "error": { "type": "String" } } },
   "commonSave": "Kaydet",

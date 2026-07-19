@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/api/error_mapper.dart';
 import '../../../core/design.dart';
 import '../../../core/utils/validators.dart';
 import '../../../l10n/app_localizations.dart';
@@ -152,12 +152,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   }
 
   String _message(BuildContext context, Object e) {
-    final loc = AppLocalizations.of(context)!;
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is String && data.isNotEmpty) return data;
-      return loc.commonNetworkError;
-    }
-    return loc.commonSomethingWentWrong;
+    return messageForError(e, AppLocalizations.of(context)!);
   }
 }

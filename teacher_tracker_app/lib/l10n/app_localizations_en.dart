@@ -33,6 +33,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSomethingWentWrong => 'Something went wrong.';
 
   @override
+  String get connectivityOffline => 'You\'re offline';
+
+  @override
+  String get connectivityBackOnline => 'Back online';
+
+  @override
   String commonError(String error) {
     return 'Error: $error';
   }

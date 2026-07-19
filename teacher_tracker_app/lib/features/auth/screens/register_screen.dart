@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/error_mapper.dart';
 import '../../../core/utils/validators.dart';
 import '../../../l10n/app_localizations.dart';
 import '../state/auth_controller.dart';
@@ -145,14 +145,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   String _message(BuildContext context, Object e) {
     final loc = AppLocalizations.of(context)!;
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is String && data.isNotEmpty) return data;
-      if (e.response?.statusCode == 409) {
-        return loc.registerEmailTaken;
-      }
-      return loc.commonNetworkError;
-    }
-    return loc.commonSomethingWentWrong;
+    return messageForError(e, loc,
+        statusMessages: {409: loc.registerEmailTaken});
   }
 }

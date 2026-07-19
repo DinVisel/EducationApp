@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -139,12 +140,14 @@ class _CoverImage extends ConsumerWidget {
     return urlAsync.when(
       loading: placeholder,
       error: (_, _) => placeholder(),
-      data: (url) => Image.network(
-        url,
+      data: (url) => CachedNetworkImage(
+        imageUrl: url,
+        cacheKey: 'file-${fileId!}',
         height: ProfileCoverHeader._coverHeight,
         width: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => placeholder(),
+        placeholder: (_, _) => placeholder(),
+        errorWidget: (_, _, _) => placeholder(),
       ),
     );
   }
@@ -180,7 +183,8 @@ class _Avatar extends ConsumerWidget {
       data: (url) => CircleAvatar(
         radius: radius,
         backgroundColor: cs.primaryContainer,
-        backgroundImage: NetworkImage(url),
+        backgroundImage:
+            CachedNetworkImageProvider(url, cacheKey: 'file-${fileId!}'),
       ),
       orElse: fallback,
     );

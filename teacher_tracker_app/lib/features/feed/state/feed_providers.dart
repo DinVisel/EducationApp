@@ -161,7 +161,7 @@ final feedProvider =
 /// A teacher's posts for their profile (pinned first), keyed by account userId.
 /// Reloads on login/logout.
 final authorPostsProvider =
-    FutureProvider.family<List<Post>, int>((ref, userId) {
+    FutureProvider.autoDispose.family<List<Post>, int>((ref, userId) {
   ref.watch(authControllerProvider);
   return ref.watch(feedRepositoryProvider).getByAuthor(userId);
 });
@@ -202,7 +202,7 @@ final profilePostActionsProvider =
 
 /// Comments for one post, keyed by post id.
 final postCommentsProvider =
-    FutureProvider.family<List<PostComment>, int>((ref, postId) {
+    FutureProvider.autoDispose.family<List<PostComment>, int>((ref, postId) {
   return ref.watch(feedRepositoryProvider).getComments(postId);
 });
 

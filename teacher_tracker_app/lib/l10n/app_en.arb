@@ -9,6 +9,8 @@
   "commonPasswordsDoNotMatch": "Passwords do not match",
   "commonNetworkError": "Network error. Is the server running?",
   "commonSomethingWentWrong": "Something went wrong.",
+  "connectivityOffline": "You're offline",
+  "connectivityBackOnline": "Back online",
   "commonError": "Error: {error}",
   "@commonError": { "placeholders": { "error": { "type": "String" } } },
   "commonSave": "Save",
