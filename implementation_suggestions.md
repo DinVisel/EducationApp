@@ -73,7 +73,7 @@ integration tests; the frontend has effectively zero.
 
 ---
 
-### 3. 🔴 Error Handling & Offline Resilience
+### 3. 🔴 Error Handling & Offline Resilience ✅ Implemented
 
 The app assumes a stable network connection. No offline caching, retry logic, or graceful
 degradation is visible.
@@ -379,7 +379,7 @@ The API has no versioning strategy. Breaking changes will affect all clients.
 
 ---
 
-### 25. Performance Optimizations
+### 25. Performance Optimizations ✅ Implemented
 
 **Suggestion:**
 - **Backend**: Add `[ResponseCache]` or ETag support on read-heavy endpoints (feed,
