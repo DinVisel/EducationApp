@@ -43,7 +43,17 @@ public record SocialLoginDto(
     [Required] string IdToken,
     string? Nonce = null,
     string? FirstName = null,
-    string? LastName = null);
+    string? LastName = null,
+    // Chosen role for a NEW account: "Teacher" or "Student" (never "Admin").
+    // Ignored for an existing account (its role is kept). When a new account
+    // has no valid role, the endpoint replies 422 { code: "role_required" } so
+    // the client can prompt for it.
+    string? Role = null);
+
+/// Admin console sign-in: a single server secret (Admin:AccessSecret). No email
+/// or password — the backend verifies the secret and issues an Admin JWT.
+public record AdminLoginDto(
+    [Required] string Secret);
 
 public record LogoutRequestDto(
     [Required] string RefreshToken);

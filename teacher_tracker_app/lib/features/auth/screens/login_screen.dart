@@ -8,6 +8,7 @@ import '../../../core/api/error_mapper.dart';
 import '../../../core/design.dart';
 import '../../../core/utils/validators.dart';
 import '../../../l10n/app_localizations.dart';
+import '../data/auth_repository.dart';
 import '../state/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -52,6 +53,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _submitting = true);
     try {
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
+    } on RoleSelectionRequired catch (pending) {
+      await _completeWithRole(pending);
     } on GoogleSignInException catch (e) {
       // User dismissed the sheet — not an error worth surfacing.
       if (e.code == GoogleSignInExceptionCode.canceled) return;
@@ -67,6 +70,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _submitting = true);
     try {
       await ref.read(authControllerProvider.notifier).signInWithApple();
+    } on RoleSelectionRequired catch (pending) {
+      await _completeWithRole(pending);
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) return;
       if (mounted) _showError(e);
@@ -75,6 +80,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  // A new social account must choose Teacher or Student; then we re-submit the
+  // same verified token with that role.
+  Future<void> _completeWithRole(RoleSelectionRequired pending) async {
+    if (!mounted) return;
+    final role = await _pickRole();
+    if (role == null || !mounted) return;
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .completeSocialSignup(pending, role);
+    } catch (e) {
+      if (mounted) _showError(e);
+    }
+  }
+
+  Future<String?> _pickRole() {
+    final loc = AppLocalizations.of(context)!;
+    return showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(loc.rolePickerTitle,
+                  style: Theme.of(ctx).textTheme.titleMedium),
+            ),
+            ListTile(
+              leading: const Icon(Icons.school_outlined),
+              title: Text(loc.roleTeacher),
+              onTap: () => Navigator.of(ctx).pop('Teacher'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: Text(loc.roleStudent),
+              onTap: () => Navigator.of(ctx).pop('Student'),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showError(Object e) {

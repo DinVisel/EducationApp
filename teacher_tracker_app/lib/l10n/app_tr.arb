@@ -64,6 +64,9 @@
   "loginSignIn": "Giriş yap",
   "loginNoAccount": "Hesabınız yok mu? Kayıt olun",
   "loginContinueWithGoogle": "Google ile devam et",
+  "rolePickerTitle": "Uygulamayı nasıl kullanacaksınız?",
+  "roleTeacher": "Öğretmenim",
+  "roleStudent": "Öğrenciyim",
   "loginInvalidCredentials": "E-posta veya şifre hatalı.",
 
   "registerTitle": "Hesap oluştur",

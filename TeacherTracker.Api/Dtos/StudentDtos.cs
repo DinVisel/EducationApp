@@ -12,7 +12,7 @@ public record StudentDto(
     string? GuardianName,
     string? GuardianPhone,
     string? Notes,
-    int TeacherId);
+    int? TeacherId);
 
 public record CreateStudentDto(
     [Required, MaxLength(100)] string FirstName,

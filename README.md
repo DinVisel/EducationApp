@@ -77,16 +77,36 @@ dotnet test
 ### Deployment / hardening (Phase 7)
 
 Externalize every secret via environment variables or `dotnet user-secrets` — the
-committed `appsettings.json` ships empty placeholders only.
+committed `appsettings.json` ships empty placeholders only. Env var names use `__`
+(double underscore) for nested keys; array entries append `__0`, `__1`, ….
 
-| Setting                                                           | Purpose                                                                        |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `ConnectionStrings__DefaultConnection`                            | Postgres connection string                                                     |
-| `Jwt__Key`                                                        | JWT signing key (**must** be overridden for production)                        |
-| `R2__Endpoint` / `R2__AccessKey` / `R2__SecretKey` / `R2__Bucket` | Cloudflare R2 credentials                                                      |
-| `Cors__AllowedOrigins__0`, `__1`, …                               | Allowed browser origins; if none set, CORS is permissive (dev only)            |
-| `Admin__Email` / `Admin__Password`                                | Bootstraps the first `Admin` account on startup (once, if absent)              |
-| `RateLimiting__Enabled`                                           | `true` by default; a global 300/min-per-IP cap + a 10/min cap on `/api/auth/*` |
+**Deployment secrets — full list**
+
+| Setting                                                           | Required? | Purpose                                                                        |
+| ----------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------ |
+| `ConnectionStrings__DefaultConnection`                            | **Yes**   | Postgres connection string                                                      |
+| `Jwt__Key`                                                        | **Yes**   | JWT signing key (**must** be overridden for production)                         |
+| `Admin__AccessSecret`                                             | Admin     | Secret that unlocks the admin console (`POST /auth/admin`). Unset ⇒ admin login disabled |
+| `Admin__Email`                                                    | No        | Identity email of the single admin account (default `admin@teachertracker.local`) |
+| `SocialAuth__Google__ClientIds__0`, `__1`, …                      | Google    | Accepted Google ID-token audiences — include the **Web** (serverClientId), iOS, and Android client IDs |
+| `SocialAuth__Apple__ClientIds__0`, `__1`, …                       | Apple     | Accepted Apple audiences — the app **bundle ID** and any **Service ID**         |
+| `R2__Endpoint` / `R2__AccessKey` / `R2__SecretKey` / `R2__Bucket` | Files     | Cloudflare R2 credentials (file uploads/storage)                               |
+| `Moderation__AwsAccessKey` / `Moderation__AwsSecretKey`           | If on     | AWS Rekognition keys; only when `Moderation__ImageModerationEnabled=true`       |
+| `Email__Host` / `Email__Port` / `Email__User` / `Email__Pass` / `Email__From` | Reset | SMTP for password-reset emails                                        |
+| `Cors__AllowedOrigins__0`, `__1`, …                               | Web       | Allowed browser origins (e.g. the admin dashboard); if none set, CORS is permissive (dev only) |
+| `DeepLink__PublicWebBaseUrl` / `DeepLink__IosTeamId` / `DeepLink__IosBundleId` / `DeepLink__AndroidPackageName` / `DeepLink__AndroidSha256CertFingerprints__0` | Links | Universal/App Links for shareable post URLs |
+| `RateLimiting__Enabled`                                           | No        | `true` by default; a global 300/min-per-IP cap + a 10/min cap on `/api/auth/*` |
+
+Client-side config (not server secrets, but needed to deploy the apps):
+
+| Where            | Setting                                            | Purpose                                             |
+| ---------------- | -------------------------------------------------- | --------------------------------------------------- |
+| Flutter build    | `--dart-define=GOOGLE_SERVER_CLIENT_ID=…`          | Google **Web** client ID (ID-token audience)        |
+| Flutter build    | `--dart-define=GOOGLE_IOS_CLIENT_ID=…`             | Google **iOS** client ID (leave unset on Android)   |
+| admin-dashboard  | `NEXT_PUBLIC_API_BASE_URL`                         | The deployed API origin                             |
+
+> Social login setup (Google/Apple consoles + native config) is documented in
+> [`SOCIAL_LOGIN_SETUP.md`](SOCIAL_LOGIN_SETUP.md).
 
 **R2 CORS** — direct (presigned-PUT) uploads are browser `PUT`s straight to R2, so
 the bucket needs a CORS policy allowing `PUT`/`GET` from your app origins, e.g.:
@@ -102,8 +122,9 @@ the bucket needs a CORS policy allowing `PUT`/`GET` from your app origins, e.g.:
 ]
 ```
 
-Run migrations (`dotnet ef database update`) before first launch so the admin
-seeder has a schema to write to.
+Run migrations (`dotnet ef database update`) before first launch. The admin
+account is created on first successful `POST /auth/admin` (secret-based) — there
+is no password-seeded admin.
 
 ## Frontend (teacher_tracker_app)
 
@@ -138,9 +159,10 @@ plain HTTP to localhost (Android `usesCleartextTraffic`, iOS ATS exception).
 ## Admin dashboard (admin-dashboard)
 
 A **Next.js** (App Router) web console for platform administrators, deployable to
-**Vercel**. It talks to the same `TeacherTracker.Api` backend: an `Admin`-role
-account signs in via the normal JWT flow and the token is attached as a bearer
-header (refreshed on 401, mirroring the Flutter client).
+**Vercel**. It talks to the same `TeacherTracker.Api` backend: sign-in posts the
+**admin secret** (`Admin:AccessSecret`) to `POST /auth/admin`, which returns an
+`Admin` JWT that is attached as a bearer header (refreshed on 401, mirroring the
+Flutter client). There is no email/password — access is the secret alone.
 
 Screens: **Overview** (platform KPIs + 30-day signup/post charts), **Users**
 (searchable/paginated roster with ban-unban and role changes), and **Reports**
@@ -151,9 +173,8 @@ Screens: **Overview** (platform KPIs + 30-day signup/post charts), **Users**
 ### Run locally
 
 ```bash
-# 1. Backend running at http://localhost:5001 with an admin seeded
-#    (Admin__Email / Admin__Password) and this origin allowed via
-#    Cors__AllowedOrigins__0=http://localhost:3000
+# 1. Backend running at http://localhost:5001 with Admin__AccessSecret set
+#    and this origin allowed via Cors__AllowedOrigins__0=http://localhost:3000
 cd admin-dashboard
 cp .env.example .env.local     # NEXT_PUBLIC_API_BASE_URL -> the API origin
 npm install

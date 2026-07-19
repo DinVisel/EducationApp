@@ -9,8 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [secret, setSecret] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +18,7 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await login(email.trim(), password);
+      await login(secret);
       router.replace("/overview");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
@@ -38,18 +37,10 @@ export default function LoginPage() {
           </div>
           <form onSubmit={onSubmit} className="space-y-3">
             <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="username"
-            />
-            <Input
               type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Admin secret"
+              value={secret}
+              onChange={(e) => setSecret(e.target.value)}
               required
               autoComplete="current-password"
             />

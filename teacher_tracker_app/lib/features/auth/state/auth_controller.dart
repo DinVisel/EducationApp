@@ -68,23 +68,33 @@ class AuthController extends AsyncNotifier<AuthState?> {
   }
 
   /// Signs in with Google and persists the returned token pair (the backend
-  /// links or creates the account). Errors (including user cancellation) bubble
-  /// up for the caller to handle.
+  /// links or creates the account). Errors bubble up for the caller to handle —
+  /// including [RoleSelectionRequired], which means a new account must pick a
+  /// role (then call [completeSocialSignup]).
   Future<void> signInWithGoogle() async {
-    final result = await ref.read(authRepositoryProvider).signInWithGoogle();
-    await ref.read(tokenStoreProvider).saveTokens(result.token, result.refreshToken);
-    state = AsyncData(AuthState(
-      role: result.role,
-      teacher: result.teacher,
-      student: result.student,
-      mustChangePassword: result.mustChangePassword,
-    ));
+    await _applyAuth(
+        await ref.read(authRepositoryProvider).signInWithGoogle());
   }
 
-  /// Signs in with Apple and persists the returned token pair.
+  /// Signs in with Apple and persists the returned token pair. May throw
+  /// [RoleSelectionRequired] (see [signInWithGoogle]).
   Future<void> signInWithApple() async {
-    final result = await ref.read(authRepositoryProvider).signInWithApple();
-    await ref.read(tokenStoreProvider).saveTokens(result.token, result.refreshToken);
+    await _applyAuth(await ref.read(authRepositoryProvider).signInWithApple());
+  }
+
+  /// Completes a social signup after the user picks a role, then persists the
+  /// resulting session.
+  Future<void> completeSocialSignup(
+      RoleSelectionRequired pending, String role) async {
+    await _applyAuth(await ref
+        .read(authRepositoryProvider)
+        .completeSocialSignup(pending, role));
+  }
+
+  Future<void> _applyAuth(AuthResult result) async {
+    await ref
+        .read(tokenStoreProvider)
+        .saveTokens(result.token, result.refreshToken);
     state = AsyncData(AuthState(
       role: result.role,
       teacher: result.teacher,

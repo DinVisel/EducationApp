@@ -14,7 +14,10 @@ public class Student
     public string? GuardianPhone { get; set; }
     public string? Notes { get; set; }
 
-    public int TeacherId { get; set; }
+    // The teacher who provisioned this student. Null for a self-registered
+    // student (social signup as Student) — they belong to no teacher until one
+    // adds them.
+    public int? TeacherId { get; set; }
     public Teacher? Teacher { get; set; }
 
     // Optional login account for the student (populated in the student module,

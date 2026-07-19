@@ -7,12 +7,19 @@ token — identical to password login from there on. The backend stays the singl
 source of truth; there is no second identity store to sync.
 
 **Account behavior:** a social sign-in links to an existing `User` by verified
-email, or creates a new account defaulting to the **Teacher** role. Admin is
-never auto-assigned. Provider subject IDs are stored on `User`
-(`GoogleSubject` / `AppleSubject`), so returning users match by stable subject.
+email; for a brand-new account the user **picks Teacher or Student** at signup
+(Admin is never selectable — admin is secret-only). A self-registered Student
+belongs to no teacher (`Student.TeacherId` is null). Provider subject IDs are
+stored on `User` (`GoogleSubject` / `AppleSubject`), so returning users match by
+stable subject regardless of email changes/relays.
 
 Endpoints: `POST /api/v1/auth/google` and `POST /api/v1/auth/apple`
-(body: `{ idToken, nonce?, firstName?, lastName? }`).
+(body: `{ idToken, nonce?, firstName?, lastName?, role? }`). When a new account
+is created without a valid `role`, the API replies `422 { "code": "role_required" }`;
+the Flutter client then prompts for the role and re-submits the same token.
+
+Admin console: `POST /api/v1/auth/admin` (body: `{ secret }`) — see the
+`Admin:AccessSecret` entry in the main README's deployment-secrets list.
 
 ---
 

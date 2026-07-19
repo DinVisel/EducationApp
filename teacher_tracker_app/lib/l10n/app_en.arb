@@ -65,6 +65,9 @@
   "loginNoAccount": "Don't have an account? Register",
   "loginInvalidCredentials": "Invalid email or password.",
   "loginContinueWithGoogle": "Continue with Google",
+  "rolePickerTitle": "How will you use the app?",
+  "roleTeacher": "I'm a teacher",
+  "roleStudent": "I'm a student",
 
   "registerTitle": "Create account",
   "registerFirstName": "First name",

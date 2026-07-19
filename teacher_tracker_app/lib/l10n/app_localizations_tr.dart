@@ -187,6 +187,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get loginContinueWithGoogle => 'Google ile devam et';
 
   @override
+  String get rolePickerTitle => 'Uygulamayı nasıl kullanacaksınız?';
+
+  @override
+  String get roleTeacher => 'Öğretmenim';
+
+  @override
+  String get roleStudent => 'Öğrenciyim';
+
+  @override
   String get registerTitle => 'Hesap oluştur';
 
   @override

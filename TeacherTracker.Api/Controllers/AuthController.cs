@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TeacherTracker.Api.Auth;
 using TeacherTracker.Api.Data;
 using TeacherTracker.Api.Dtos;
@@ -24,15 +25,18 @@ public class AuthController : ControllerBase
     private readonly TokenService _tokens;
     private readonly IEmailService _email;
     private readonly SocialTokenVerifier _social;
+    private readonly AdminOptions _admin;
     private readonly PasswordHasher<User> _hasher = new();
 
     public AuthController(
-        AppDbContext db, TokenService tokens, IEmailService email, SocialTokenVerifier social)
+        AppDbContext db, TokenService tokens, IEmailService email,
+        SocialTokenVerifier social, IOptions<AdminOptions> admin)
     {
         _db = db;
         _tokens = tokens;
         _email = email;
         _social = social;
+        _admin = admin.Value;
     }
 
     [EnableRateLimiting("auth")]
@@ -98,7 +102,7 @@ public class AuthController : ControllerBase
             return Unauthorized("Could not verify the Google sign-in.");
         }
 
-        return await SocialSignInAsync(SocialProvider.Google, identity);
+        return await SocialSignInAsync(SocialProvider.Google, identity, dto.Role);
     }
 
     [EnableRateLimiting("auth")]
@@ -116,16 +120,49 @@ public class AuthController : ControllerBase
             return Unauthorized("Could not verify the Apple sign-in.");
         }
 
-        return await SocialSignInAsync(SocialProvider.Apple, identity);
+        return await SocialSignInAsync(SocialProvider.Apple, identity, dto.Role);
+    }
+
+    // Admin console sign-in via the server secret only (Admin:AccessSecret). No
+    // email/password: verify the secret, find-or-create the single admin User,
+    // and issue an Admin JWT — the same token shape the dashboard already uses.
+    [EnableRateLimiting("auth")]
+    [HttpPost("admin")]
+    public async Task<ActionResult<AuthResponseDto>> Admin(AdminLoginDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(_admin.AccessSecret))
+            return Unauthorized("Admin login is not configured.");
+
+        // Constant-time compare so a wrong secret can't be timed byte-by-byte.
+        var provided = System.Text.Encoding.UTF8.GetBytes(dto.Secret);
+        var expected = System.Text.Encoding.UTF8.GetBytes(_admin.AccessSecret);
+        if (!CryptographicOperations.FixedTimeEquals(provided, expected))
+            return Unauthorized("Invalid admin secret.");
+
+        var email = (_admin.Email ?? "admin@teachertracker.local").Trim().ToLowerInvariant();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null)
+        {
+            user = new User { Email = email, Role = UserRole.Admin };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+        }
+        else if (user.Role != UserRole.Admin)
+        {
+            return Unauthorized("The configured admin email is already a non-admin account.");
+        }
+
+        return Ok(await IssueAsync(user, null, null));
     }
 
     private enum SocialProvider { Google, Apple }
 
     // Shared social sign-in: match the account by provider subject, else link by
-    // verified email, else create a new Teacher account (never Admin). Issues our
-    // own token pair, so everything downstream is identical to password login.
+    // verified email, else create a new account in the requested role (Teacher or
+    // Student, never Admin). Issues our own token pair, so everything downstream
+    // is identical to password login.
     private async Task<ActionResult<AuthResponseDto>> SocialSignInAsync(
-        SocialProvider provider, SocialIdentity identity)
+        SocialProvider provider, SocialIdentity identity, string? requestedRole)
     {
         // 1. Returning user: match on the provider's stable subject id.
         System.Linq.Expressions.Expression<Func<User, bool>> bySubject =
@@ -161,25 +198,55 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(email))
             return BadRequest("A verified email is required to create an account.");
 
-        var teacher = new Teacher
+        // The role is chosen at signup; without a valid one, ask the client to
+        // prompt for it (it re-sends the same token with the choice).
+        if (!TryParseSelfSignupRole(requestedRole, out var role))
+            return UnprocessableEntity(new { code = "role_required" });
+
+        var firstName = identity.FirstName?.Trim() ?? string.Empty;
+        var lastName = identity.LastName?.Trim() ?? string.Empty;
+
+        // A pure-social account has no password until it sets one via
+        // forgot/reset-password.
+        User newUser;
+        Teacher? teacher = null;
+        Student? student = null;
+        if (role == UserRole.Teacher)
         {
-            FirstName = identity.FirstName?.Trim() ?? string.Empty,
-            LastName = identity.LastName?.Trim() ?? string.Empty,
-        };
-        // No password login until the account sets one via forgot/reset-password.
-        var newUser = new User { Email = email, Role = UserRole.Teacher, Teacher = teacher };
+            teacher = new Teacher { FirstName = firstName, LastName = lastName };
+            newUser = new User { Email = email, Role = UserRole.Teacher, Teacher = teacher };
+        }
+        else
+        {
+            // Self-registered student: belongs to no teacher (TeacherId null).
+            student = new Student { FirstName = firstName, LastName = lastName };
+            newUser = new User { Email = email, Role = UserRole.Student, Student = student };
+        }
         LinkSubject(newUser, provider, identity.Subject);
 
         _db.Users.Add(newUser);
         await _db.SaveChangesAsync();
 
-        return Ok(await IssueAsync(newUser, teacher, null));
+        return Ok(await IssueAsync(newUser, teacher, student));
     }
 
     private static void LinkSubject(User user, SocialProvider provider, string subject)
     {
         if (provider == SocialProvider.Google) user.GoogleSubject = subject;
         else user.AppleSubject = subject;
+    }
+
+    // A self-signup role must be Teacher or Student — never Admin (admin access is
+    // secret-only, see the /admin endpoint).
+    private static bool TryParseSelfSignupRole(string? requested, out UserRole role)
+    {
+        role = default;
+        if (!Enum.TryParse(requested, ignoreCase: true, out UserRole parsed))
+            return false;
+        if (parsed != UserRole.Teacher && parsed != UserRole.Student)
+            return false;
+        role = parsed;
+        return true;
     }
 
     [EnableRateLimiting("auth")]

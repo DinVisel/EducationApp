@@ -410,6 +410,24 @@ abstract class AppLocalizations {
   /// **'Continue with Google'**
   String get loginContinueWithGoogle;
 
+  /// No description provided for @rolePickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How will you use the app?'**
+  String get rolePickerTitle;
+
+  /// No description provided for @roleTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m a teacher'**
+  String get roleTeacher;
+
+  /// No description provided for @roleStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m a student'**
+  String get roleStudent;
+
   /// No description provided for @registerTitle.
   ///
   /// In en, this message translates to:

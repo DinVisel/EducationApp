@@ -119,6 +119,10 @@ builder.Services.Configure<SocialAuthOptions>(
     builder.Configuration.GetSection(SocialAuthOptions.SectionName));
 builder.Services.AddSingleton<SocialTokenVerifier>();
 
+// Admin console: secret-based sign-in (Admin:AccessSecret) — see /auth/admin.
+builder.Services.Configure<AdminOptions>(
+    builder.Configuration.GetSection(AdminOptions.SectionName));
+
 // --- Real-time notifications (SignalR) ---
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
@@ -280,11 +284,6 @@ app.MapHub<NotificationsHub>("/hubs/notifications");
 if (app.Environment.IsDevelopment())
     await ApplyMigrationsAsync(app);
 
-// Seed an admin account from configuration if one doesn't exist yet. Set
-// `Admin:Email` + `Admin:Password` (env/user-secrets) to bootstrap the first
-// admin; leave unset to skip. Requires the schema to already be migrated.
-await SeedAdminAsync(app);
-
 app.Run();
 
 static async Task ApplyMigrationsAsync(WebApplication app)
@@ -295,25 +294,6 @@ static async Task ApplyMigrationsAsync(WebApplication app)
     // on in-memory SQLite (via EnsureCreated) where MigrateAsync would fail.
     if (db.Database.IsNpgsql())
         await db.Database.MigrateAsync();
-}
-
-static async Task SeedAdminAsync(WebApplication app)
-{
-    var email = app.Configuration["Admin:Email"];
-    var password = app.Configuration["Admin:Password"];
-    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-        return;
-
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var normalized = email.Trim().ToLowerInvariant();
-    if (await db.Users.AnyAsync(u => u.Email == normalized))
-        return;
-
-    var admin = new User { Email = normalized, Role = UserRole.Admin };
-    admin.PasswordHash = new PasswordHasher<User>().HashPassword(admin, password);
-    db.Users.Add(admin);
-    await db.SaveChangesAsync();
 }
 
 // Exposed so the integration test project can boot the app via WebApplicationFactory.

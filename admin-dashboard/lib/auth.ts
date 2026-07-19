@@ -35,25 +35,23 @@ export function isAuthenticated(): boolean {
   return getAccessToken() !== null;
 }
 
-/// Signs in against the shared API. Rejects non-admin accounts so a teacher's or
-/// student's credentials can't open the admin console.
-export async function login(email: string, password: string): Promise<void> {
-  const res = await fetch(`${apiBaseUrl}/api/v1/auth/login`, {
+/// Signs in with the server admin secret (Admin:AccessSecret). The backend
+/// verifies it and returns an Admin JWT — no email/password. Access is granted
+/// by holding the secret alone.
+export async function login(secret: string): Promise<void> {
+  const res = await fetch(`${apiBaseUrl}/api/v1/auth/admin`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ secret }),
   });
 
   if (res.status === 401) {
-    throw new Error("Invalid email or password.");
+    throw new Error("Invalid admin secret.");
   }
   if (!res.ok) {
     throw new Error(`Login failed (${res.status}).`);
   }
 
   const data = (await res.json()) as AuthResponse;
-  if (data.role !== "Admin") {
-    throw new Error("This account is not an administrator.");
-  }
   storeTokens(data.token, data.refreshToken);
 }

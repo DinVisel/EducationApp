@@ -19,6 +19,16 @@ class SocialSignInException implements Exception {
   String toString() => message;
 }
 
+/// Thrown when a social sign-in is for a brand-new account and the backend needs
+/// the user to pick a role first. Carries the verified provider payload so the
+/// caller can re-submit it (via [AuthRepository.completeSocialSignup]) once the
+/// user chooses — without re-running the native provider flow.
+class RoleSelectionRequired implements Exception {
+  const RoleSelectionRequired(this.path, this.payload);
+  final String path;
+  final Map<String, dynamic> payload;
+}
+
 // google_sign_in requires a one-time initialize() per process; guard it.
 bool _googleInitialized = false;
 
@@ -92,8 +102,9 @@ class AuthRepository {
 
   /// Signs in with Google: runs the native flow to get an ID token, then trades
   /// it with the backend for our own token pair (creating/linking the account
-  /// server-side). Throws [GoogleSignInException] (e.g. on cancel) or
-  /// [SocialSignInException].
+  /// server-side). Throws [GoogleSignInException] (e.g. on cancel),
+  /// [SocialSignInException], or [RoleSelectionRequired] when a new account must
+  /// pick a role first.
   Future<AuthResult> signInWithGoogle() async {
     final signIn = GoogleSignIn.instance;
     if (!_googleInitialized) {
@@ -112,18 +123,14 @@ class AuthRepository {
           'Google did not return an identity token.');
     }
 
-    final res = await _dio.post<Map<String, dynamic>>(
-      '/api/v1/auth/google',
-      data: {'idToken': idToken},
-    );
-    return _parse(res.data!);
+    return _exchangeSocial('/api/v1/auth/google', {'idToken': idToken});
   }
 
   /// Signs in with Apple: runs the native flow (with a one-time nonce the server
   /// checks against the token) and forwards the ID token — plus the name, which
   /// Apple only returns on the first authorization — to the backend. Throws
-  /// [SignInWithAppleAuthorizationException] (e.g. on cancel) or
-  /// [SocialSignInException].
+  /// [SignInWithAppleAuthorizationException] (e.g. on cancel),
+  /// [SocialSignInException], or [RoleSelectionRequired].
   Future<AuthResult> signInWithApple() async {
     final nonce = _randomNonce();
     final credential = await SignInWithApple.getAppleIDCredential(
@@ -142,16 +149,38 @@ class AuthRepository {
           'Apple did not return an identity token.');
     }
 
-    final res = await _dio.post<Map<String, dynamic>>(
-      '/api/v1/auth/apple',
-      data: {
-        'idToken': idToken,
-        'nonce': nonce,
-        'firstName': credential.givenName,
-        'lastName': credential.familyName,
-      },
-    );
-    return _parse(res.data!);
+    return _exchangeSocial('/api/v1/auth/apple', {
+      'idToken': idToken,
+      'nonce': nonce,
+      'firstName': credential.givenName,
+      'lastName': credential.familyName,
+    });
+  }
+
+  /// Retries a social sign-in once the user has picked a role, re-sending the
+  /// same verified payload (no native re-prompt) with the chosen role.
+  Future<AuthResult> completeSocialSignup(
+      RoleSelectionRequired pending, String role) {
+    return _exchangeSocial(pending.path, {...pending.payload, 'role': role});
+  }
+
+  // Posts a verified social payload to [path]; on the backend's 422
+  // `role_required` signal, surfaces [RoleSelectionRequired] carrying the payload
+  // so the caller can prompt and retry.
+  Future<AuthResult> _exchangeSocial(
+      String path, Map<String, dynamic> payload) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(path, data: payload);
+      return _parse(res.data!);
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (e.response?.statusCode == 422 &&
+          data is Map &&
+          data['code'] == 'role_required') {
+        throw RoleSelectionRequired(path, payload);
+      }
+      rethrow;
+    }
   }
 
   /// Restores the current identity (any role) from the saved token.

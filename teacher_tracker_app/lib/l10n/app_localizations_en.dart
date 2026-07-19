@@ -187,6 +187,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginContinueWithGoogle => 'Continue with Google';
 
   @override
+  String get rolePickerTitle => 'How will you use the app?';
+
+  @override
+  String get roleTeacher => 'I\'m a teacher';
+
+  @override
+  String get roleStudent => 'I\'m a student';
+
+  @override
   String get registerTitle => 'Create account';
 
   @override
