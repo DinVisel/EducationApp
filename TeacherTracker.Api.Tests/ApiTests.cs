@@ -342,8 +342,9 @@ public class ApiTests
 
         var res = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/admin/users", admin));
         res.EnsureSuccessStatusCode();
-        var users = await res.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.True(users.GetArrayLength() >= 2); // the teacher + the admin
+        var page = await res.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(page.GetProperty("total").GetInt32() >= 2); // the teacher + the admin
+        Assert.True(page.GetProperty("items").GetArrayLength() >= 2);
     }
 
     // --- Phase 9: content safety ----------------------------------------------

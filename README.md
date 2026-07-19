@@ -134,3 +134,32 @@ flutter run -d chrome        # web avoids emulator networking gotchas
 API base URL is resolved per-platform in `lib/core/config.dart`
 (`10.0.2.2` for the Android emulator, `localhost` elsewhere). Debug builds allow
 plain HTTP to localhost (Android `usesCleartextTraffic`, iOS ATS exception).
+
+## Admin dashboard (admin-dashboard)
+
+A **Next.js** (App Router) web console for platform administrators, deployable to
+**Vercel**. It talks to the same `TeacherTracker.Api` backend: an `Admin`-role
+account signs in via the normal JWT flow and the token is attached as a bearer
+header (refreshed on 401, mirroring the Flutter client).
+
+Screens: **Overview** (platform KPIs + 30-day signup/post charts), **Users**
+(searchable/paginated roster with ban-unban and role changes), and **Reports**
+(moderation queue). These are backed by admin endpoints under `api/v1/admin`
+(`stats`, paginated `users`, `users/{id}/ban|unban|role`, plus the existing
+`reports`).
+
+### Run locally
+
+```bash
+# 1. Backend running at http://localhost:5001 with an admin seeded
+#    (Admin__Email / Admin__Password) and this origin allowed via
+#    Cors__AllowedOrigins__0=http://localhost:3000
+cd admin-dashboard
+cp .env.example .env.local     # NEXT_PUBLIC_API_BASE_URL -> the API origin
+npm install
+npm run dev                    # http://localhost:3000
+```
+
+Deploy: import the repo into Vercel with **Root Directory** = `admin-dashboard`,
+set `NEXT_PUBLIC_API_BASE_URL` to the deployed API origin, and add the Vercel
+domain to the API's `Cors:AllowedOrigins`.
