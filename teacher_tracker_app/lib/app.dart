@@ -21,6 +21,7 @@ import 'features/auth/state/auth_controller.dart';
 import 'features/feed/screens/post_detail_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/onboarding/screens/onboarding_screen.dart';
+import 'features/onboarding/screens/profile_setup_screen.dart';
 import 'features/student/screens/student_shell.dart';
 
 /// A `/post/:id` deep link that arrived before the user was signed in. Held until
@@ -81,8 +82,17 @@ final routerProvider = Provider<GoRouter>((ref) {
               ? '/admin'
               : '/home';
 
-      // First-login onboarding gate (teachers only).
+      // First-login gates (teachers only).
       if (session.isTeacher) {
+        // 1. Mandatory demographic profile (server-backed): no way past it until
+        //    City/District/School type/Education level are saved.
+        if (session.needsProfileSetup) {
+          return loc == '/profile-setup' ? null : '/profile-setup';
+        }
+        if (loc == '/profile-setup') return home;
+
+        // 2. Product walkthrough (local, skippable): create a class, add a
+        //    student. Only shown after the profile is complete.
         final onboarding = ref.read(onboardingControllerProvider);
         if (onboarding.isLoading || !onboarding.hasValue) {
           return loc == '/' ? null : '/';
@@ -122,6 +132,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (_, _) => const ChangePasswordScreen(forced: true)),
       GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
+      GoRoute(
+          path: '/profile-setup',
+          builder: (_, _) => const ProfileSetupScreen()),
       GoRoute(path: '/student', builder: (_, _) => const StudentShell()),
       GoRoute(path: '/admin', builder: (_, _) => const AdminShell()),
       GoRoute(

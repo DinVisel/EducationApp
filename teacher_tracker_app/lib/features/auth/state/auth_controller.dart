@@ -27,6 +27,13 @@ class AuthState {
   bool get isTeacher => role == 'Teacher';
   bool get isStudent => role == 'Student';
   bool get isAdmin => role == 'Admin';
+
+  /// True when a teacher hasn't yet completed the mandatory demographic profile.
+  /// The router forces the profile-setup screen while this is set. Server-backed
+  /// (derived from the profile), so it clears the moment the fields are saved and
+  /// applies on every device.
+  bool get needsProfileSetup =>
+      isTeacher && teacher != null && !teacher!.hasCompletedDemographics;
 }
 
 /// Owns authentication. `null` data = signed out.

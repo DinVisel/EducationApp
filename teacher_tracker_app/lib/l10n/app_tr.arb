@@ -134,13 +134,17 @@
   "settingsDistrict": "İlçe",
   "settingsSchoolType": "Okul türü",
   "settingsEducationLevel": "Eğitim kademesi",
-  "settingsNotSet": "Belirtilmedi",
   "schoolTypeState": "Devlet",
   "schoolTypePrivate": "Özel",
   "schoolTypeOther": "Diğer",
   "educationLevelPrimary": "İlkokul",
   "educationLevelMiddle": "Ortaokul",
   "educationLevelBoth": "Her ikisi",
+
+  "profileSetupTitle": "Profilini tamamla",
+  "profileSetupBody": "Nerede öğretmenlik yaptığını bize kısaca anlat. Bu, uygulamayı senin gibi öğretmenler için geliştirmemize yardımcı olur. Tüm alanlar zorunludur.",
+  "profileSetupSelect": "Seç",
+  "profileSetupContinue": "Devam et",
 
   "imageCropperTitle": "Fotoğrafı düzenle",
 

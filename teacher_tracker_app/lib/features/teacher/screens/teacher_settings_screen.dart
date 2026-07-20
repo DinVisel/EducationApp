@@ -211,20 +211,23 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
                 controller: _city,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(labelText: loc.settingsCity),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _district,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(labelText: loc.settingsDistrict),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<SchoolType?>(
+              DropdownButtonFormField<SchoolType>(
                 initialValue: _schoolType,
                 isExpanded: true,
                 decoration: InputDecoration(labelText: loc.settingsSchoolType),
                 items: [
-                  DropdownMenuItem(value: null, child: Text(loc.settingsNotSet)),
                   DropdownMenuItem(
                       value: SchoolType.state, child: Text(loc.schoolTypeState)),
                   DropdownMenuItem(
@@ -232,16 +235,16 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
                   DropdownMenuItem(
                       value: SchoolType.other, child: Text(loc.schoolTypeOther)),
                 ],
+                validator: (v) => v == null ? loc.commonRequired : null,
                 onChanged: (v) => setState(() => _schoolType = v),
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<EducationLevel?>(
+              DropdownButtonFormField<EducationLevel>(
                 initialValue: _educationLevel,
                 isExpanded: true,
                 decoration:
                     InputDecoration(labelText: loc.settingsEducationLevel),
                 items: [
-                  DropdownMenuItem(value: null, child: Text(loc.settingsNotSet)),
                   DropdownMenuItem(
                       value: EducationLevel.primarySchool,
                       child: Text(loc.educationLevelPrimary)),
@@ -252,6 +255,7 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
                       value: EducationLevel.both,
                       child: Text(loc.educationLevelBoth)),
                 ],
+                validator: (v) => v == null ? loc.commonRequired : null,
                 onChanged: (v) => setState(() => _educationLevel = v),
               ),
             ],

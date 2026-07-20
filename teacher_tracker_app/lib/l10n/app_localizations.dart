@@ -782,12 +782,6 @@ abstract class AppLocalizations {
   /// **'Education level'**
   String get settingsEducationLevel;
 
-  /// No description provided for @settingsNotSet.
-  ///
-  /// In en, this message translates to:
-  /// **'Not set'**
-  String get settingsNotSet;
-
   /// No description provided for @schoolTypeState.
   ///
   /// In en, this message translates to:
@@ -823,6 +817,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Both'**
   String get educationLevelBoth;
+
+  /// No description provided for @profileSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile'**
+  String get profileSetupTitle;
+
+  /// No description provided for @profileSetupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us a bit about where you teach. This helps us improve the app for teachers like you. All fields are required.'**
+  String get profileSetupBody;
+
+  /// No description provided for @profileSetupSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get profileSetupSelect;
+
+  /// No description provided for @profileSetupContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get profileSetupContinue;
 
   /// No description provided for @imageCropperTitle.
   ///

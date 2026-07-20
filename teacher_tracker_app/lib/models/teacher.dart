@@ -74,6 +74,15 @@ class Teacher {
 
   String get fullName => '$firstName $lastName'.trim();
 
+  /// Whether the mandatory demographic profile has been filled in. Drives the
+  /// first-login onboarding gate (see the router in app.dart): a teacher can't
+  /// enter the app until City, District, School type and Education level are set.
+  bool get hasCompletedDemographics =>
+      (city?.trim().isNotEmpty ?? false) &&
+      (district?.trim().isNotEmpty ?? false) &&
+      schoolType != null &&
+      educationLevel != null;
+
   factory Teacher.fromJson(Map<String, dynamic> json) => Teacher(
         id: json['id'] as int,
         userId: json['userId'] as int? ?? 0,

@@ -139,13 +139,17 @@
   "settingsDistrict": "District",
   "settingsSchoolType": "School type",
   "settingsEducationLevel": "Education level",
-  "settingsNotSet": "Not set",
   "schoolTypeState": "State",
   "schoolTypePrivate": "Private",
   "schoolTypeOther": "Other",
   "educationLevelPrimary": "Primary school",
   "educationLevelMiddle": "Middle school",
   "educationLevelBoth": "Both",
+
+  "profileSetupTitle": "Complete your profile",
+  "profileSetupBody": "Tell us a bit about where you teach. This helps us improve the app for teachers like you. All fields are required.",
+  "profileSetupSelect": "Select",
+  "profileSetupContinue": "Continue",
 
   "imageCropperTitle": "Edit photo",
 

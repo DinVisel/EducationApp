@@ -381,9 +381,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsEducationLevel => 'Education level';
 
   @override
-  String get settingsNotSet => 'Not set';
-
-  @override
   String get schoolTypeState => 'State';
 
   @override
@@ -400,6 +397,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get educationLevelBoth => 'Both';
+
+  @override
+  String get profileSetupTitle => 'Complete your profile';
+
+  @override
+  String get profileSetupBody =>
+      'Tell us a bit about where you teach. This helps us improve the app for teachers like you. All fields are required.';
+
+  @override
+  String get profileSetupSelect => 'Select';
+
+  @override
+  String get profileSetupContinue => 'Continue';
 
   @override
   String get imageCropperTitle => 'Edit photo';

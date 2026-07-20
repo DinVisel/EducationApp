@@ -381,9 +381,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsEducationLevel => 'Eğitim kademesi';
 
   @override
-  String get settingsNotSet => 'Belirtilmedi';
-
-  @override
   String get schoolTypeState => 'Devlet';
 
   @override
@@ -400,6 +397,19 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get educationLevelBoth => 'Her ikisi';
+
+  @override
+  String get profileSetupTitle => 'Profilini tamamla';
+
+  @override
+  String get profileSetupBody =>
+      'Nerede öğretmenlik yaptığını bize kısaca anlat. Bu, uygulamayı senin gibi öğretmenler için geliştirmemize yardımcı olur. Tüm alanlar zorunludur.';
+
+  @override
+  String get profileSetupSelect => 'Seç';
+
+  @override
+  String get profileSetupContinue => 'Devam et';
 
   @override
   String get imageCropperTitle => 'Fotoğrafı düzenle';
