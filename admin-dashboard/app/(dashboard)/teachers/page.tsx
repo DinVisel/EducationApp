@@ -41,6 +41,10 @@ const LABELS: Record<string, string> = {
 };
 const pretty = (raw: string) => LABELS[raw] ?? raw;
 
+// How many provinces the city chart shows before collapsing the rest into
+// a single "Other" bucket.
+const TOP_CITIES = 12;
+
 export default function TeachersPage() {
   const router = useRouter();
   const [data, setData] = useState<TeacherStats | null>(null);
@@ -75,7 +79,24 @@ export default function TeachersPage() {
       ? Math.round((data.withLocation / data.totalTeachers) * 100)
       : 0;
 
-  const cityData = data.byCity.map((c) => ({ ...c }));
+  // Cap the city chart at the top N provinces and roll the long tail into a
+  // single non-clickable "Other" bucket, so 81 provinces don't crowd it.
+  // byCity arrives already sorted by descending count from the API.
+  const topCities = data.byCity.slice(0, TOP_CITIES);
+  const tailCities = data.byCity.slice(TOP_CITIES);
+  const cityData: { label: string; count: number; isOther: boolean }[] = [
+    ...topCities.map((c) => ({ label: c.label, count: c.count, isOther: false })),
+    ...(tailCities.length > 0
+      ? [
+          {
+            label: `Other (${tailCities.length})`,
+            count: tailCities.reduce((sum, c) => sum + c.count, 0),
+            isOther: true,
+          },
+        ]
+      : []),
+  ];
+
   const schoolData = data.bySchoolType.map((c) => ({ ...c, label: pretty(c.label) }));
   const levelData = data.byEducationLevel.map((c) => ({ ...c, label: pretty(c.label) }));
 
@@ -98,7 +119,10 @@ export default function TeachersPage() {
       {/* By city — click a bar to drill into that city's districts */}
       <Card>
         <CardHeader>
-          <CardTitle>Teachers by city</CardTitle>
+          <CardTitle>
+            Teachers by city
+            {tailCities.length > 0 ? ` (top ${TOP_CITIES})` : ""}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {cityData.length === 0 ? (
@@ -120,17 +144,21 @@ export default function TeachersPage() {
                   dataKey="count"
                   radius={[0, 3, 3, 0]}
                   cursor="pointer"
-                  onClick={(d: { label?: string }) =>
-                    d.label && setSelectedCity(d.label === selectedCity ? null : d.label)
-                  }
+                  onClick={(d: { label?: string; isOther?: boolean }) => {
+                    // The aggregated "Other" bucket isn't a real city — no drill.
+                    if (d.isOther || !d.label) return;
+                    setSelectedCity(d.label === selectedCity ? null : d.label);
+                  }}
                 >
                   {cityData.map((c) => (
                     <Cell
                       key={c.label}
                       fill={
-                        c.label === selectedCity
-                          ? "hsl(28 80% 52%)"
-                          : "hsl(222 47% 45%)"
+                        c.isOther
+                          ? "hsl(215 16% 60%)"
+                          : c.label === selectedCity
+                            ? "hsl(28 80% 52%)"
+                            : "hsl(222 47% 45%)"
                       }
                     />
                   ))}
@@ -140,6 +168,9 @@ export default function TeachersPage() {
           )}
           <p className="mt-2 text-xs text-muted-foreground">
             Tip: click a city to see its district breakdown below.
+            {tailCities.length > 0
+              ? ` "Other" groups the remaining ${tailCities.length} provinces.`
+              : ""}
           </p>
         </CardContent>
       </Card>
