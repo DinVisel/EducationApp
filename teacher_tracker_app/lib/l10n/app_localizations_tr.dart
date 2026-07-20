@@ -362,6 +362,46 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsHapticsToggle => 'Titreşim geri bildirimi';
 
   @override
+  String get settingsTeachingProfile => 'Öğretim profili';
+
+  @override
+  String get settingsTeachingProfileHint =>
+      'Öğretmenlerimizin nerede olduğunu anlamamıza yardımcı olur. İsteğe bağlı.';
+
+  @override
+  String get settingsCity => 'İl';
+
+  @override
+  String get settingsDistrict => 'İlçe';
+
+  @override
+  String get settingsSchoolType => 'Okul türü';
+
+  @override
+  String get settingsEducationLevel => 'Eğitim kademesi';
+
+  @override
+  String get settingsNotSet => 'Belirtilmedi';
+
+  @override
+  String get schoolTypeState => 'Devlet';
+
+  @override
+  String get schoolTypePrivate => 'Özel';
+
+  @override
+  String get schoolTypeOther => 'Diğer';
+
+  @override
+  String get educationLevelPrimary => 'İlkokul';
+
+  @override
+  String get educationLevelMiddle => 'Ortaokul';
+
+  @override
+  String get educationLevelBoth => 'Her ikisi';
+
+  @override
   String get imageCropperTitle => 'Fotoğrafı düzenle';
 
   @override

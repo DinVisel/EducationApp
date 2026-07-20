@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using TeacherTracker.Api.Models;
 
 namespace TeacherTracker.Api.Dtos;
 
@@ -29,7 +30,13 @@ public record UpdateProfileDto(
     // When provided, set the profile picture / cover to this owned file. Null
     // leaves the current image unchanged.
     int? AvatarFileId = null,
-    int? CoverFileId = null);
+    int? CoverFileId = null,
+    // Demographic profile fields for growth analytics. Null leaves the current
+    // value unchanged (so a partial edit doesn't wipe previously-set fields).
+    [MaxLength(100)] string? City = null,
+    [MaxLength(100)] string? District = null,
+    SchoolType? SchoolType = null,
+    EducationLevel? EducationLevel = null);
 
 public record ChangePasswordDto(
     [Required] string CurrentPassword,

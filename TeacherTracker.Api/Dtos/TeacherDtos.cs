@@ -1,3 +1,5 @@
+using TeacherTracker.Api.Models;
+
 namespace TeacherTracker.Api.Dtos;
 
 public record TeacherDto(
@@ -9,4 +11,9 @@ public record TeacherDto(
     string LastName,
     string Email,
     int? AvatarFileId = null,
-    int? CoverFileId = null);
+    int? CoverFileId = null,
+    // Demographic profile fields (null until the teacher fills them in).
+    string? City = null,
+    string? District = null,
+    SchoolType? SchoolType = null,
+    EducationLevel? EducationLevel = null);

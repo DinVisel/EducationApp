@@ -14,6 +14,14 @@ public class Teacher
     public int UserId { get; set; }
     public User? User { get; set; }
 
+    // Demographic data collected during onboarding / profile setup, used by the
+    // admin analytics dashboard to segment teacher growth. All nullable: rows that
+    // predate this feature (and social/quick signups) haven't filled them in yet.
+    public string? City { get; set; }
+    public string? District { get; set; }
+    public SchoolType? SchoolType { get; set; }
+    public EducationLevel? EducationLevel { get; set; }
+
     // Optional profile picture and cover photo (uploaded files in R2).
     public int? AvatarFileObjectId { get; set; }
     public FileObject? AvatarFileObject { get; set; }

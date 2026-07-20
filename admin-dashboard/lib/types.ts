@@ -33,6 +33,21 @@ export interface AdminOverview {
   posts: TimeSeriesPoint[];
 }
 
+export interface CategoryCount {
+  label: string;
+  count: number;
+}
+
+export interface TeacherStats {
+  totalTeachers: number;
+  withLocation: number;
+  byCity: CategoryCount[];
+  bySchoolType: CategoryCount[];
+  byEducationLevel: CategoryCount[];
+  districtCity: string | null;
+  byDistrict: CategoryCount[];
+}
+
 export interface AdminUser {
   id: number;
   email: string;

@@ -83,6 +83,19 @@ public class AppDbContext : DbContext
             .HasForeignKey<Teacher>(t => t.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Demographic enums as readable text rather than ints. City/District stay
+        // free-text strings. Indexed for the admin GROUP BY aggregations.
+        modelBuilder.Entity<Teacher>()
+            .Property(t => t.SchoolType)
+            .HasConversion<string>();
+        modelBuilder.Entity<Teacher>()
+            .Property(t => t.EducationLevel)
+            .HasConversion<string>();
+        modelBuilder.Entity<Teacher>()
+            .HasIndex(t => t.City);
+        modelBuilder.Entity<Teacher>()
+            .HasIndex(t => new { t.City, t.District });
+
         // Optional profile picture / cover photo; clearing the file just nulls
         // the reference (keeps the teacher).
         modelBuilder.Entity<Teacher>()

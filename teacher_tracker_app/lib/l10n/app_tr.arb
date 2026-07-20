@@ -127,6 +127,21 @@
   "settingsThemeDark": "Koyu",
   "settingsHaptics": "Dokunsal Geri Bildirim",
   "settingsHapticsToggle": "Titreşim geri bildirimi",
+
+  "settingsTeachingProfile": "Öğretim profili",
+  "settingsTeachingProfileHint": "Öğretmenlerimizin nerede olduğunu anlamamıza yardımcı olur. İsteğe bağlı.",
+  "settingsCity": "İl",
+  "settingsDistrict": "İlçe",
+  "settingsSchoolType": "Okul türü",
+  "settingsEducationLevel": "Eğitim kademesi",
+  "settingsNotSet": "Belirtilmedi",
+  "schoolTypeState": "Devlet",
+  "schoolTypePrivate": "Özel",
+  "schoolTypeOther": "Diğer",
+  "educationLevelPrimary": "İlkokul",
+  "educationLevelMiddle": "Ortaokul",
+  "educationLevelBoth": "Her ikisi",
+
   "imageCropperTitle": "Fotoğrafı düzenle",
 
   "attendanceTitle": "Yoklama",

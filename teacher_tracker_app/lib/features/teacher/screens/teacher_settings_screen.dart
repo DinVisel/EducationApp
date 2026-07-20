@@ -43,6 +43,10 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
   late final TextEditingController _firstName;
   late final TextEditingController _lastName;
   late final TextEditingController _email;
+  late final TextEditingController _city;
+  late final TextEditingController _district;
+  SchoolType? _schoolType;
+  EducationLevel? _educationLevel;
   bool _saving = false;
 
   @override
@@ -51,6 +55,10 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
     _firstName = TextEditingController(text: widget.teacher.firstName);
     _lastName = TextEditingController(text: widget.teacher.lastName);
     _email = TextEditingController(text: widget.teacher.email);
+    _city = TextEditingController(text: widget.teacher.city ?? '');
+    _district = TextEditingController(text: widget.teacher.district ?? '');
+    _schoolType = widget.teacher.schoolType;
+    _educationLevel = widget.teacher.educationLevel;
   }
 
   @override
@@ -58,6 +66,8 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
     _firstName.dispose();
     _lastName.dispose();
     _email.dispose();
+    _city.dispose();
+    _district.dispose();
     super.dispose();
   }
 
@@ -75,6 +85,10 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
               firstName: _firstName.text.trim(),
               lastName: _lastName.text.trim(),
               email: _email.text.trim(),
+              city: _city.text.trim(),
+              district: _district.text.trim(),
+              schoolType: _schoolType,
+              educationLevel: _educationLevel,
             ),
           );
       if (mounted) {
@@ -180,6 +194,67 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
                 ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(loc.settingsTeachingProfile,
+            style: tt.titleMedium
+                ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        Text(loc.settingsTeachingProfileHint,
+            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+        const SizedBox(height: 12),
+        GlassCard(
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _city,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(labelText: loc.settingsCity),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _district,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(labelText: loc.settingsDistrict),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<SchoolType?>(
+                initialValue: _schoolType,
+                isExpanded: true,
+                decoration: InputDecoration(labelText: loc.settingsSchoolType),
+                items: [
+                  DropdownMenuItem(value: null, child: Text(loc.settingsNotSet)),
+                  DropdownMenuItem(
+                      value: SchoolType.state, child: Text(loc.schoolTypeState)),
+                  DropdownMenuItem(
+                      value: SchoolType.private, child: Text(loc.schoolTypePrivate)),
+                  DropdownMenuItem(
+                      value: SchoolType.other, child: Text(loc.schoolTypeOther)),
+                ],
+                onChanged: (v) => setState(() => _schoolType = v),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<EducationLevel?>(
+                initialValue: _educationLevel,
+                isExpanded: true,
+                decoration:
+                    InputDecoration(labelText: loc.settingsEducationLevel),
+                items: [
+                  DropdownMenuItem(value: null, child: Text(loc.settingsNotSet)),
+                  DropdownMenuItem(
+                      value: EducationLevel.primarySchool,
+                      child: Text(loc.educationLevelPrimary)),
+                  DropdownMenuItem(
+                      value: EducationLevel.middleSchool,
+                      child: Text(loc.educationLevelMiddle)),
+                  DropdownMenuItem(
+                      value: EducationLevel.both,
+                      child: Text(loc.educationLevelBoth)),
+                ],
+                onChanged: (v) => setState(() => _educationLevel = v),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 24),

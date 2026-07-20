@@ -1,3 +1,45 @@
+/// School type a teacher works at. Mirrors the backend `SchoolType` enum
+/// (serialized as its name, e.g. "State").
+enum SchoolType {
+  state,
+  private,
+  other;
+
+  /// The wire value expected by the API (PascalCase, matching the C# enum).
+  String get wire => switch (this) {
+        SchoolType.state => 'State',
+        SchoolType.private => 'Private',
+        SchoolType.other => 'Other',
+      };
+
+  static SchoolType? fromWire(String? value) => switch (value) {
+        'State' => SchoolType.state,
+        'Private' => SchoolType.private,
+        'Other' => SchoolType.other,
+        _ => null,
+      };
+}
+
+/// Education level(s) a teacher teaches. Mirrors the backend `EducationLevel`.
+enum EducationLevel {
+  primarySchool,
+  middleSchool,
+  both;
+
+  String get wire => switch (this) {
+        EducationLevel.primarySchool => 'PrimarySchool',
+        EducationLevel.middleSchool => 'MiddleSchool',
+        EducationLevel.both => 'Both',
+      };
+
+  static EducationLevel? fromWire(String? value) => switch (value) {
+        'PrimarySchool' => EducationLevel.primarySchool,
+        'MiddleSchool' => EducationLevel.middleSchool,
+        'Both' => EducationLevel.both,
+        _ => null,
+      };
+}
+
 /// Mirrors `TeacherDto` from the backend (camelCase JSON).
 class Teacher {
   const Teacher({
@@ -8,6 +50,10 @@ class Teacher {
     required this.email,
     this.avatarFileId,
     this.coverFileId,
+    this.city,
+    this.district,
+    this.schoolType,
+    this.educationLevel,
   });
 
   final int id;
@@ -20,6 +66,12 @@ class Teacher {
   final int? avatarFileId;
   final int? coverFileId;
 
+  /// Demographic profile fields (null until the teacher fills them in).
+  final String? city;
+  final String? district;
+  final SchoolType? schoolType;
+  final EducationLevel? educationLevel;
+
   String get fullName => '$firstName $lastName'.trim();
 
   factory Teacher.fromJson(Map<String, dynamic> json) => Teacher(
@@ -30,6 +82,11 @@ class Teacher {
         email: json['email'] as String? ?? '',
         avatarFileId: json['avatarFileId'] as int?,
         coverFileId: json['coverFileId'] as int?,
+        city: json['city'] as String?,
+        district: json['district'] as String?,
+        schoolType: SchoolType.fromWire(json['schoolType'] as String?),
+        educationLevel:
+            EducationLevel.fromWire(json['educationLevel'] as String?),
       );
 
   /// Body for create/update (server assigns `id`). Includes the image ids so a
@@ -40,6 +97,10 @@ class Teacher {
         'email': email,
         'avatarFileId': ?avatarFileId,
         'coverFileId': ?coverFileId,
+        'city': ?city,
+        'district': ?district,
+        'schoolType': ?schoolType?.wire,
+        'educationLevel': ?educationLevel?.wire,
       };
 
   Teacher copyWith({
@@ -48,6 +109,10 @@ class Teacher {
     String? email,
     int? avatarFileId,
     int? coverFileId,
+    String? city,
+    String? district,
+    SchoolType? schoolType,
+    EducationLevel? educationLevel,
   }) =>
       Teacher(
         id: id,
@@ -57,5 +122,9 @@ class Teacher {
         email: email ?? this.email,
         avatarFileId: avatarFileId ?? this.avatarFileId,
         coverFileId: coverFileId ?? this.coverFileId,
+        city: city ?? this.city,
+        district: district ?? this.district,
+        schoolType: schoolType ?? this.schoolType,
+        educationLevel: educationLevel ?? this.educationLevel,
       );
 }

@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Users, Flag, LogOut } from "lucide-react";
+import { BarChart3, Users, Flag, LogOut, GraduationCap } from "lucide-react";
 import { clearTokens, isAuthenticated } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const nav = [
   { href: "/overview", label: "Overview", icon: BarChart3 },
+  { href: "/teachers", label: "Teachers", icon: GraduationCap },
   { href: "/users", label: "Users", icon: Users },
   { href: "/reports", label: "Reports", icon: Flag },
 ];

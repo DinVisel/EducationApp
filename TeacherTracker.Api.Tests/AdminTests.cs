@@ -190,6 +190,94 @@ public class AdminTests
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
+    /// Updates the signed-in teacher's demographic profile via PUT /auth/me.
+    private static async Task SetDemographicsAsync(
+        HttpClient c, string token, string city, string district, string schoolType, string educationLevel)
+    {
+        var res = await c.SendAsync(Req(HttpMethod.Put, "/api/v1/auth/me", token, new
+        {
+            firstName = "Test",
+            lastName = "Teacher",
+            email = $"kept-{Guid.NewGuid():N}@t.com",
+            city,
+            district,
+            schoolType,
+            educationLevel,
+        }));
+        res.EnsureSuccessStatusCode();
+    }
+
+    [Fact]
+    public async Task Teacher_Stats_Aggregate_Distributions_By_Group()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+
+        // Two Istanbul teachers (one Kadıköy State/Primary, one Kadıköy Private/Both)
+        // and one Ankara teacher (Çankaya State/Middle). A fourth leaves demographics
+        // blank to prove "with location" only counts filled-in profiles.
+        var t1 = await RegisterTeacherAsync(c, "t1@t.com");
+        await SetDemographicsAsync(c, t1, "Istanbul", "Kadikoy", "State", "PrimarySchool");
+        var t2 = await RegisterTeacherAsync(c, "t2@t.com");
+        await SetDemographicsAsync(c, t2, "Istanbul", "Kadikoy", "Private", "Both");
+        var t3 = await RegisterTeacherAsync(c, "t3@t.com");
+        await SetDemographicsAsync(c, t3, "Ankara", "Cankaya", "State", "MiddleSchool");
+        await RegisterTeacherAsync(c, "t4@t.com"); // no demographics
+
+        var admin = await SeedAdminAndLoginAsync(factory, c);
+
+        var res = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/admin/teachers/stats", admin));
+        res.EnsureSuccessStatusCode();
+        var json = await res.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.Equal(4, json.GetProperty("totalTeachers").GetInt32());
+        Assert.Equal(3, json.GetProperty("withLocation").GetInt32());
+
+        // Cities sorted by count desc: Istanbul (2) then Ankara (1).
+        var byCity = json.GetProperty("byCity");
+        Assert.Equal(2, byCity.GetArrayLength());
+        Assert.Equal("Istanbul", byCity[0].GetProperty("label").GetString());
+        Assert.Equal(2, byCity[0].GetProperty("count").GetInt32());
+
+        // School type: State (2) then Private (1).
+        var bySchool = json.GetProperty("bySchoolType");
+        Assert.Equal("State", bySchool[0].GetProperty("label").GetString());
+        Assert.Equal(2, bySchool[0].GetProperty("count").GetInt32());
+
+        // Education level has three distinct buckets, each with one teacher.
+        Assert.Equal(3, json.GetProperty("byEducationLevel").GetArrayLength());
+
+        // District drill-down is empty until a city is requested.
+        Assert.Equal(0, json.GetProperty("byDistrict").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task Teacher_Stats_Drills_Into_A_City_Districts()
+    {
+        using var factory = new TestApiFactory();
+        var c = factory.CreateApiClient();
+
+        var t1 = await RegisterTeacherAsync(c, "t1@t.com");
+        await SetDemographicsAsync(c, t1, "Istanbul", "Kadikoy", "State", "PrimarySchool");
+        var t2 = await RegisterTeacherAsync(c, "t2@t.com");
+        await SetDemographicsAsync(c, t2, "Istanbul", "Kadikoy", "Private", "Both");
+        var t3 = await RegisterTeacherAsync(c, "t3@t.com");
+        await SetDemographicsAsync(c, t3, "Ankara", "Cankaya", "State", "MiddleSchool");
+
+        var admin = await SeedAdminAndLoginAsync(factory, c);
+
+        // City match is case-insensitive.
+        var res = await c.SendAsync(Req(HttpMethod.Get, "/api/v1/admin/teachers/stats?city=istanbul", admin));
+        res.EnsureSuccessStatusCode();
+        var json = await res.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.Equal("istanbul", json.GetProperty("districtCity").GetString());
+        var byDistrict = json.GetProperty("byDistrict");
+        Assert.Equal(1, byDistrict.GetArrayLength()); // only Kadikoy, and it has 2
+        Assert.Equal("Kadikoy", byDistrict[0].GetProperty("label").GetString());
+        Assert.Equal(2, byDistrict[0].GetProperty("count").GetInt32());
+    }
+
     [Fact]
     public async Task Non_Admin_Is_Forbidden_From_Admin_Routes()
     {

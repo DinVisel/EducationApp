@@ -485,6 +485,18 @@ public class AuthController : ControllerBase
         teacher.LastName = dto.LastName.Trim();
         teacher.User.Email = email;
 
+        // Demographic fields: only overwrite when the client sends a value, so a
+        // partial profile edit never clears data the teacher set earlier. Blank
+        // strings are normalized to null (treated as "not provided").
+        if (dto.City is not null)
+            teacher.City = Blank(dto.City);
+        if (dto.District is not null)
+            teacher.District = Blank(dto.District);
+        if (dto.SchoolType is not null)
+            teacher.SchoolType = dto.SchoolType;
+        if (dto.EducationLevel is not null)
+            teacher.EducationLevel = dto.EducationLevel;
+
         // Profile images must be files this teacher uploaded.
         if (dto.AvatarFileId is int avatarId)
         {
@@ -528,13 +540,19 @@ public class AuthController : ControllerBase
             user.MustChangePassword);
     }
 
+    // Trim to null: an empty/whitespace demographic value means "not provided".
+    private static string? Blank(string s) =>
+        string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
     private static TeacherDto ToDto(Teacher t) =>
         new(t.Id, t.UserId, t.FirstName, t.LastName, t.User?.Email ?? string.Empty,
-            t.AvatarFileObjectId, t.CoverFileObjectId);
+            t.AvatarFileObjectId, t.CoverFileObjectId,
+            t.City, t.District, t.SchoolType, t.EducationLevel);
 
     private static TeacherDto ToDto(Teacher t, User u) =>
         new(t.Id, u.Id, t.FirstName, t.LastName, u.Email ?? string.Empty,
-            t.AvatarFileObjectId, t.CoverFileObjectId);
+            t.AvatarFileObjectId, t.CoverFileObjectId,
+            t.City, t.District, t.SchoolType, t.EducationLevel);
 
     private static StudentProfileDto ToProfileDto(Student s) =>
         new(s.Id, s.FirstName, s.LastName, s.StudentNumber);

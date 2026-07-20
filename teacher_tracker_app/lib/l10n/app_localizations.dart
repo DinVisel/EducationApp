@@ -746,6 +746,84 @@ abstract class AppLocalizations {
   /// **'Vibration feedback'**
   String get settingsHapticsToggle;
 
+  /// No description provided for @settingsTeachingProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching profile'**
+  String get settingsTeachingProfile;
+
+  /// No description provided for @settingsTeachingProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Helps us understand where our teachers are. Optional.'**
+  String get settingsTeachingProfileHint;
+
+  /// No description provided for @settingsCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get settingsCity;
+
+  /// No description provided for @settingsDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get settingsDistrict;
+
+  /// No description provided for @settingsSchoolType.
+  ///
+  /// In en, this message translates to:
+  /// **'School type'**
+  String get settingsSchoolType;
+
+  /// No description provided for @settingsEducationLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Education level'**
+  String get settingsEducationLevel;
+
+  /// No description provided for @settingsNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get settingsNotSet;
+
+  /// No description provided for @schoolTypeState.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get schoolTypeState;
+
+  /// No description provided for @schoolTypePrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get schoolTypePrivate;
+
+  /// No description provided for @schoolTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get schoolTypeOther;
+
+  /// No description provided for @educationLevelPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary school'**
+  String get educationLevelPrimary;
+
+  /// No description provided for @educationLevelMiddle.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle school'**
+  String get educationLevelMiddle;
+
+  /// No description provided for @educationLevelBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get educationLevelBoth;
+
   /// No description provided for @imageCropperTitle.
   ///
   /// In en, this message translates to:

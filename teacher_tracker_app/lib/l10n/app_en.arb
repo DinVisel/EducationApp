@@ -132,6 +132,21 @@
   "settingsThemeDark": "Dark",
   "settingsHaptics": "Haptics",
   "settingsHapticsToggle": "Vibration feedback",
+
+  "settingsTeachingProfile": "Teaching profile",
+  "settingsTeachingProfileHint": "Helps us understand where our teachers are. Optional.",
+  "settingsCity": "City",
+  "settingsDistrict": "District",
+  "settingsSchoolType": "School type",
+  "settingsEducationLevel": "Education level",
+  "settingsNotSet": "Not set",
+  "schoolTypeState": "State",
+  "schoolTypePrivate": "Private",
+  "schoolTypeOther": "Other",
+  "educationLevelPrimary": "Primary school",
+  "educationLevelMiddle": "Middle school",
+  "educationLevelBoth": "Both",
+
   "imageCropperTitle": "Edit photo",
 
   "attendanceTitle": "Attendance",

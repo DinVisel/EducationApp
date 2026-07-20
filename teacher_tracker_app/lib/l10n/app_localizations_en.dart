@@ -362,6 +362,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsHapticsToggle => 'Vibration feedback';
 
   @override
+  String get settingsTeachingProfile => 'Teaching profile';
+
+  @override
+  String get settingsTeachingProfileHint =>
+      'Helps us understand where our teachers are. Optional.';
+
+  @override
+  String get settingsCity => 'City';
+
+  @override
+  String get settingsDistrict => 'District';
+
+  @override
+  String get settingsSchoolType => 'School type';
+
+  @override
+  String get settingsEducationLevel => 'Education level';
+
+  @override
+  String get settingsNotSet => 'Not set';
+
+  @override
+  String get schoolTypeState => 'State';
+
+  @override
+  String get schoolTypePrivate => 'Private';
+
+  @override
+  String get schoolTypeOther => 'Other';
+
+  @override
+  String get educationLevelPrimary => 'Primary school';
+
+  @override
+  String get educationLevelMiddle => 'Middle school';
+
+  @override
+  String get educationLevelBoth => 'Both';
+
+  @override
   String get imageCropperTitle => 'Edit photo';
 
   @override

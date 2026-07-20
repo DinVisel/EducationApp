@@ -261,6 +261,76 @@ public class AdminController : ControllerBase
             FillDailySeries(postBuckets.ToDictionary(b => b.Date, b => b.Count), windowStart, now.Date)));
     }
 
+    /// Teacher demographic analytics for the growth/B2B dashboard. Every
+    /// distribution is a provider-side GROUP BY aggregation (never pulls the full
+    /// roster into memory), ordered by descending count. Pass `city` to drill into
+    /// that city's per-district breakdown; districts are only meaningful within a
+    /// city so they aren't returned otherwise.
+    [HttpGet("teachers/stats")]
+    public async Task<ActionResult<TeacherStatsDto>> GetTeacherStats([FromQuery] string? city = null)
+    {
+        var teachers = _db.Teachers.AsNoTracking();
+
+        var total = await teachers.CountAsync();
+        var withLocation = await teachers.CountAsync(t => t.City != null);
+
+        // City distribution: GROUP BY City, sorted by size (biggest markets first).
+        var byCity = (await teachers
+            .Where(t => t.City != null)
+            .GroupBy(t => t.City!)
+            .Select(g => new { Label = g.Key, Count = g.Count() })
+            .OrderByDescending(x => x.Count)
+            .ThenBy(x => x.Label)
+            .ToListAsync())
+            .Select(x => new CategoryCountDto(x.Label, x.Count))
+            .ToList();
+
+        // Enum distributions: group in SQL on the (string-stored) enum, then label
+        // in memory. Only a handful of buckets, so ordering is done in memory.
+        var bySchoolType = await GroupEnumAsync(
+            teachers.Where(t => t.SchoolType != null).Select(t => t.SchoolType!.Value));
+        var byEducationLevel = await GroupEnumAsync(
+            teachers.Where(t => t.EducationLevel != null).Select(t => t.EducationLevel!.Value));
+
+        // District drill-down, scoped to one city (case-insensitive match).
+        string? districtCity = null;
+        var byDistrict = new List<CategoryCountDto>();
+        if (!string.IsNullOrWhiteSpace(city))
+        {
+            var term = city.Trim();
+            districtCity = term;
+            byDistrict = (await teachers
+                .Where(t => t.City != null && t.City.ToLower() == term.ToLower() && t.District != null)
+                .GroupBy(t => t.District!)
+                .Select(g => new { Label = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .ThenBy(x => x.Label)
+                .ToListAsync())
+                .Select(x => new CategoryCountDto(x.Label, x.Count))
+                .ToList();
+        }
+
+        return Ok(new TeacherStatsDto(
+            total, withLocation, byCity, bySchoolType, byEducationLevel, districtCity, byDistrict));
+    }
+
+    /// GROUP BY over a projected enum column: counts per value in SQL, then labels
+    /// with the enum name and sorts (largest first) in memory.
+    private static async Task<List<CategoryCountDto>> GroupEnumAsync<TEnum>(
+        IQueryable<TEnum> values) where TEnum : struct, Enum
+    {
+        var grouped = await values
+            .GroupBy(v => v)
+            .Select(g => new { Value = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        return grouped
+            .OrderByDescending(x => x.Count)
+            .ThenBy(x => x.Value.ToString())
+            .Select(x => new CategoryCountDto(x.Value.ToString(), x.Count))
+            .ToList();
+    }
+
     /// Turns sparse per-day counts into a continuous daily series (zero-filled)
     /// from `start` through `end` inclusive.
     private static List<TimeSeriesPointDto> FillDailySeries(
