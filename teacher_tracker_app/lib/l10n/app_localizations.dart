@@ -836,11 +836,29 @@ abstract class AppLocalizations {
   /// **'Select'**
   String get profileSetupSelect;
 
+  /// No description provided for @profileSetupProvinceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a province first'**
+  String get profileSetupProvinceHint;
+
   /// No description provided for @profileSetupContinue.
   ///
   /// In en, this message translates to:
   /// **'Continue'**
   String get profileSetupContinue;
+
+  /// No description provided for @profileSetupConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing you agree to our {privacy}. We use this data only in aggregate to understand where our teachers are.'**
+  String profileSetupConsent(String privacy);
+
+  /// No description provided for @profileSetupPrivacyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get profileSetupPrivacyLink;
 
   /// No description provided for @imageCropperTitle.
   ///

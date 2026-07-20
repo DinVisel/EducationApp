@@ -54,6 +54,7 @@ class Teacher {
     this.district,
     this.schoolType,
     this.educationLevel,
+    this.requiresProfileSetup = false,
   });
 
   final int id;
@@ -71,6 +72,10 @@ class Teacher {
   final String? district;
   final SchoolType? schoolType;
   final EducationLevel? educationLevel;
+
+  /// Whether this account is subject to the mandatory demographic onboarding
+  /// gate. False for grandfathered (pre-feature) accounts — server-controlled.
+  final bool requiresProfileSetup;
 
   String get fullName => '$firstName $lastName'.trim();
 
@@ -96,6 +101,7 @@ class Teacher {
         schoolType: SchoolType.fromWire(json['schoolType'] as String?),
         educationLevel:
             EducationLevel.fromWire(json['educationLevel'] as String?),
+        requiresProfileSetup: json['requiresProfileSetup'] as bool? ?? false,
       );
 
   /// Body for create/update (server assigns `id`). Includes the image ids so a
@@ -122,6 +128,7 @@ class Teacher {
     String? district,
     SchoolType? schoolType,
     EducationLevel? educationLevel,
+    bool? requiresProfileSetup,
   }) =>
       Teacher(
         id: id,
@@ -135,5 +142,6 @@ class Teacher {
         district: district ?? this.district,
         schoolType: schoolType ?? this.schoolType,
         educationLevel: educationLevel ?? this.educationLevel,
+        requiresProfileSetup: requiresProfileSetup ?? this.requiresProfileSetup,
       );
 }

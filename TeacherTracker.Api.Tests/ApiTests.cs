@@ -100,6 +100,8 @@ public class ApiTests
         login.EnsureSuccessStatusCode();
         var json = await login.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal("Teacher", json.GetProperty("role").GetString());
+        // A brand-new teacher is flagged for the mandatory demographic gate.
+        Assert.True(json.GetProperty("teacher").GetProperty("requiresProfileSetup").GetBoolean());
     }
 
     [Fact]

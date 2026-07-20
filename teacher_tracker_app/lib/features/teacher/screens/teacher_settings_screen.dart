@@ -5,6 +5,7 @@ import '../../../core/design.dart';
 import '../../../core/haptics/haptic_controller.dart';
 import '../../../core/haptics/haptic_service.dart';
 import '../../../core/locale/locale_controller.dart';
+import '../../../core/location/tr_locations.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/teacher.dart';
 import '../../auth/state/auth_controller.dart';
@@ -43,8 +44,8 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
   late final TextEditingController _firstName;
   late final TextEditingController _lastName;
   late final TextEditingController _email;
-  late final TextEditingController _city;
-  late final TextEditingController _district;
+  String? _province;
+  String? _district;
   SchoolType? _schoolType;
   EducationLevel? _educationLevel;
   bool _saving = false;
@@ -55,8 +56,8 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
     _firstName = TextEditingController(text: widget.teacher.firstName);
     _lastName = TextEditingController(text: widget.teacher.lastName);
     _email = TextEditingController(text: widget.teacher.email);
-    _city = TextEditingController(text: widget.teacher.city ?? '');
-    _district = TextEditingController(text: widget.teacher.district ?? '');
+    _province = widget.teacher.city;
+    _district = widget.teacher.district;
     _schoolType = widget.teacher.schoolType;
     _educationLevel = widget.teacher.educationLevel;
   }
@@ -66,8 +67,6 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
     _firstName.dispose();
     _lastName.dispose();
     _email.dispose();
-    _city.dispose();
-    _district.dispose();
     super.dispose();
   }
 
@@ -85,8 +84,8 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
               firstName: _firstName.text.trim(),
               lastName: _lastName.text.trim(),
               email: _email.text.trim(),
-              city: _city.text.trim(),
-              district: _district.text.trim(),
+              city: _province,
+              district: _district,
               schoolType: _schoolType,
               educationLevel: _educationLevel,
             ),
@@ -207,20 +206,14 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
         GlassCard(
           child: Column(
             children: [
-              TextFormField(
-                controller: _city,
-                textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(labelText: loc.settingsCity),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _district,
-                textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(labelText: loc.settingsDistrict),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? loc.commonRequired : null,
+              _LocationFields(
+                province: _province,
+                district: _district,
+                onProvinceChanged: (v) => setState(() {
+                  _province = v;
+                  _district = null;
+                }),
+                onDistrictChanged: (v) => setState(() => _district = v),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<SchoolType>(
@@ -284,6 +277,61 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
           onPressed: _confirmLogout,
           icon: const Icon(Icons.logout),
           label: Text(loc.settingsSignOut),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dependent Province → District dropdowns backed by [trLocationsProvider], so
+/// the saved values stay canonical (matching the profile-setup gate and keeping
+/// the admin analytics clean). While the bundled dataset loads, the teacher's
+/// current values remain selectable so they're never dropped.
+class _LocationFields extends ConsumerWidget {
+  const _LocationFields({
+    required this.province,
+    required this.district,
+    required this.onProvinceChanged,
+    required this.onDistrictChanged,
+  });
+
+  final String? province;
+  final String? district;
+  final ValueChanged<String?> onProvinceChanged;
+  final ValueChanged<String?> onDistrictChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
+    final data = ref.watch(trLocationsProvider).value;
+
+    final provinceNames = data?.provinceNames ?? [?province];
+    final districts = data?.districtsOf(province) ?? [?district];
+
+    return Column(
+      children: [
+        DropdownButtonFormField<String>(
+          initialValue: province,
+          isExpanded: true,
+          decoration: InputDecoration(labelText: loc.settingsCity),
+          items: [
+            for (final n in provinceNames)
+              DropdownMenuItem(value: n, child: Text(n)),
+          ],
+          validator: (v) => v == null ? loc.commonRequired : null,
+          onChanged: onProvinceChanged,
+        ),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<String>(
+          initialValue: districts.contains(district) ? district : null,
+          isExpanded: true,
+          decoration: InputDecoration(labelText: loc.settingsDistrict),
+          items: [
+            for (final n in districts)
+              DropdownMenuItem(value: n, child: Text(n)),
+          ],
+          validator: (v) => v == null ? loc.commonRequired : null,
+          onChanged: province == null ? null : onDistrictChanged,
         ),
       ],
     );

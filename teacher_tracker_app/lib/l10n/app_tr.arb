@@ -144,7 +144,15 @@
   "profileSetupTitle": "Profilini tamamla",
   "profileSetupBody": "Nerede öğretmenlik yaptığını bize kısaca anlat. Bu, uygulamayı senin gibi öğretmenler için geliştirmemize yardımcı olur. Tüm alanlar zorunludur.",
   "profileSetupSelect": "Seç",
+  "profileSetupProvinceHint": "Önce bir il seç",
   "profileSetupContinue": "Devam et",
+  "profileSetupConsent": "Devam ederek {privacy} belgemizi kabul etmiş olursun. Bu verileri yalnızca öğretmenlerimizin nerede olduğunu anlamak için toplu olarak kullanırız.",
+  "@profileSetupConsent": {
+    "placeholders": {
+      "privacy": { "type": "String" }
+    }
+  },
+  "profileSetupPrivacyLink": "Gizlilik Politikası",
 
   "imageCropperTitle": "Fotoğrafı düzenle",
 

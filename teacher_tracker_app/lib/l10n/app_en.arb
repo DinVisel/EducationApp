@@ -149,7 +149,15 @@
   "profileSetupTitle": "Complete your profile",
   "profileSetupBody": "Tell us a bit about where you teach. This helps us improve the app for teachers like you. All fields are required.",
   "profileSetupSelect": "Select",
+  "profileSetupProvinceHint": "Select a province first",
   "profileSetupContinue": "Continue",
+  "profileSetupConsent": "By continuing you agree to our {privacy}. We use this data only in aggregate to understand where our teachers are.",
+  "@profileSetupConsent": {
+    "placeholders": {
+      "privacy": { "type": "String" }
+    }
+  },
+  "profileSetupPrivacyLink": "Privacy Policy",
 
   "imageCropperTitle": "Edit photo",
 

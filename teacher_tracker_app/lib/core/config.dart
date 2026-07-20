@@ -31,3 +31,7 @@ const String googleIosClientId =
 /// iOS Universal Links / Android App Links and the API's `DeepLink:PublicWebBaseUrl`.
 /// Swap for your real domain when deploying.
 const String publicWebBaseUrl = 'https://app.example.com';
+
+/// Privacy policy shown at the mandatory profile-setup gate (KVKK/GDPR notice
+/// for the demographic data we collect). Swap for your real policy URL.
+const String privacyPolicyUrl = '$publicWebBaseUrl/privacy';

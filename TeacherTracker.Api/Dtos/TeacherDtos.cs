@@ -16,4 +16,7 @@ public record TeacherDto(
     string? City = null,
     string? District = null,
     SchoolType? SchoolType = null,
-    EducationLevel? EducationLevel = null);
+    EducationLevel? EducationLevel = null,
+    // Whether the client should force the mandatory demographic onboarding gate.
+    // False for grandfathered (pre-feature) accounts.
+    bool RequiresProfileSetup = false);

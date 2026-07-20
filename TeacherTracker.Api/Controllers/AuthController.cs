@@ -547,12 +547,12 @@ public class AuthController : ControllerBase
     private static TeacherDto ToDto(Teacher t) =>
         new(t.Id, t.UserId, t.FirstName, t.LastName, t.User?.Email ?? string.Empty,
             t.AvatarFileObjectId, t.CoverFileObjectId,
-            t.City, t.District, t.SchoolType, t.EducationLevel);
+            t.City, t.District, t.SchoolType, t.EducationLevel, t.RequiresProfileSetup);
 
     private static TeacherDto ToDto(Teacher t, User u) =>
         new(t.Id, u.Id, t.FirstName, t.LastName, u.Email ?? string.Empty,
             t.AvatarFileObjectId, t.CoverFileObjectId,
-            t.City, t.District, t.SchoolType, t.EducationLevel);
+            t.City, t.District, t.SchoolType, t.EducationLevel, t.RequiresProfileSetup);
 
     private static StudentProfileDto ToProfileDto(Student s) =>
         new(s.Id, s.FirstName, s.LastName, s.StudentNumber);

@@ -409,7 +409,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSetupSelect => 'Select';
 
   @override
+  String get profileSetupProvinceHint => 'Select a province first';
+
+  @override
   String get profileSetupContinue => 'Continue';
+
+  @override
+  String profileSetupConsent(String privacy) {
+    return 'By continuing you agree to our $privacy. We use this data only in aggregate to understand where our teachers are.';
+  }
+
+  @override
+  String get profileSetupPrivacyLink => 'Privacy Policy';
 
   @override
   String get imageCropperTitle => 'Edit photo';

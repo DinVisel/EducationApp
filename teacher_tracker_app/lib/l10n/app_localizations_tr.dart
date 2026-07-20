@@ -409,7 +409,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profileSetupSelect => 'Seç';
 
   @override
+  String get profileSetupProvinceHint => 'Önce bir il seç';
+
+  @override
   String get profileSetupContinue => 'Devam et';
+
+  @override
+  String profileSetupConsent(String privacy) {
+    return 'Devam ederek $privacy belgemizi kabul etmiş olursun. Bu verileri yalnızca öğretmenlerimizin nerede olduğunu anlamak için toplu olarak kullanırız.';
+  }
+
+  @override
+  String get profileSetupPrivacyLink => 'Gizlilik Politikası';
 
   @override
   String get imageCropperTitle => 'Fotoğrafı düzenle';

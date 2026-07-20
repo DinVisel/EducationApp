@@ -22,6 +22,13 @@ public class Teacher
     public SchoolType? SchoolType { get; set; }
     public EducationLevel? EducationLevel { get; set; }
 
+    // Whether this account is subject to the mandatory demographic onboarding
+    // gate. New accounts default to true; the AddTeacherProfileGate migration
+    // backfills all pre-existing teachers to false so they're grandfathered in
+    // (not forced through the gate). Combined with the demographic fields above,
+    // the client shows the gate only while (RequiresProfileSetup && incomplete).
+    public bool RequiresProfileSetup { get; set; } = true;
+
     // Optional profile picture and cover photo (uploaded files in R2).
     public int? AvatarFileObjectId { get; set; }
     public FileObject? AvatarFileObject { get; set; }
