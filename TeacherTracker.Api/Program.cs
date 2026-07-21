@@ -278,10 +278,11 @@ app.MapControllers();
 app.MapHub<NotificationsHub>("/hubs/notifications");
 
 // In development, apply any pending EF migrations on startup so the schema stays
-// in sync with the code without a manual `dotnet ef database update`. Left off
-// outside development, where migrations should be applied deliberately as part
-// of deployment.
-if (app.Environment.IsDevelopment())
+// in sync with the code without a manual `dotnet ef database update`. Outside
+// development this is opt-in via `Database:AutoMigrate` (env: Database__AutoMigrate),
+// which containerised deployments enable so the schema is applied on boot.
+if (app.Environment.IsDevelopment()
+    || app.Configuration.GetValue("Database:AutoMigrate", false))
     await ApplyMigrationsAsync(app);
 
 app.Run();

@@ -1,0 +1,19 @@
+# Build outputs (rebuilt inside the image)
+bin/
+obj/
+
+# Local secrets / env — never bake into an image
+appsettings.*.local.json
+*.env
+.env
+
+# Dev tooling
+.vs/
+.idea/
+*.user
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# OS cruft
+.DS_Store

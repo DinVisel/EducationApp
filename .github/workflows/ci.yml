@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (build + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore TeacherTracker.Api.Tests/TeacherTracker.Api.Tests.csproj
+
+      - name: Build
+        run: >-
+          dotnet build TeacherTracker.Api.Tests/TeacherTracker.Api.Tests.csproj
+          --configuration Release --no-restore
+
+      # Tests run on in-memory SQLite (see the test project), so no DB service.
+      - name: Test
+        run: >-
+          dotnet test TeacherTracker.Api.Tests/TeacherTracker.Api.Tests.csproj
+          --configuration Release --no-build --verbosity normal
+
+  admin:
+    name: Admin dashboard (lint + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin-dashboard
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: admin-dashboard/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          # Baked into the client bundle at build time; a placeholder is fine for CI.
+          NEXT_PUBLIC_API_BASE_URL: https://api.example.com

@@ -1,0 +1,55 @@
+# Prod-like local stack: the API container + its Postgres, wired together.
+# For just the dev database (running the API with `dotnet run`), use
+# TeacherTracker.Api/docker-compose.yml instead.
+#
+#   docker compose up --build
+#   API   -> http://localhost:5001  (health: /health)
+#   DB    -> localhost:5432
+#
+# Override any of the ${VARS} below via a root .env file (git-ignored).
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: teacher_tracker_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-TeacherTrackerDb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./TeacherTracker.Api
+      dockerfile: Dockerfile
+    container_name: teacher_tracker_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      # __ maps to the ":" config separator in .NET.
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB:-TeacherTrackerDb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+      # Apply EF migrations on boot (see Program.cs). Fine for a single instance;
+      # for multi-instance deploys run migrations as a separate step instead.
+      Database__AutoMigrate: "true"
+      # Secrets — set these in a root .env file, never commit them.
+      Jwt__Key: ${JWT_KEY:?set JWT_KEY in .env}
+      Jwt__Issuer: ${JWT_ISSUER:-TeacherTracker.Api}
+      Jwt__Audience: ${JWT_AUDIENCE:-TeacherTracker.App}
+      Cors__AllowedOrigins__0: ${ADMIN_ORIGIN:-http://localhost:3000}
+    ports:
+      - "5001:8080"
+
+volumes:
+  postgres_data:
