@@ -2,20 +2,27 @@
 
 How to ship the two deployable pieces of this repo:
 
-| Component     | Path                 | Stack               | Recommended host          |
-| ------------- | -------------------- | ------------------- | ------------------------- |
-| Backend API   | `TeacherTracker.Api` | ASP.NET Core 10     | Any container host + GHCR |
-| Admin console | `admin-dashboard`    | Next.js 14 (static) | Vercel                    |
+| Component     | Path                 | Stack               | Recommended host              |
+| ------------- | -------------------- | ------------------- | ----------------------------- |
+| Backend API   | `TeacherTracker.Api` | ASP.NET Core 10     | Your own VPS (Docker Hub image) |
+| Admin console | `admin-dashboard`    | Next.js 14 (static) | Vercel                        |
 
 The Flutter app (`teacher_tracker_app`) ships through the app stores and is out of
 scope here.
+
+> **Registry vs. host — two different jobs.** **Docker Hub** only *stores* the
+> built image. Something still has to *run* it and give it a public URL. This
+> guide runs it on **your own server (a VPS)** with `docker compose`, which is
+> why no PaaS (Render/Railway/Fly) is needed. If you'd rather not manage a
+> server, any of those platforms can pull the same Docker Hub image instead.
 
 CI/CD lives in `.github/workflows/`:
 
 - **`ci.yml`** — on every push/PR to `main`: builds + tests the backend and
   lint-builds the admin dashboard.
 - **`deploy-backend.yml`** — on push to `main` and on `v*` tags: builds the API
-  Docker image and pushes it to **GHCR** (`ghcr.io/<owner>/<repo>-api`).
+  Docker image and pushes it to **Docker Hub**
+  (`docker.io/<your-username>/teacher-tracker-api`).
 
 ---
 
@@ -50,76 +57,101 @@ origin is configured, CORS switches from `AllowAnyOrigin` to an explicit
 allow-list **with credentials**, so the admin origin must be listed exactly
 (scheme + host + port, no trailing slash).
 
-### Database migrations
+### Step 1 — Set up Docker Hub + CI push (one time)
 
-The schema is managed by EF Core migrations. Two ways to apply them:
+1. Create a **Docker Hub** account (hub.docker.com). Your username is used in the
+   image name.
+2. Create an access token: **Account Settings → Security → New Access Token**
+   (read/write). Copy it.
+3. In GitHub: **repo → Settings → Secrets and variables → Actions → New
+   repository secret**, add two secrets:
+   - `DOCKERHUB_USERNAME` = your Docker Hub username
+   - `DOCKERHUB_TOKEN` = the access token
+4. Push to `main` (or run the **Deploy Backend** workflow manually from the
+   Actions tab). It builds and pushes
+   `docker.io/<your-username>/teacher-tracker-api:latest` (plus `:<git-sha>`, and
+   `:<version>` on `v*` tags). The Docker Hub repo is created automatically on
+   first push — make it **Private** in its settings if you don't want it public.
 
-- **On boot (simple, single instance):** set `Database__AutoMigrate=true`. The
-  app runs `Migrate()` at startup. This is what `docker-compose.yml` does.
-- **As a deliberate step (recommended for multi-instance / zero-downtime):**
-  leave `Database__AutoMigrate` unset and run migrations from CI or a one-off
-  job before rolling out the new image:
+### Step 2 — Smoke-test locally (optional but recommended)
 
-  ```bash
-  dotnet ef database update \
-    --project TeacherTracker.Api \
-    --connection "Host=…;Database=…;Username=…;Password=…"
-  ```
-
-### Option A — Run the full stack locally with Docker Compose
-
-Prod-like smoke test of the built image against a real Postgres:
+Before touching a server, verify the built image runs against a real Postgres.
+From the repo root:
 
 ```bash
-# From the repo root. Create a .env first (git-ignored):
+# Create a .env (git-ignored):
 cat > .env <<'EOF'
 JWT_KEY=replace-with-a-long-random-secret-at-least-32-chars
 POSTGRES_PASSWORD=change-me
 ADMIN_ORIGIN=http://localhost:3000
 EOF
 
-docker compose up --build
+docker compose up --build          # builds from source, runs API + Postgres
 ```
 
 - API → <http://localhost:5001> (health: <http://localhost:5001/health>)
-- Postgres → `localhost:5432`
+- `docker compose down` to stop; add `-v` to also drop the database volume.
 
-`docker compose down` to stop; add `-v` to also drop the database volume.
+### Step 3 — Run it on your server (VPS)
 
-### Option B — Deploy the image to a host
-
-CI already pushes `ghcr.io/<owner>/<repo>-api:latest` (and `:<git-sha>`, plus
-`:<version>` on tags). Pick a host that runs a container and point it at that
-image with the env vars above and a managed Postgres.
-
-**Fly.io** (has a built-in Postgres):
+Any cheap Linux VPS works (Hetzner, DigitalOcean, Contabo, …). One-time setup on
+the server:
 
 ```bash
-fly launch --image ghcr.io/<owner>/<repo>-api:latest --no-deploy
-fly postgres create --name teacher-tracker-db
-fly postgres attach teacher-tracker-db          # sets DATABASE_URL
-# Map it into the connection string + set secrets:
-fly secrets set \
-  ConnectionStrings__DefaultConnection="Host=…;Port=5432;Database=…;Username=…;Password=…" \
-  Jwt__Key="<long-random-secret>" \
-  Database__AutoMigrate="true" \
-  Cors__AllowedOrigins__0="https://<your-admin>.vercel.app"
-fly deploy
+# 1. Install Docker (Ubuntu/Debian):
+curl -fsSL https://get.docker.com | sh
+
+# 2. Log in so it can pull your image (skip if the Docker Hub repo is public):
+docker login -u <your-dockerhub-username>      # paste the access token as password
+
+# 3. Create the deploy folder and grab the prod compose file:
+sudo mkdir -p /opt/teacher-tracker && cd /opt/teacher-tracker
+# copy docker-compose.prod.yml from this repo to ./docker-compose.yml
+# (scp it up, or paste it in with an editor)
 ```
 
-Set the health check path to `/health` and the internal port to `8080` in
-`fly.toml`. To auto-redeploy on each image push, uncomment the `deploy` job in
-`deploy-backend.yml` and add the `FLY_API_TOKEN` secret.
+Then create `/opt/teacher-tracker/.env`:
 
-**Render / Railway / any container host:** create a "Deploy from container
-image" service, image `ghcr.io/<owner>/<repo>-api:latest`, port `8080`, health
-check path `/health`, and add the env vars above. Attach a managed Postgres and
-use its connection string. For Render, uncomment the `deploy` job's `curl`
-line and store the deploy-hook URL as `RENDER_DEPLOY_HOOK`.
+```dotenv
+IMAGE=docker.io/<your-dockerhub-username>/teacher-tracker-api:latest
+POSTGRES_PASSWORD=<strong-db-password>
+JWT_KEY=<long-random-secret-at-least-32-chars>
+ADMIN_ORIGIN=https://<your-vercel-admin-domain>
+```
 
-> **GHCR access:** the package is private by default. Either make the package
-> public (Packages → package → visibility), or give your host a pull token
-> (a GitHub PAT with `read:packages`) as the registry password.
+Start it:
+
+```bash
+docker compose pull
+docker compose up -d
+docker compose logs -f api        # watch it apply migrations and boot
+```
+
+The API is now on the server's **port 80** (`http://<server-ip>/health`).
+Postgres runs in a sibling container with a persistent volume, so no managed
+database is needed.
+
+> **Add HTTPS.** Browsers (and Vercel) will want `https://`. The simplest route
+> is [Caddy](https://caddyserver.com) as a reverse proxy — point a domain's DNS
+> at the server, and Caddy fetches a Let's Encrypt certificate automatically and
+> proxies to the API. (Or put Cloudflare in front.) Until then the API is
+> reachable over plain HTTP by IP, which is fine for testing.
+
+### Step 4 — Redeploy on each push (optional)
+
+To auto-update the server whenever CI pushes a new image, uncomment the `deploy`
+job in `.github/workflows/deploy-backend.yml` and add three secrets:
+`SERVER_HOST`, `SERVER_USER`, `SERVER_SSH_KEY` (a private key whose public half
+is in the server's `~/.ssh/authorized_keys`). It SSHes in and runs
+`docker compose pull && docker compose up -d api`. Until you set this up, redeploy
+manually by re-running those two commands on the server.
+
+### Database migrations
+
+Handled automatically: the prod compose sets `Database__AutoMigrate=true`, so the
+API applies any pending EF migrations on boot. (For multi-instance / zero-downtime
+setups you'd instead run `dotnet ef database update` as a separate step and leave
+that flag off — not needed for a single-server deploy.)
 
 ### Post-deploy checks
 
@@ -169,11 +201,15 @@ deploy; you don't need a separate deploy workflow for it.
 
 ## Order of operations (first-time bring-up)
 
-1. Provision Postgres.
-2. Deploy the **API** with its secrets + connection string (migrations apply via
-   `Database__AutoMigrate=true` or a manual `dotnet ef database update`).
-3. Verify `GET /health` returns `Healthy`.
-4. Deploy the **admin dashboard** with `NEXT_PUBLIC_API_BASE_URL` → the API.
-5. Add the dashboard origin to the API's `Cors__AllowedOrigins__*` and redeploy
-   the API.
-6. Log in and confirm the dashboard loads data.
+1. Add `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` secrets, then push to `main` so CI
+   builds and pushes the image (Step 1).
+2. On your VPS: install Docker, drop in `docker-compose.prod.yml` + `.env`, and
+   `docker compose up -d` (Step 3). Migrations apply automatically on boot; the
+   bundled Postgres container is the database.
+3. Verify `http://<server-ip>/health` returns `Healthy`.
+4. Point a domain at the server and put HTTPS in front (Caddy/Cloudflare).
+5. Deploy the **admin dashboard** to Vercel with `NEXT_PUBLIC_API_BASE_URL` → your
+   `https://` API domain.
+6. Set `ADMIN_ORIGIN` in the server's `.env` to the Vercel URL and
+   `docker compose up -d` to apply it (CORS).
+7. Log in at the dashboard and confirm it loads data.

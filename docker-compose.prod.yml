@@ -1,0 +1,53 @@
+# Production stack for your own server (VPS). Unlike the root docker-compose.yml,
+# this PULLS the pre-built image from Docker Hub instead of building from source,
+# so the server never needs the code — just this file and a .env next to it.
+#
+# On the server:
+#   1. Put this file at /opt/teacher-tracker/docker-compose.yml
+#   2. Create /opt/teacher-tracker/.env (see below), then:
+#        docker compose pull
+#        docker compose up -d
+#
+# .env must define:
+#   IMAGE=docker.io/<your-dockerhub-username>/teacher-tracker-api:latest
+#   POSTGRES_PASSWORD=<strong-password>
+#   JWT_KEY=<long-random-secret-at-least-32-chars>
+#   ADMIN_ORIGIN=https://<your-admin-domain>
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-TeacherTrackerDb}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ${IMAGE:?set IMAGE in .env, e.g. docker.io/you/teacher-tracker-api:latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB:-TeacherTrackerDb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}"
+      Database__AutoMigrate: "true"
+      Jwt__Key: ${JWT_KEY:?set JWT_KEY in .env}
+      Jwt__Issuer: ${JWT_ISSUER:-TeacherTracker.Api}
+      Jwt__Audience: ${JWT_AUDIENCE:-TeacherTracker.App}
+      Cors__AllowedOrigins__0: ${ADMIN_ORIGIN:?set ADMIN_ORIGIN in .env}
+    # Exposes the API on the host's port 80. Put a reverse proxy (Caddy/Nginx)
+    # in front for HTTPS in a real deployment — see DEPLOY.md.
+    ports:
+      - "80:8080"
+
+volumes:
+  postgres_data:

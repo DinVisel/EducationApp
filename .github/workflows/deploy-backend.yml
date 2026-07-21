@@ -1,8 +1,12 @@
 name: Deploy Backend
 
-# Builds the API container and pushes it to GitHub Container Registry (GHCR).
-# Fires on pushes to main and on version tags (v1.2.3). Your host (Fly.io,
-# Render, a VM, etc.) then pulls `ghcr.io/<owner>/<repo>-api:<tag>`.
+# Builds the API container and pushes it to Docker Hub.
+# Fires on pushes to main and on version tags (v1.2.3). Your server then pulls
+# `docker.io/<DOCKERHUB_USERNAME>/teacher-tracker-api:<tag>` and runs it.
+#
+# Required repo secrets (Settings -> Secrets and variables -> Actions):
+#   DOCKERHUB_USERNAME  your Docker Hub username
+#   DOCKERHUB_TOKEN     a Docker Hub access token (Account -> Security -> New Access Token)
 on:
   push:
     branches: [main]
@@ -10,30 +14,26 @@ on:
   workflow_dispatch: {}
 
 env:
-  IMAGE_NAME: ${{ github.repository }}-api
+  IMAGE_NAME: teacher-tracker-api
 
 jobs:
   image:
     name: Build & push image
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to GHCR
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Image metadata (tags + labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ env.IMAGE_NAME }}
+          images: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -54,19 +54,20 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ── Optional: trigger a redeploy on your host after the image is pushed. ──
-  # Uncomment and set the matching secret once you've picked a platform.
+  # ── Optional: SSH into your server and pull the new image after each push. ──
+  # Uncomment and add the SERVER_* secrets once your VPS is set up (see DEPLOY.md).
   #
   # deploy:
-  #   name: Redeploy
+  #   name: Redeploy on server
   #   needs: image
   #   runs-on: ubuntu-latest
   #   steps:
-  #     # Fly.io:
-  #     - uses: superfly/flyctl-actions/setup-flyctl@master
-  #     - run: flyctl deploy --remote-only
-  #       env:
-  #         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-  #
-  #     # Render (deploy hook URL):
-  #     # - run: curl -fsSL -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+  #     - uses: appleboy/ssh-action@v1
+  #       with:
+  #         host: ${{ secrets.SERVER_HOST }}
+  #         username: ${{ secrets.SERVER_USER }}
+  #         key: ${{ secrets.SERVER_SSH_KEY }}
+  #         script: |
+  #           cd /opt/teacher-tracker
+  #           docker compose pull api
+  #           docker compose up -d api
