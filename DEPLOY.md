@@ -105,12 +105,12 @@ curl -fsSL https://get.docker.com | sh
 docker login -u <your-dockerhub-username>      # paste the access token as password
 
 # 3. Create the deploy folder and grab the prod compose file:
-sudo mkdir -p /opt/teacher-tracker && cd /opt/teacher-tracker
+sudo mkdir -p /var/www/eduapp && cd /var/www/eduapp
 # copy docker-compose.prod.yml from this repo to ./docker-compose.yml
 # (scp it up, or paste it in with an editor)
 ```
 
-Then create `/opt/teacher-tracker/.env`:
+Then create `/var/www/eduapp/.env`:
 
 ```dotenv
 IMAGE=docker.io/<your-dockerhub-username>/teacher-tracker-api:latest

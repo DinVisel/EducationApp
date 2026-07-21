@@ -3,8 +3,8 @@
 # so the server never needs the code — just this file and a .env next to it.
 #
 # On the server:
-#   1. Put this file at /opt/teacher-tracker/docker-compose.yml
-#   2. Create /opt/teacher-tracker/.env (see below), then:
+#   1. Put this file at /var/www/eduapp/docker-compose.yml
+#   2. Create /var/www/eduapp/.env (see below), then:
 #        docker compose pull
 #        docker compose up -d
 #

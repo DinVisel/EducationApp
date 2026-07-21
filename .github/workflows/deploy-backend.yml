@@ -68,6 +68,6 @@ jobs:
   #         username: ${{ secrets.SERVER_USER }}
   #         key: ${{ secrets.SERVER_SSH_KEY }}
   #         script: |
-  #           cd /opt/teacher-tracker
+  #           cd /var/www/eduapp
   #           docker compose pull api
   #           docker compose up -d api
