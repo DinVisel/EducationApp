@@ -44,6 +44,12 @@ services:
       Jwt__Issuer: ${JWT_ISSUER:-TeacherTracker.Api}
       Jwt__Audience: ${JWT_AUDIENCE:-TeacherTracker.App}
       Cors__AllowedOrigins__0: ${ADMIN_ORIGIN:?set ADMIN_ORIGIN in .env}
+      # Cloudflare R2 (S3-compatible) storage for uploads.
+      R2__Endpoint: ${R2_ENDPOINT:-}
+      R2__AccessKey: ${R2_ACCESS_KEY:-}
+      R2__SecretKey: ${R2_SECRET_KEY:-}
+      R2__Bucket: ${R2_BUCKET:-}
+      R2__PresignedUrlMinutes: ${R2_PRESIGNED_URL_MINUTES:-15}
     # Exposes the API on the host's port 80. Put a reverse proxy (Caddy/Nginx)
     # in front for HTTPS in a real deployment — see DEPLOY.md.
     ports:
