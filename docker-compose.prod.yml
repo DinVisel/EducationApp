@@ -50,10 +50,11 @@ services:
       R2__SecretKey: ${R2_SECRET_KEY:-}
       R2__Bucket: ${R2_BUCKET:-}
       R2__PresignedUrlMinutes: ${R2_PRESIGNED_URL_MINUTES:-15}
-    # Exposes the API on the host's port 80. Put a reverse proxy (Caddy/Nginx)
-    # in front for HTTPS in a real deployment — see DEPLOY.md.
+    # Bound to localhost only — your host nginx reverse-proxies to it (and
+    # terminates HTTPS). Pick a host port that's free on this box; default 3013
+    # sits alongside the existing 3010/3011/3012 apps. Override via API_HOST_PORT.
     ports:
-      - "80:8080"
+      - "127.0.0.1:${API_HOST_PORT:-3013}:8080"
 
 volumes:
   postgres_data:
