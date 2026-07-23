@@ -54,20 +54,22 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ── Optional: SSH into your server and pull the new image after each push. ──
-  # Uncomment and add the SERVER_* secrets once your VPS is set up (see DEPLOY.md).
-  #
-  # deploy:
-  #   name: Redeploy on server
-  #   needs: image
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: appleboy/ssh-action@v1
-  #       with:
-  #         host: ${{ secrets.SERVER_HOST }}
-  #         username: ${{ secrets.SERVER_USER }}
-  #         key: ${{ secrets.SERVER_SSH_KEY }}
-  #         script: |
-  #           cd /var/www/eduapp
-  #           docker compose pull api
-  #           docker compose up -d api
+  # SSH into the VPS and roll the new image. Only runs on main/tags (not on the
+  # manual-branch case) after the image is pushed. Requires the SERVER_* secrets.
+  deploy:
+    name: Redeploy on server
+    needs: image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull & restart on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            cd /var/www/eduapp
+            docker compose pull api
+            docker compose up -d api
+            docker image prune -f
